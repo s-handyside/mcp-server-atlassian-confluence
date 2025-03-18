@@ -8,7 +8,14 @@ updates:
     versioning-strategy: auto
     labels:
       - "dependencies"
-      - "npm"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "direct"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
