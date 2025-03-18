@@ -1,11 +1,11 @@
 {
   "name": "@aashari/boilerplate-npm-package",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "A simple Node.js package that prints 'Hello World'",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aashari/boilerplate-npm-package.git"
+    "url": "https://github.com/aashari/boilerplate-npm-package.git"
   },
   "bin": {
     "my-node-package": "./dist/index.js"

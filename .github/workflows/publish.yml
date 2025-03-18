@@ -7,10 +7,10 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    # Ensure we have write permissions for packages
     permissions:
-      packages: write
       contents: read
-      id-token: write # Need this for OIDC authentication
+      packages: write
     steps:
       - uses: actions/checkout@v4
       
@@ -38,25 +38,24 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # Publish to GitHub Packages
+      # Publish to GitHub Packages - Fixed approach
       - name: Setup Node.js for GitHub Packages
         uses: actions/setup-node@v4
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com/
-          scope: '@aashari'
 
       - name: Publish to GitHub Packages
         run: |
-          # Create temporary .npmrc specifically for GitHub Packages
-          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" > .npmrc
-          echo "@aashari:registry=https://npm.pkg.github.com/" >> .npmrc
+          # Make sure repository field matches GitHub's requirements
+          if ! grep -q '"repository":' package.json; then
+            echo "Adding repository field to package.json"
+            # Use jq to add the repository field if missing
+            jq '.repository = {"type": "git", "url": "git+https://github.com/aashari/boilerplate-npm-package.git"}' package.json > package.json.tmp
+            mv package.json.tmp package.json
+          fi
           
-          # Debug info (no secrets)
-          echo "Repository: aashari/boilerplate-npm-package"
-          echo "Package name: @aashari/boilerplate-npm-package"
-          
-          # Publish with verbose output
-          npm publish --access public --verbose
+          # Publish package to GitHub Packages
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
