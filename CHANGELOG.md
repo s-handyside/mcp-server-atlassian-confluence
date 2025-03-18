@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/aashari/boilerplate-npm-package/compare/v1.4.2...v1.4.3) (2025-03-18)
+
+
+### Bug Fixes
+
+* resolve linter errors in version detection code ([5f1f33e](https://github.com/aashari/boilerplate-npm-package/commit/5f1f33e88ae843b7a0d708899713be36fcd2ec2e))
+
 # [1.2.0](https://github.com/aashari/boilerplate-npm-package/compare/v1.1.0...v1.2.0) (2025-03-18)
 
 
