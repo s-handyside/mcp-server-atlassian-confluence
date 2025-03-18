@@ -24,8 +24,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "devDependencies": {
+    "@eslint/js": "^9.22.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.1",
@@ -43,7 +44,8 @@
     "prettier": "^3.5.3",
     "semantic-release": "^24.2.3",
     "ts-jest": "^29.2.6",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
