@@ -7,7 +7,8 @@
     "prettier"
   ],
   "rules": {
-    "prettier/prettier": ["error"]
+    "prettier/prettier": ["error"],
+    "indent": ["error", "tab", { "SwitchCase": 1 }]
   },
   "env": {
     "node": true,
