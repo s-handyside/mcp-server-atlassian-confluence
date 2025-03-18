@@ -1,0 +1,26 @@
+{
+  "name": "@aashari/boilerplate-npm-package",
+  "version": "1.0.0",
+  "description": "A simple Node.js package that prints 'Hello World'",
+  "main": "dist/index.js",
+  "bin": {
+    "my-node-package": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish:github": "npm publish --registry=https://npm.pkg.github.com/",
+    "publish:npm": "npm publish"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  }
+}
