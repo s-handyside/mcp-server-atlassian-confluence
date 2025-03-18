@@ -41,7 +41,28 @@ This will print "Hello World" to the console.
 1. Clone the repository
 2. Install dependencies: `npm install`
 3. Build the package: `npm run build`
-4. Test locally: `node dist/index.js`
+4. Run tests: `npm test`
+5. Lint code: `npm run lint`
+6. Format code: `npm run format`
+7. Test locally: `node dist/index.js`
+
+## Semantic Versioning and Release
+
+This project uses [semantic-release](https://github.com/semantic-release/semantic-release) for automated versioning and CHANGELOG generation. When you push to the `main` branch, semantic-release will:
+
+1. Analyze commits using conventional commit format
+2. Determine the next semantic version
+3. Generate/update CHANGELOG.md
+4. Create a GitHub release
+5. Publish to npm and GitHub Packages
+
+To make this work, follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format for your commit messages:
+
+- `fix: message` - for bug fixes (patch version)
+- `feat: message` - for new features (minor version)
+- `feat!: message` or `fix!: message` - for breaking changes (major version)
+- `chore: message` - for maintenance tasks (no version change)
+- `docs: message` - for documentation updates (no version change)
 
 ## Publishing
 
