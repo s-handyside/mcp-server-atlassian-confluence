@@ -12,6 +12,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+      
       - name: Setup Node.js for npm
         uses: actions/setup-node@v4
         with:
@@ -37,6 +38,12 @@ jobs:
           scope: '@aashari'
 
       - name: Publish to GitHub Packages
-        run: npm publish
+        run: |
+          # Update package.json temporarily for GitHub Packages
+          cp package.json package.json.backup
+          sed -i 's|"registry": "https://registry.npmjs.org/"|"registry": "https://npm.pkg.github.com/"|g' package.json
+          npm publish
+          # Restore the original package.json
+          mv package.json.backup package.json
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
