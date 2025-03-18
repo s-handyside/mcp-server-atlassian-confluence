@@ -42,28 +42,4 @@ if (!/^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)?$/.test(newVersion)) {
 	process.exit(1);
 }
 
-// Update src/index.ts
-const indexTsPath = path.join(rootDir, 'src', 'index.ts');
-try {
-	let indexTsContent = fs.readFileSync(indexTsPath, 'utf8');
-	// Look for the version in Commander setup
-	const versionRegex = /\.version\(['"]([^'"]*)['"]\)/;
-	const match = indexTsContent.match(versionRegex);
-
-	if (match) {
-		// Replace with the new version
-		const updatedContent = indexTsContent.replace(
-			versionRegex,
-			`.version('${newVersion}')`,
-		);
-		fs.writeFileSync(indexTsPath, updatedContent);
-		console.log(`Updated version in src/index.ts to ${newVersion}`);
-	} else {
-		console.warn('Warning: Could not find version in src/index.ts');
-	}
-} catch (error) {
-	console.error(`Error updating src/index.ts: ${error.message}`);
-	process.exit(1);
-}
-
 console.log(`\nVersion successfully updated to ${newVersion}`); 

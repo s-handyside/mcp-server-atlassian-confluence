@@ -50,7 +50,7 @@ export function createCli(): Command {
 	program
 		.name('my-node-package')
 		.description('A simple Node.js package that prints Hello World')
-		.version('1.4.4');
+		.version(getPackageVersion());
 
 	program
 		.command('greet')
