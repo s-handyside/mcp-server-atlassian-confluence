@@ -27,11 +27,11 @@ jest.mock('commander', () => {
 		action: actionMock,
 		parse: parseMock,
 		version: versionMock,
-		name: nameMock
+		name: nameMock,
 	};
 
 	return {
-		Command: jest.fn().mockImplementation(() => commandInstance)
+		Command: jest.fn().mockImplementation(() => commandInstance),
 	};
 });
 
@@ -63,14 +63,14 @@ describe('index.ts coverage', () => {
 		it('should set up command handlers that call greet', () => {
 			// This will set up the action handlers
 			createCli();
-			
+
 			// Call the stored callback functions
 			expect(greetCommandAction).toBeDefined();
 			greetCommandAction();
 			expect(consoleSpy).toHaveBeenCalledWith('Hello World');
-			
+
 			consoleSpy.mockClear();
-			
+
 			expect(defaultAction).toBeDefined();
 			defaultAction();
 			expect(consoleSpy).toHaveBeenCalledWith('Hello World');
@@ -91,4 +91,4 @@ describe('index.ts coverage', () => {
 			expect(typeof result).toBe('boolean');
 		});
 	});
-}); 
+});

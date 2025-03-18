@@ -11,17 +11,23 @@ function getPackageVersion(): string {
 	try {
 		// First try to read from current directory
 		const packageJson = JSON.parse(
-			readFileSync(join(process.cwd(), 'package.json'), 'utf8')
+			readFileSync(join(process.cwd(), 'package.json'), 'utf8'),
 		);
 		return packageJson.version;
-	} catch (e) {
+	} catch (
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		_e
+	) {
 		try {
 			// Then try to read from the module's directory
 			const packageJson = JSON.parse(
-				readFileSync(join(__dirname, '..', 'package.json'), 'utf8')
+				readFileSync(join(__dirname, '..', 'package.json'), 'utf8'),
 			);
 			return packageJson.version;
-		} catch (e) {
+		} catch (
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			_e
+		) {
 			// Fallback to env var or hardcoded version
 			return process.env.npm_package_version || '1.1.0';
 		}
