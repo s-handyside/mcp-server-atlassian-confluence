@@ -56,6 +56,14 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
+    "testMatch": [
+      "**/src/**/*.test.ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.test.ts",
+      "!src/**/*.spec.ts"
+    ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/dist/",

@@ -1,8 +1,23 @@
 import { greet } from './index';
 
 describe('greet function', () => {
-	it('should return "Hello World"', () => {
-		// Instead of mocking console.log, just ensure the function doesn't throw
-		expect(() => greet()).not.toThrow();
+	let consoleSpy: jest.SpyInstance;
+
+	beforeEach(() => {
+		// Mock console.log
+		consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 	});
-}); 
+
+	afterEach(() => {
+		// Restore console.log
+		consoleSpy.mockRestore();
+	});
+
+	it('should print "Hello World" to the console', () => {
+		// Call the function
+		greet();
+
+		// Verify that console.log was called with "Hello World"
+		expect(consoleSpy).toHaveBeenCalledWith('Hello World');
+	});
+});

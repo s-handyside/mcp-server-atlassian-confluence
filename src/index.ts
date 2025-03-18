@@ -35,9 +35,24 @@ export function createCli(): Command {
 }
 
 /**
- * Main entry point for the CLI
+ * Execute CLI - exposed for testing
  */
-if (require.main === module) {
+export function executeCli(): void {
 	const program = createCli();
 	program.parse();
+}
+
+/**
+ * Check if this is the main module - exposed for testing
+ */
+export function isMainModule(): boolean {
+	return require.main === module;
+}
+
+/**
+ * Main entry point for the CLI
+ */
+/* istanbul ignore if */
+if (isMainModule()) {
+	executeCli();
 }
