@@ -1,79 +1,96 @@
 name: Publish Package
 
+# This workflow is triggered when a new release is created in GitHub
+# It builds and publishes the package to both npm and GitHub Packages
 on:
   release:
     types: [created]
 
 jobs:
+  # First job: Build and publish to npm registry
   build-and-publish-npm:
     name: Build and Publish to npm
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: read # Only need read permissions for this job
     steps:
+      # Step 1: Check out the code from the repository
       - uses: actions/checkout@v4
+        name: Checkout code
       
-      # Build first
+      # Step 2: Setup Node.js environment for building
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 20 # Using latest LTS version
 
+      # Step 3: Install all dependencies needed for building
       - name: Install dependencies
-        run: npm ci
+        run: npm ci # Clean install preserving package-lock.json
 
+      # Step 4: Build the TypeScript package
       - name: Build
-        run: npm run build
+        run: npm run build # Runs the tsc compiler
 
-      # Publish to npm
+      # Step 5: Setup Node.js specifically for npm publishing
       - name: Setup Node.js for npm publishing
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: https://registry.npmjs.org/
+          registry-url: https://registry.npmjs.org/ # Official npm registry
 
+      # Step 6: Publish the package to npm with public access
       - name: Publish to npm
         run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # NPM authentication token from secrets
 
+  # Second job: Build and publish to GitHub Packages
+  # This job depends on the first job completing successfully
   build-and-publish-github:
     name: Build and Publish to GitHub Packages
     runs-on: ubuntu-latest
-    needs: build-and-publish-npm
+    needs: build-and-publish-npm # Wait for npm publish to complete
     permissions:
-      contents: read
-      packages: write
+      contents: read # Read access to repository contents
+      packages: write # Write access to publish packages
     steps:
+      # Step 1: Check out the code from the repository
       - uses: actions/checkout@v4
+        name: Checkout code
       
+      # Step 2: Setup Node.js environment for building
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # Step 3: Install all dependencies needed for building
       - name: Install dependencies
         run: npm ci
 
+      # Step 4: Build the TypeScript package
       - name: Build
         run: npm run build
 
-      # Publish to GitHub Packages
+      # Step 5: Setup Node.js specifically for GitHub Packages
       - name: Setup Node.js for GitHub Packages
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: https://npm.pkg.github.com/
-          scope: '@aashari'
+          registry-url: https://npm.pkg.github.com/ # GitHub Packages registry
+          scope: '@aashari' # Package scope matching GitHub username
 
-      # Add GitHub Packages configuration
+      # Step 6: Configure the local environment for GitHub Packages
       - name: Configure package for GitHub Packages
         run: |
-          # Ensure the package name matches GitHub username format
+          # Create .npmrc file with authentication and scope configuration
+          # This ensures the package can be published to GitHub Packages
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > .npmrc
           echo "@aashari:registry=https://npm.pkg.github.com/" >> .npmrc
 
+      # Step 7: Publish the package to GitHub Packages
       - name: Publish to GitHub Packages
         run: npm publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token with packages:write permission 

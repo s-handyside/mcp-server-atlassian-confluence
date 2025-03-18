@@ -1,5 +1,11 @@
 # Boilerplate NPM Package
 
+![npm](https://img.shields.io/npm/v/@aashari/boilerplate-npm-package)
+![License](https://img.shields.io/npm/l/@aashari/boilerplate-npm-package)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/aashari/boilerplate-npm-package/release.yml?branch=main)
+![Test Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen)
+![npm downloads](https://img.shields.io/npm/dm/@aashari/boilerplate-npm-package)
+
 A simple Node.js package that prints 'Hello World' when executed. This package is published to both npm and GitHub Packages.
 
 ## Installation
@@ -31,10 +37,20 @@ Replace `YOUR_GITHUB_PAT` with your actual token.
 After installing the package globally, you can run:
 
 ```bash
+# Default usage - prints "Hello World"
 my-node-package
+
+# Or use the specific greet command
+my-node-package greet
+
+# View help and available commands
+my-node-package --help
+
+# Check the version
+my-node-package --version
 ```
 
-This will print "Hello World" to the console.
+This package uses Commander.js for CLI functionality, making it easy to extend with additional commands in the future.
 
 ## Development
 
@@ -42,9 +58,10 @@ This will print "Hello World" to the console.
 2. Install dependencies: `npm install`
 3. Build the package: `npm run build`
 4. Run tests: `npm test`
-5. Lint code: `npm run lint`
-6. Format code: `npm run format`
-7. Test locally: `node dist/index.js`
+5. Run test coverage: `npm run test:coverage`
+6. Lint code: `npm run lint`
+7. Format code: `npm run format`
+8. Test locally: `node dist/index.js`
 
 ## Semantic Versioning and Release
 

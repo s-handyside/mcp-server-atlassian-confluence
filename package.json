@@ -13,6 +13,7 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write 'src/**/*.ts'",
     "publish:github": "npm publish --registry=https://npm.pkg.github.com/",
@@ -43,5 +44,9 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
+  },
+  "dependencies": {
+    "@types/commander": "^2.12.0",
+    "commander": "^13.1.0"
   }
 }
