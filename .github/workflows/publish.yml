@@ -10,6 +10,7 @@ jobs:
     permissions:
       packages: write
       contents: read
+      id-token: write # Need this for OIDC authentication
     steps:
       - uses: actions/checkout@v4
       
@@ -50,6 +51,12 @@ jobs:
           # Create temporary .npmrc specifically for GitHub Packages
           echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" > .npmrc
           echo "@aashari:registry=https://npm.pkg.github.com/" >> .npmrc
-          npm publish --access public
+          
+          # Debug info (no secrets)
+          echo "Repository: aashari/boilerplate-npm-package"
+          echo "Package name: @aashari/boilerplate-npm-package"
+          
+          # Publish with verbose output
+          npm publish --access public --verbose
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
