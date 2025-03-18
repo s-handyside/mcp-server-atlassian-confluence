@@ -1,5 +1,32 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+// Import for package.json
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+/**
+ * Get package version from package.json
+ */
+function getPackageVersion(): string {
+	try {
+		// First try to read from current directory
+		const packageJson = JSON.parse(
+			readFileSync(join(process.cwd(), 'package.json'), 'utf8')
+		);
+		return packageJson.version;
+	} catch (e) {
+		try {
+			// Then try to read from the module's directory
+			const packageJson = JSON.parse(
+				readFileSync(join(__dirname, '..', 'package.json'), 'utf8')
+			);
+			return packageJson.version;
+		} catch (e) {
+			// Fallback to env var or hardcoded version
+			return process.env.npm_package_version || '1.1.0';
+		}
+	}
+}
 
 /**
  * Prints "Hello World" to the console
@@ -17,7 +44,7 @@ export function createCli(): Command {
 	program
 		.name('my-node-package')
 		.description('A simple Node.js package that prints Hello World')
-		.version(process.env.npm_package_version || '1.1.0');
+		.version(getPackageVersion());
 
 	program
 		.command('greet')
