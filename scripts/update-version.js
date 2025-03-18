@@ -42,4 +42,28 @@ if (!/^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)?$/.test(newVersion)) {
 	process.exit(1);
 }
 
+// Update src/index.ts
+const indexTsPath = path.join(rootDir, 'src', 'index.ts');
+try {
+	let indexTsContent = fs.readFileSync(indexTsPath, 'utf8');
+	// Look for the VERSION constant
+	const versionRegex = /const VERSION = ['"]([^'"]*)['"]/;
+	const match = indexTsContent.match(versionRegex);
+
+	if (match) {
+		// Replace with the new version
+		const updatedContent = indexTsContent.replace(
+			versionRegex,
+			`const VERSION = '${newVersion}'`,
+		);
+		fs.writeFileSync(indexTsPath, updatedContent);
+		console.log(`Updated VERSION in src/index.ts to ${newVersion}`);
+	} else {
+		console.warn('Warning: Could not find VERSION constant in src/index.ts');
+	}
+} catch (error) {
+	console.error(`Error updating src/index.ts: ${error.message}`);
+	process.exit(1);
+}
+
 console.log(`\nVersion successfully updated to ${newVersion}`); 

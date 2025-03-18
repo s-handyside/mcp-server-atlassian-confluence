@@ -21,7 +21,7 @@
     "update:check": "npx npm-check-updates",
     "update:deps": "npx npm-check-updates -u && npm install --legacy-peer-deps",
     "update:version": "node scripts/update-version.js",
-    "postversion": "npm run build"
+    "postversion": "npm run update:version && npm run build"
   },
   "keywords": [],
   "author": "",
