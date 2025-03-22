@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/aashari/boilerplate-npm-package/compare/v1.6.1...v1.7.0) (2025-03-22)
+
+
+### Features
+
+* improve package structure and add better examples ([bd66891](https://github.com/aashari/boilerplate-npm-package/commit/bd668915bde84445161cdbd55ff9da0b0af51944))
+
 ## [1.6.1](https://github.com/aashari/boilerplate-npm-package/compare/v1.6.0...v1.6.1) (2025-03-22)
 
 
