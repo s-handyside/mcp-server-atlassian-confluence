@@ -44,6 +44,13 @@ const versionFiles = [
 		replacement: (match, currentVersion) =>
 			match.replace(currentVersion, newVersion),
 	},
+	// Also update the compiled JavaScript file if it exists
+	{
+		path: path.join(rootDir, 'dist', 'index.js'),
+		pattern: /const VERSION = ['"]([^'"]*)['"]/,
+		replacement: (match, currentVersion) =>
+			match.replace(currentVersion, newVersion),
+	},
 	// Additional files can be added here with their patterns and replacement logic
 ];
 
