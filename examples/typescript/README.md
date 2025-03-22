@@ -46,10 +46,37 @@ npm run test:version
 
 ## Examples Included
 
-1. **Basic Usage** - Using the package's main functionality
-2. **Using with Parameters** - Demonstrating parameter passing with proper types
+### Basic Usage
 
-All examples include proper TypeScript type annotations.
+The `index.ts` file demonstrates:
+
+1. Using the package's `greet` function with default parameters
+2. Using the package's `greet` function with custom parameters
+
+### CLI Usage
+
+The `cli-usage.ts` file demonstrates how to use the package as a CLI tool.
+
+To use the CLI functionality, you need to install the package globally:
+
+```bash
+npm install -g @aashari/boilerplate-npm-package
+```
+
+Then you can use commands like:
+
+```bash
+# Basic usage
+my-node-package
+
+# With a name parameter
+my-node-package greet --name "Your Name"
+
+# Get help
+my-node-package --help
+```
+
+The file also shows how to use the CLI programmatically in your TypeScript code with proper type safety.
 
 ## Additional Resources
 

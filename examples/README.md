@@ -37,8 +37,18 @@ npm start
 
 All examples demonstrate the same core functionality in their respective language:
 
-1. **Basic Usage** - Using the package's main functionality
-2. **CLI Usage** - Using the package as a command-line tool
+### Basic API Usage
+
+- Using the `greet` function to print "Hello World"
+- Using the `greet` function with a custom name parameter
+
+### CLI Usage
+
+Both JavaScript and TypeScript examples include demonstrations of how to use the package as a command-line interface (CLI) tool:
+
+- Installing the package globally
+- Running CLI commands (basic usage, with parameters, help)
+- Using the CLI programmatically in code
 
 ## Version Check
 
