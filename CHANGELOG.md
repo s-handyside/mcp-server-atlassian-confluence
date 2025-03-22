@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/aashari/boilerplate-npm-package/compare/v1.5.2...v1.6.0) (2025-03-22)
+
+
+### Features
+
+* add support for custom name in greet command ([be48a05](https://github.com/aashari/boilerplate-npm-package/commit/be48a053834a1d910877864608a5e9942d913367))
+
 ## [1.5.2](https://github.com/aashari/boilerplate-npm-package/compare/v1.5.1...v1.5.2) (2025-03-22)
 
 
