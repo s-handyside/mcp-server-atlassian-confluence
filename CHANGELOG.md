@@ -1,3 +1,10 @@
+## [1.7.2](https://github.com/aashari/boilerplate-npm-package/compare/v1.7.1...v1.7.2) (2025-03-22)
+
+
+### Bug Fixes
+
+* update release workflow to ensure correct versioning in compiled files ([a365394](https://github.com/aashari/boilerplate-npm-package/commit/a365394b8596defa33ff5a44583d52e2c43f0aa3))
+
 ## [1.7.1](https://github.com/aashari/boilerplate-npm-package/compare/v1.7.0...v1.7.1) (2025-03-22)
 
 
