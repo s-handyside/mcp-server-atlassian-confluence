@@ -45,7 +45,7 @@ async function startServer(mode = 'stdio') {
     logger_util_js_1.logger.info(`[src/index.ts] Config DEBUG value: ${config_util_js_1.config.get('DEBUG')}`);
     serverInstance = new mcp_js_1.McpServer({
         name: '@aashari/boilerplate-mcp-server',
-        version: '1.1.0',
+        version: '1.0.0',
     });
     if (mode === 'stdio') {
         transportInstance = new stdio_js_1.StdioServerTransport();

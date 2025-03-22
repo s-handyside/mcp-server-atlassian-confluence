@@ -31,7 +31,7 @@ export async function startServer(mode: 'stdio' | 'sse' = 'stdio') {
 
 	serverInstance = new McpServer({
 		name: '@aashari/boilerplate-mcp-server',
-		version: '1.1.0',
+		version: '1.0.0',
 	});
 
 	if (mode === 'stdio') {
