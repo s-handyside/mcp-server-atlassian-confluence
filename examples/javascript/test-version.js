@@ -10,4 +10,5 @@ console.log(`Using boilerplate-npm-package version: ${packageInfo.version}`);
 
 // Simple test to ensure the package is working
 console.log('\nPerforming a simple test...');
-console.log('Result:', boilerplate.sayHello('Test User'));
+console.log('Result:');
+boilerplate.greet('Test User'); // This will log "Hello Test User" to the console

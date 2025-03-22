@@ -11,6 +11,6 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@aashari/boilerplate-npm-package": "^1.6.1"
+		"@aashari/boilerplate-npm-package": "^1.7.0"
 	}
 }

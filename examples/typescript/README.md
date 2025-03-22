@@ -33,7 +33,7 @@ The package includes TypeScript type definitions, allowing you to use it seamles
 import * as boilerplate from '@aashari/boilerplate-npm-package';
 
 // With type annotations
-console.log(boilerplate.sayHello('TypeScript User'));
+boilerplate.greet('TypeScript User'); // Calls the greet function with proper typing
 ```
 
 ## Version Check
