@@ -16,7 +16,6 @@
 		"test:coverage": "jest --coverage",
 		"lint": "eslint src --ext .ts",
 		"format": "prettier --write 'src/**/*.ts' 'scripts/**/*.js'",
-		"publish:github": "npm publish --registry=https://npm.pkg.github.com/",
 		"publish:npm": "npm publish",
 		"update:check": "npx npm-check-updates",
 		"update:deps": "npx npm-check-updates -u && npm install --legacy-peer-deps",
