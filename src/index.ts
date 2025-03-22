@@ -8,8 +8,8 @@ const VERSION = '1.5.2';
  * Prints "Hello World" to the console
  * Update: Added better documentation
  */
-export function greet(): void {
-	console.log('Hello World');
+export function greet(name?: string): void {
+	console.log(`Hello ${name || 'World'}`);
 }
 
 /**
@@ -26,8 +26,9 @@ export function createCli(): Command {
 	program
 		.command('greet')
 		.description('Print Hello World')
-		.action(() => {
-			greet();
+		.option('-n, --name <name>', 'Name to greet')
+		.action((options) => {
+			greet(options.name);
 		});
 
 	// Default command when no command is specified

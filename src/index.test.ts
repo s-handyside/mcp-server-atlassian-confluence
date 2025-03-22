@@ -1,7 +1,7 @@
 import { greet, createCli, executeCli, isMainModule } from './index';
 
 // Capture the action callbacks to call them directly
-let greetCommandAction: () => void;
+let greetCommandAction: (options: { name?: string }) => void;
 let defaultAction: () => void;
 
 // Mock commander
@@ -20,6 +20,7 @@ jest.mock('commander', () => {
 	const descriptionMock = jest.fn().mockReturnThis();
 	const versionMock = jest.fn().mockReturnThis();
 	const nameMock = jest.fn().mockReturnThis();
+	const optionMock = jest.fn().mockReturnThis();
 
 	const commandInstance = {
 		command: commandMock,
@@ -28,6 +29,7 @@ jest.mock('commander', () => {
 		parse: parseMock,
 		version: versionMock,
 		name: nameMock,
+		option: optionMock,
 	};
 
 	return {
@@ -48,9 +50,14 @@ describe('index.ts coverage', () => {
 	});
 
 	describe('greet function', () => {
-		it('should print "Hello World" to the console', () => {
+		it('should print "Hello World" to the console when no name is provided', () => {
 			greet();
 			expect(consoleSpy).toHaveBeenCalledWith('Hello World');
+		});
+
+		it('should print "Hello [name]" when a name is provided', () => {
+			greet('Alice');
+			expect(consoleSpy).toHaveBeenCalledWith('Hello Alice');
 		});
 	});
 
@@ -66,8 +73,13 @@ describe('index.ts coverage', () => {
 
 			// Call the stored callback functions
 			expect(greetCommandAction).toBeDefined();
-			greetCommandAction();
+			greetCommandAction({});
 			expect(consoleSpy).toHaveBeenCalledWith('Hello World');
+
+			consoleSpy.mockClear();
+
+			greetCommandAction({ name: 'Alice' });
+			expect(consoleSpy).toHaveBeenCalledWith('Hello Alice');
 
 			consoleSpy.mockClear();
 
