@@ -48,10 +48,24 @@ jobs:
                   git config --global user.email "actions@github.com"
                   git config --global user.name "GitHub Actions"
 
-            # Step 7: Run semantic-release to analyze commits and publish if needed
+            # Step 7: Run semantic-release to analyze commits and publish to npm
             - name: Semantic Release
+              id: semantic
               env:
                   # Tokens needed for GitHub and npm authentication
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For creating releases, commenting, and GitHub Packages
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For creating releases and commenting
                   NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # For publishing to npm
-              run: npx semantic-release # Analyzes commits and releases according to semantic version
+              run: |
+                  echo "Running semantic-release for version bump and npm publishing"
+                  npx semantic-release
+                  echo "new_release_published=$([[ $? -eq 0 ]] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
+                  echo "new_release_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+            # Step 8: Publish to GitHub Packages if a new version was released
+            - name: Publish to GitHub Packages
+              if: steps.semantic.outputs.new_release_published == 'true'
+              run: |
+                  echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > .npmrc
+                  echo "@aashari:registry=https://npm.pkg.github.com/" >> .npmrc
+                  npm publish --registry=https://npm.pkg.github.com/ --access public
+              continue-on-error: true # Don't fail the workflow if GitHub Packages publishing fails

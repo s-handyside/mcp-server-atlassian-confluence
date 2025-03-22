@@ -100,28 +100,29 @@ npm run update:version --verbose
 
 ## Release Process
 
-The project uses semantic-release for automated versioning and publishing:
+The project uses [semantic-release](https://github.com/semantic-release/semantic-release) to automate the release process. When commits are pushed to the main branch:
 
-1. Make changes and write conventional commit messages:
+1. Semantic release determines if a new version should be published (based on commit messages)
+2. If a release is needed:
+    - Version is automatically incremented (patch, minor, or major)
+    - Changelog is updated
+    - Release notes are generated
+    - Publish to both npm and GitHub Packages registries.
+    - Note: GitHub Packages publishing is a best-effort publishing and will not cause the workflow to fail if it encounters permission issues.
 
-    - `feat: add new feature` (triggers MINOR version bump)
-    - `fix: resolve issue` (triggers PATCH version bump)
-    - `feat!:` or `fix!:` or commit with `BREAKING CHANGE:` in body (triggers MAJOR version bump)
+To trigger a release, push a commit with a message following the [Conventional Commits](https://www.conventionalcommits.org/) format:
 
-2. Push changes to the main branch, which will automatically:
-    - Analyze commits to determine the next version number
-    - Update version in package.json
-    - Update version references in source code using our update-version.js script
-    - Generate/update CHANGELOG.md
-    - Create a new GitHub release with release notes
-    - Publish to both npm and GitHub Packages registries
+- `fix: ...` - for a patch release (e.g., 1.0.1)
+- `feat: ...` - for a minor release (e.g., 1.1.0)
+- `feat!: ...` or `fix!: ...` or `feat: ...BREAKING CHANGE...` - for a major release (e.g., 2.0.0)
 
-For manual releases (not recommended), you can still use:
+### Manual Release
+
+If you need to publish manually:
 
 ```bash
-npm version [patch|minor|major]
-npm run publish:npm
-npm run publish:github
+npm run publish:npm  # Publish to npm
+npm run publish:github  # Publish to GitHub Packages
 ```
 
 ## Contributing
