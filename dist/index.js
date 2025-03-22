@@ -7,7 +7,7 @@ exports.executeCli = executeCli;
 exports.isMainModule = isMainModule;
 const commander_1 = require("commander");
 // Version is updated by the update-version.js script
-const VERSION = '1.7.2';
+const VERSION = '1.8.0';
 /**
  * Prints "Hello World" to the console
  * Update: Added better documentation

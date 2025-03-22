@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/aashari/boilerplate-npm-package/compare/v1.7.2...v1.8.0) (2025-03-22)
+
+
+### Features
+
+* add CLI usage examples for both JavaScript and TypeScript ([d5743b0](https://github.com/aashari/boilerplate-npm-package/commit/d5743b07a6f2afe1c6cb0b03265228cba771e657))
+
 ## [1.7.2](https://github.com/aashari/boilerplate-npm-package/compare/v1.7.1...v1.7.2) (2025-03-22)
 
 
