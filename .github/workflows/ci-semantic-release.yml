@@ -72,8 +72,47 @@ jobs:
             # Step 8: Publish to GitHub Packages if a new version was released
             - name: Publish to GitHub Packages
               if: steps.semantic.outputs.new_release_published == 'true'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
+                  # Debug information
+                  echo "GitHub Repository: $GITHUB_REPOSITORY"
+                  echo "Current working directory: $(pwd)"
+
+                  # Configure GitHub Packages authentication
                   echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > .npmrc
+                  # Important: The scope must match exactly with the GitHub owner
                   echo "@aashari:registry=https://npm.pkg.github.com/" >> .npmrc
+
+                  # Verify package.json name matches GitHub repo owner
+                  PACKAGE_NAME=$(node -p "require('./package.json').name")
+                  REPO_OWNER=$(echo "$GITHUB_REPOSITORY" | cut -d '/' -f 1)
+                  echo "Package name: $PACKAGE_NAME, Repo owner: $REPO_OWNER"
+
+                  # If needed, temporarily update package name to match repository owner
+                  if [[ ! "$PACKAGE_NAME" == "@$REPO_OWNER/"* ]]; then
+                    echo "Adjusting package name to match repository owner"
+                    ORIGINAL_NAME="$PACKAGE_NAME"
+                    NEW_NAME="@$REPO_OWNER/$(echo "$PACKAGE_NAME" | sed 's/^@[^/]*\///')"
+                    sed -i "s|\"name\": \"$ORIGINAL_NAME\"|\"name\": \"$NEW_NAME\"|" package.json
+                    echo "Adjusted package name from $ORIGINAL_NAME to $NEW_NAME"
+                  fi
+
+                  # Additional verification
+                  echo "Checking for GitHub Packages access..."
+                  curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user/packages | grep -i aashari || echo "No packages found or no access"
+
+                  # Setup npm access for GitHub Packages
+                  npm config set registry https://npm.pkg.github.com/
+                  npm config set //npm.pkg.github.com/:_authToken $GITHUB_TOKEN
+
+                  # Show final .npmrc 
+                  echo "Final .npmrc contents (removing auth token):"
+                  cat .npmrc | sed 's/_authToken=.*/\_authToken=***/'
+
+                  # Show final package.json name
+                  echo "Final package name: $(node -p "require('./package.json').name")"
+
+                  # Publish to GitHub Packages
                   npm publish --registry=https://npm.pkg.github.com/ --access public
               continue-on-error: true # Don't fail the workflow if GitHub Packages publishing fails
