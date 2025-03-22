@@ -8,6 +8,19 @@ A simple TypeScript npm package boilerplate with automated publishing to npm usi
 npm install @aashari/boilerplate-npm-package
 ```
 
+## TypeScript Support
+
+This package is written in TypeScript and includes type definitions. When using it in a TypeScript project, you'll get full type checking and autocompletion:
+
+```typescript
+import { greet } from '@aashari/boilerplate-npm-package';
+
+// Type checking works as expected
+greet(); // OK
+greet('Alice'); // OK
+greet(123); // Type error: Argument of type 'number' is not assignable to parameter of type 'string | undefined'
+```
+
 ## Usage
 
 ### As a Library
@@ -19,8 +32,11 @@ import { greet } from '@aashari/boilerplate-npm-package';
 // CommonJS
 const { greet } = require('@aashari/boilerplate-npm-package');
 
-// Call the function
+// Call the function with default greeting
 greet(); // Outputs "Hello World"
+
+// Call the function with custom name
+greet('Alice'); // Outputs "Hello Alice"
 ```
 
 ### Command Line Interface (CLI)
@@ -33,6 +49,11 @@ my-node-package
 
 # Specific greeting command
 my-node-package greet
+
+# Greeting with custom name
+my-node-package greet --name Alice
+# OR
+my-node-package greet -n Alice
 
 # Display version
 my-node-package --version
@@ -78,7 +99,6 @@ Current test coverage is 100% across all metrics.
 - `npm run update:check` - Check for outdated dependencies
 - `npm run update:deps` - Update all dependencies
 - `npm run publish:npm` - Publish to npm registry
-- `npm run publish:github` - Publish to GitHub Packages
 
 ## Version Management
 
@@ -107,8 +127,8 @@ The project uses [semantic-release](https://github.com/semantic-release/semantic
     - Version is automatically incremented (patch, minor, or major)
     - Changelog is updated
     - Release notes are generated
-    - Publish to both npm and GitHub Packages registries.
-    - Note: GitHub Packages publishing is a best-effort publishing and will not cause the workflow to fail if it encounters permission issues.
+    - Package is published to npm registry
+    - GitHub release is created with release notes
 
 To trigger a release, push a commit with a message following the [Conventional Commits](https://www.conventionalcommits.org/) format:
 
@@ -122,7 +142,6 @@ If you need to publish manually:
 
 ```bash
 npm run publish:npm  # Publish to npm
-npm run publish:github  # Publish to GitHub Packages
 ```
 
 ## Contributing
@@ -132,6 +151,16 @@ npm run publish:github  # Publish to GitHub Packages
 3. Commit your changes: `git commit -m 'Add some feature'`
 4. Push to the branch: `git push origin feature/your-feature-name`
 5. Submit a pull request
+
+## CI/CD Workflows
+
+This project uses GitHub Actions for continuous integration and delivery:
+
+1. **Semantic Release** - Automatically determines version bumps based on commit messages, creates releases, and publishes to npm.
+2. **Dependency Checks** - Scheduled workflow that checks for outdated dependencies.
+3. **Dependabot Auto-merge** - Automatically tests and merges minor and patch Dependabot PRs if they pass tests.
+
+All workflows use Node.js 22 with dependency caching for optimal performance.
 
 ## License
 
