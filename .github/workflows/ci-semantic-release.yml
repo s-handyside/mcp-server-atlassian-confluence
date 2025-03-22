@@ -59,7 +59,14 @@ jobs:
               run: |
                   echo "Running semantic-release for version bump and npm publishing"
                   npx semantic-release
-                  echo "new_release_published=$([[ $? -eq 0 ]] && echo "true" || echo "false")" >> $GITHUB_OUTPUT
+
+                  # Set output variables for next steps
+                  if [ $? -eq 0 ]; then
+                    echo "new_release_published=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "new_release_published=false" >> $GITHUB_OUTPUT
+                  fi
+
                   echo "new_release_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
             # Step 8: Publish to GitHub Packages if a new version was released
