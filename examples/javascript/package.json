@@ -1,0 +1,16 @@
+{
+	"name": "boilerplate-npm-package-javascript-examples",
+	"version": "1.0.0",
+	"description": "JavaScript examples for boilerplate-npm-package",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "node index.js",
+		"test:version": "node test-version.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@aashari/boilerplate-npm-package": "^1.6.1"
+	}
+}

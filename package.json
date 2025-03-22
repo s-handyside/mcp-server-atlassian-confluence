@@ -3,6 +3,8 @@
 	"version": "1.6.1",
 	"description": "A simple Node.js package that prints 'Hello World'",
 	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "commonjs",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/aashari/boilerplate-npm-package.git"
@@ -14,7 +16,7 @@
 		"build": "tsc",
 		"test": "jest",
 		"test:coverage": "jest --coverage",
-		"lint": "eslint src --ext .ts",
+		"lint": "eslint src --ext .ts --config eslint.config.mjs",
 		"format": "prettier --write 'src/**/*.ts' 'scripts/**/*.js'",
 		"publish:npm": "npm publish",
 		"update:check": "npx npm-check-updates",
@@ -54,6 +56,9 @@
 	"dependencies": {
 		"@types/commander": "^2.12.5",
 		"commander": "^13.1.0"
+	},
+	"directories": {
+		"example": "examples"
 	},
 	"jest": {
 		"preset": "ts-jest",
