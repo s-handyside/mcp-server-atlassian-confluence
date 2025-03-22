@@ -1,193 +1,357 @@
-# @aashari/boilerplate-npm-package
+# Boilerplate MCP Server
 
-A simple TypeScript npm package boilerplate with automated publishing to npm using GitHub Actions.
+A boilerplate Model Context Protocol (MCP) server implementation using TypeScript. This project demonstrates how to build a well-structured MCP server that exposes both tools and resources to AI applications like Claude Desktop. It serves as a starting point for developers building MCP-compatible servers with a focus on clean architecture, automated workflows, and easy deployment.
+
+## Core Features
+
+- **STDIO MCP Server**: Designed for AI clients like Claude Desktop, providing tools and resources via the Model Context Protocol.
+- **CLI Support**: Human-friendly command-line interface for the same functionality, making it easy to test and use directly.
+- **IP Address Lookup**: Get details about any IP address or your current device's IP.
+- **Flexible Configuration**: Support for environment variables, .env files, and global config files.
+- **Testing & Development Tools**: Built-in inspection, testing, and development utilities.
 
 ## Installation
 
-```bash
-npm install @aashari/boilerplate-npm-package
-```
+### Global Installation
 
-## TypeScript Support
-
-This package is written in TypeScript and includes type definitions. When using it in a TypeScript project, you'll get full type checking and autocompletion:
-
-```typescript
-import { greet } from '@aashari/boilerplate-npm-package';
-
-// Type checking works as expected
-greet(); // OK
-greet('Alice'); // OK
-greet(123); // Type error: Argument of type 'number' is not assignable to parameter of type 'string | undefined'
-```
-
-## Usage
-
-### As a Library
-
-```javascript
-// ES Modules
-import { greet } from '@aashari/boilerplate-npm-package';
-
-// CommonJS
-const { greet } = require('@aashari/boilerplate-npm-package');
-
-// Call the function with default greeting
-greet(); // Outputs "Hello World"
-
-// Call the function with custom name
-greet('Alice'); // Outputs "Hello Alice"
-```
-
-### Command Line Interface (CLI)
-
-This package also provides a CLI that can be used after installation:
+You can install this package globally to use as a CLI tool:
 
 ```bash
-# Basic usage (prints "Hello World")
-my-node-package
-
-# Specific greeting command
-my-node-package greet
-
-# Greeting with custom name
-my-node-package greet --name Alice
-# OR
-my-node-package greet -n Alice
-
-# Display version
-my-node-package --version
-
-# Display help
-my-node-package --help
+npm install -g @aashari/boilerplate-mcp-server
 ```
 
-## Testing
-
-This package includes comprehensive testing with Jest.
-
-To run tests:
+After global installation, you can run the CLI commands directly:
 
 ```bash
-# Run all tests
+# Get help
+mcp-server --help
+
+# Get current IP details
+mcp-server get-ip-details
+
+# Get details for a specific IP
+mcp-server get-ip-details 8.8.8.8
+```
+
+### Local Installation
+
+For development or local use, clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/aashari/boilerplate-mcp-server.git
+cd boilerplate-mcp-server
+npm install
+```
+
+Then run the development server:
+
+```bash
+npm run dev
+```
+
+Or build and start:
+
+```bash
+npm run build
+npm start
+```
+
+## Developer Tools
+
+This project includes several scripts to make development easier:
+
+```bash
+# Run tests
 npm test
 
-# Run tests with coverage report
+# Check test coverage
 npm run test:coverage
+
+# Run linting
+npm run lint
+
+# Format code
+npm run format
+
+# Run the server with live reload during development
+npm run dev
+
+# Use the MCP Inspector to visually test your server
+npm run inspect
+
+# Use the MCP Inspector with debug mode enabled
+npm run inspect:debug
 ```
 
-Current test coverage is 100% across all metrics.
+## Configuration Options for End Users
 
-## Development
+Before setting up with Claude Desktop or Cursor AI, you can configure the server. There are two recommended options for end users:
 
-1. Clone this repository
-2. Install dependencies: `npm install`
-3. Make your changes
-4. Run linting: `npm run lint`
-5. Format code: `npm run format`
-6. Build the package: `npm run build`
-7. Run tests: `npm test`
+### Option 1: Direct Configuration in Claude/Cursor
 
-## Available Scripts
+Pass your configuration directly in the Claude Desktop config or Cursor AI command:
 
-- `npm run build` - Compile TypeScript files
-- `npm test` - Run tests
-- `npm run test:coverage` - Run tests with coverage report
-- `npm run lint` - Check code for linting errors
-- `npm run format` - Format code with Prettier
-- `npm run update:version` - Update version numbers in source files
-- `npm run update:check` - Check for outdated dependencies
-- `npm run update:deps` - Update all dependencies
-- `npm run publish:npm` - Publish to npm registry
+```json
+{
+	"mcpServers": {
+		"aashari/boilerplate-mcp-server": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"DEBUG=true",
+				"IPAPI_API_TOKEN=your_token",
+				"@aashari/boilerplate-mcp-server"
+			]
+		}
+	}
+}
+```
 
-## Version Management
+### Option 2: Global Configuration File (Recommended)
 
-The package includes a versatile version management script that syncs versions between package.json and source files:
+1. Create a global configuration file at `$HOME/.mcp/configs.json`:
+
+```json
+{
+	"@aashari/boilerplate-mcp-server": {
+		"environments": {
+			"DEBUG": "true",
+			"IPAPI_API_TOKEN": "your_token"
+		}
+	}
+}
+```
+
+2. Then use a simplified configuration in Claude Desktop or Cursor AI:
+
+```json
+{
+	"mcpServers": {
+		"aashari/boilerplate-mcp-server": {
+			"command": "npx",
+			"args": ["-y", "@aashari/boilerplate-mcp-server"]
+		}
+	}
+}
+```
+
+This approach keeps your configuration in one secure location and simplifies your AI assistant setup.
+
+### Available Configuration Options
+
+- **DEBUG**: Set to `true` to enable debug logging.
+- **IPAPI_API_TOKEN**: API token for the IP API service (if required).
+
+## Setting Up with Claude Desktop
+
+To use this MCP server with Claude Desktop:
+
+1. **Open Claude Desktop Settings**:
+
+    - Launch Claude Desktop
+    - Click on the settings icon (gear) in the top-right corner
+
+2. **Edit MCP Configuration**:
+
+    - Click on "Edit Config" button
+    - This will open File Explorer/Finder with the `claude_desktop_config.json` file
+
+3. **Update Configuration File**:
+
+    - Add one of the configuration options from above to the file
+    - Save the file
+
+    Example with global configuration file already set up:
+
+    ```json
+    {
+    	"mcpServers": {
+    		"aashari/boilerplate-mcp-server": {
+    			"command": "npx",
+    			"args": ["-y", "@aashari/boilerplate-mcp-server"]
+    		}
+    	}
+    }
+    ```
+
+4. **Restart Claude Desktop**:
+
+    - Close and reopen Claude Desktop to apply the changes
+
+5. **Verify Tool Availability**:
+
+    - On the Claude home page, look for the hammer icon on the right side
+    - Click it to see available tools
+    - Ensure the `get-ip-details` tool is listed
+
+6. **Test the Tool**:
+
+    - Try asking Claude: "give me my public IP" or "analyze this IP: 8.8.8.8"
+    - Claude will use the MCP tool to fetch and display the requested information
+
+## Setting Up with Cursor AI
+
+To use this MCP server with Cursor AI:
+
+1. **Open Cursor Settings**:
+
+    - Launch Cursor
+    - Press `CMD + SHIFT + P` (or `CTRL + SHIFT + P` on Windows)
+    - Type "settings" and select "Cursor Settings"
+    - On the sidebar, select "MCP"
+
+2. **Add New MCP Server**:
+
+    - Click "+ Add new MCP server"
+    - A configuration form will appear
+
+3. **Configure MCP Server**:
+
+    - **Name**: Enter `aashari/boilerplate-mcp-server`
+    - **Type**: Select `command` from the dropdown
+    - **Command**: Choose one of the following based on your configuration approach:
+
+    If using global configuration file (recommended):
+
+    ```
+    npx -y @aashari/boilerplate-mcp-server
+    ```
+
+    If passing configuration directly:
+
+    ```
+    DEBUG=true IPAPI_API_TOKEN=your_token npx -y @aashari/boilerplate-mcp-server
+    ```
+
+    - Click "Add"
+
+4. **Verify Server Configuration**:
+
+    - The server should now be listed with a green indicator
+    - You should see the `get_ip_details` tool listed under the server
+
+5. **Test the Tool**:
+
+    - In the chat sidebar, ensure Agent mode is active
+    - Try asking: "give me my public IP" or "analyze this IP: 8.8.8.8"
+    - Cursor AI will use the MCP tool to fetch and display the requested information
+
+## Using as a CLI Tool
+
+The package can also be used as a command-line tool for human interaction:
+
+- **Get help and available commands**:
+
+    ```bash
+    npx -y @aashari/boilerplate-mcp-server --help
+    ```
+
+    Example output:
+
+    ```
+    Usage: @aashari/boilerplate-mcp-server [options] [command]
+
+    A boilerplate Model Context Protocol (MCP) server implementation using TypeScript
+
+    Options:
+      -V, --version               output the version number
+      -h, --help                  display help for command
+
+    Commands:
+      get-ip-details [ipAddress]  Get details about a specific IP address or the current device
+      help [command]              display help for command
+    ```
+
+- **Get current device IP details**:
+
+    ```bash
+    npx -y @aashari/boilerplate-mcp-server get-ip-details
+    ```
+
+    Example output:
+
+    ```
+    status: success
+    country: Indonesia
+    countryCode: ID
+    region: JK
+    regionName: Jakarta
+    city: Jakarta
+    zip: 11730
+    lat: -6.2114
+    lon: 106.8446
+    timezone: Asia/Jakarta
+    isp: Biznet Wifi
+    org:
+    as: AS17451 BIZNET NETWORKS
+    query: 118.99.106.135
+    ```
+
+    - **Get details for a specific IP address**:
+
+    ```bash
+    npx -y @aashari/boilerplate-mcp-server get-ip-details 8.8.8.8
+    ```
+
+    Example output:
+
+    ```
+    status: success
+    country: United States
+    countryCode: US
+    region: VA
+    regionName: Virginia
+    city: Ashburn
+    zip: 20149
+    lat: 39.03
+    lon: -77.5
+    timezone: America/New_York
+    isp: Google LLC
+    org: Google Public DNS
+    as: AS15169 Google LLC
+    query: 8.8.8.8
+    ```
+
+## For Developers
+
+### MCP Inspector Usage
+
+This project includes integration with MCP Inspector for easy debugging and testing:
 
 ```bash
-# Use version from package.json
-npm run update:version
+# Launch the MCP Inspector with your server
+npm run inspect
 
-# Specify a custom version
-npm run update:version 1.2.3
-
-# Preview changes without applying them
-npm run update:version --dry-run
-
-# Show detailed information
-npm run update:version --verbose
+# Launch with debug mode enabled
+npm run inspect:debug
 ```
 
-## Release Process
+When you run the inspector:
 
-The project uses [semantic-release](https://github.com/semantic-release/semantic-release) to automate the release process. When commits are pushed to the main branch:
+1. The Inspector will start your MCP server
+2. It will launch a web UI (typically at http://localhost:5173)
+3. You can use the UI to interact with your server and test its functionality
 
-1. Semantic release determines if a new version should be published (based on commit messages)
-2. If a release is needed:
-    - Version is automatically incremented (patch, minor, or major)
-    - Changelog is updated
-    - Release notes are generated
-    - Package is published to npm registry
-    - GitHub release is created with release notes
+The inspector provides a visual way to see:
 
-> **Note:** Automated publishing to npm requires an `NPM_TOKEN` secret to be configured in your GitHub repository settings. See the [CI/CD Workflows](#cicd-workflows) section for details.
+- Your server's tools and resources
+- The requests and responses between client and server
+- Any errors that occur during communication
 
-To trigger a release, push a commit with a message following the [Conventional Commits](https://www.conventionalcommits.org/) format:
+## About MCP
 
-- `fix: ...` - for a patch release (e.g., 1.0.1)
-- `feat: ...` - for a minor release (e.g., 1.1.0)
-- `feat!: ...` or `fix!: ...` or `feat: ...BREAKING CHANGE...` - for a major release (e.g., 2.0.0)
+The Model Context Protocol (MCP) is an open standard developed by Anthropic to simplify how AI systems connect to external data sources and tools. For detailed information, including core concepts, architecture, and implementation guides, please refer to the [official MCP documentation](https://modelcontextprotocol.io/docs/).
 
-Other common prefixes that don't trigger releases:
+## Extending This Project
 
-- `docs:` - Documentation changes only
-- `style:` - Changes that don't affect code functionality
-- `refactor:` - Code changes that neither fix bugs nor add features
-- `test:` - Adding or updating tests
-- `chore:` - Maintenance tasks
-- `ci:` - Changes to CI configuration
-- `build:` - Changes to build process
-- `perf:` - Performance improvements
+To add your own tools and resources:
 
-### Manual Release
-
-If you need to publish manually:
-
-```bash
-npm run publish:npm  # Publish to npm
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a new branch: `git checkout -b feature/your-feature-name`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature-name`
-5. Submit a pull request
-
-## CI/CD Workflows
-
-This project uses GitHub Actions for continuous integration and delivery:
-
-1. **Semantic Release** - Automatically determines version bumps based on commit messages, creates releases, and publishes to npm.
-2. **Dependency Checks** - Scheduled workflow that checks for outdated dependencies.
-3. **Dependabot Auto-merge** - Automatically tests and merges minor and patch Dependabot PRs if they pass tests.
-
-All workflows use Node.js 22 with dependency caching for optimal performance.
-
-### Required Repository Secrets
-
-For the CI/CD pipeline to work correctly, you need to configure the following secrets in your GitHub repository settings:
-
-- `NPM_TOKEN` - An npm authentication token with publish permissions. You can create one at https://www.npmjs.com/settings/[your-username]/tokens.
-
-To add these secrets:
-
-1. Go to your repository on GitHub
-2. Navigate to Settings > Secrets and variables > Actions
-3. Click "New repository secret"
-4. Add your NPM_TOKEN with the appropriate value
+1. Create service files in the `src/services` directory
+2. Implement controllers in `src/controllers`
+3. Create tool implementations in `src/tools`
+4. Create resource implementations in `src/resources`
+5. Register your new tools and resources in `src/index.ts`
 
 ## License
 
-MIT
+[ISC](https://opensource.org/licenses/ISC)

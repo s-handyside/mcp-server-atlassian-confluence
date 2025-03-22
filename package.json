@@ -1,16 +1,16 @@
 {
-	"name": "@aashari/boilerplate-npm-package",
-	"version": "1.8.0",
-	"description": "A simple Node.js package that prints 'Hello World'",
+	"name": "@aashari/boilerplate-mcp-server",
+	"version": "1.1.0",
+	"description": "A boilerplate Model Context Protocol (MCP) server implementation using TypeScript",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "commonjs",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/aashari/boilerplate-npm-package.git"
+		"url": "https://github.com/aashari/boilerplate-mcp-server.git"
 	},
 	"bin": {
-		"my-node-package": "./dist/index.js"
+		"mcp-server": "./dist/index.js"
 	},
 	"scripts": {
 		"build": "tsc",
@@ -21,9 +21,22 @@
 		"publish:npm": "npm publish",
 		"update:check": "npx npm-check-updates",
 		"update:deps": "npx npm-check-updates -u && npm install --legacy-peer-deps",
-		"update:version": "node scripts/update-version.js"
+		"update:version": "node scripts/update-version.js",
+		"start": "node dist/index.js",
+		"dev": "nodemon --watch src --ext ts --exec 'npm run build && npm start'",
+		"inspect": "npx @modelcontextprotocol/inspector node dist/index.js",
+		"inspect:debug": "npx @modelcontextprotocol/inspector -e DEBUG=true node dist/index.js"
 	},
-	"keywords": [],
+	"keywords": [
+		"mcp",
+		"model",
+		"context",
+		"protocol",
+		"server",
+		"ai",
+		"anthropic",
+		"claude"
+	],
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
@@ -54,31 +67,12 @@
 		"access": "public"
 	},
 	"dependencies": {
-		"commander": "^13.1.0"
+		"@modelcontextprotocol/sdk": "^1.7.0",
+		"commander": "^13.1.0",
+		"dotenv": "^16.4.7",
+		"zod": "^3.24.2"
 	},
 	"directories": {
 		"example": "examples"
-	},
-	"jest": {
-		"preset": "ts-jest",
-		"testEnvironment": "node",
-		"testMatch": [
-			"**/src/**/*.test.ts"
-		],
-		"collectCoverageFrom": [
-			"src/**/*.ts",
-			"!src/**/*.test.ts",
-			"!src/**/*.spec.ts"
-		],
-		"coveragePathIgnorePatterns": [
-			"/node_modules/",
-			"/dist/",
-			"/coverage/"
-		],
-		"coverageReporters": [
-			"text",
-			"lcov",
-			"json-summary"
-		]
 	}
 }
