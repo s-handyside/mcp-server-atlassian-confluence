@@ -16,6 +16,7 @@ jobs:
             issues: write # Needed to comment on issues
             pull-requests: write # Needed to comment on pull requests
             packages: write # Needed to publish packages
+            workflows: write # Needed to update workflow files when pushing with semantic-release
         steps:
             # Step 1: Check out the full Git history for proper versioning
             - name: Checkout
