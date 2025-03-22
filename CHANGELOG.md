@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/aashari/boilerplate-npm-package/compare/v1.7.0...v1.7.1) (2025-03-22)
+
+
+### Bug Fixes
+
+* update examples to use correct API (greet instead of sayHello) ([7c062ca](https://github.com/aashari/boilerplate-npm-package/commit/7c062ca42765c659f018f990f4b1ec563d1172d3))
+
 # [1.7.0](https://github.com/aashari/boilerplate-npm-package/compare/v1.6.1...v1.7.0) (2025-03-22)
 
 
