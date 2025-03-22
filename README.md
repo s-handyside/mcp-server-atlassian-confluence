@@ -130,6 +130,8 @@ The project uses [semantic-release](https://github.com/semantic-release/semantic
     - Package is published to npm registry
     - GitHub release is created with release notes
 
+> **Note:** Automated publishing to npm requires an `NPM_TOKEN` secret to be configured in your GitHub repository settings. See the [CI/CD Workflows](#cicd-workflows) section for details.
+
 To trigger a release, push a commit with a message following the [Conventional Commits](https://www.conventionalcommits.org/) format:
 
 - `fix: ...` - for a patch release (e.g., 1.0.1)
@@ -161,6 +163,19 @@ This project uses GitHub Actions for continuous integration and delivery:
 3. **Dependabot Auto-merge** - Automatically tests and merges minor and patch Dependabot PRs if they pass tests.
 
 All workflows use Node.js 22 with dependency caching for optimal performance.
+
+### Required Repository Secrets
+
+For the CI/CD pipeline to work correctly, you need to configure the following secrets in your GitHub repository settings:
+
+- `NPM_TOKEN` - An npm authentication token with publish permissions. You can create one at https://www.npmjs.com/settings/[your-username]/tokens.
+
+To add these secrets:
+
+1. Go to your repository on GitHub
+2. Navigate to Settings > Secrets and variables > Actions
+3. Click "New repository secret"
+4. Add your NPM_TOKEN with the appropriate value
 
 ## License
 
