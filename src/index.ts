@@ -2,10 +2,11 @@
 import { Command } from 'commander';
 
 // Version is updated by the update-version.js script
-const VERSION = '1.4.6';
+const VERSION = '1.4.7';
 
 /**
  * Prints "Hello World" to the console
+ * Update: Added better documentation
  */
 export function greet(): void {
 	console.log('Hello World');
