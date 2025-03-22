@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/aashari/boilerplate-npm-package/compare/v1.5.0...v1.5.1) (2025-03-22)
+
+
+### Bug Fixes
+
+* improve GitHub Packages publishing with a more robust approach ([fd2aec9](https://github.com/aashari/boilerplate-npm-package/commit/fd2aec9926cf99d301cbb2b5f5ca961a6b6fec7e))
+
 # [1.5.0](https://github.com/aashari/boilerplate-npm-package/compare/v1.4.7...v1.5.0) (2025-03-22)
 
 
