@@ -138,6 +138,17 @@ To trigger a release, push a commit with a message following the [Conventional C
 - `feat: ...` - for a minor release (e.g., 1.1.0)
 - `feat!: ...` or `fix!: ...` or `feat: ...BREAKING CHANGE...` - for a major release (e.g., 2.0.0)
 
+Other common prefixes that don't trigger releases:
+
+- `docs:` - Documentation changes only
+- `style:` - Changes that don't affect code functionality
+- `refactor:` - Code changes that neither fix bugs nor add features
+- `test:` - Adding or updating tests
+- `chore:` - Maintenance tasks
+- `ci:` - Changes to CI configuration
+- `build:` - Changes to build process
+- `perf:` - Performance improvements
+
 ### Manual Release
 
 If you need to publish manually:
