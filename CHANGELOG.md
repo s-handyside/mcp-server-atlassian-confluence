@@ -3,6 +3,16 @@
 
 ### Bug Fixes
 
+* add workflows permission to semantic-release workflow ([de3a335](https://github.com/aashari/boilerplate-npm-package/commit/de3a33510bd447af353444db1fcb58e1b1aa02e4))
+* improve GITHUB_OUTPUT syntax in semantic-release workflow ([6f154bc](https://github.com/aashari/boilerplate-npm-package/commit/6f154bc43f42475857e9256b0a671c3263dc9708))
+* make publish workflow more resilient against version conflicts ([ffd3705](https://github.com/aashari/boilerplate-npm-package/commit/ffd3705bc064ee9135402052a0dc7fe32645714b))
+* remove invalid workflows permission ([c012e46](https://github.com/aashari/boilerplate-npm-package/commit/c012e46a29070c8394f7ab596fe7ba68c037d3a3))
+
+## [1.5.2](https://github.com/aashari/boilerplate-npm-package/compare/v1.5.1...v1.5.2) (2025-03-22)
+
+
+### Bug Fixes
+
 * make publish workflow more resilient against version conflicts ([ffd3705](https://github.com/aashari/boilerplate-npm-package/commit/ffd3705bc064ee9135402052a0dc7fe32645714b))
 
 ## [1.5.1](https://github.com/aashari/boilerplate-npm-package/compare/v1.5.0...v1.5.1) (2025-03-22)
