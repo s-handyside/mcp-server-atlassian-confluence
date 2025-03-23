@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/aashari/boilerplate-mcp-server/compare/v1.0.1...v1.0.2) (2025-03-23)
+
+
+### Bug Fixes
+
+* improve error logging with IP address details ([121f516](https://github.com/aashari/boilerplate-mcp-server/commit/121f51655517ddbea7d25968372bd6476f1b3e0f))
+
 ## [1.0.1](https://github.com/aashari/boilerplate-mcp-server/compare/v1.0.0...v1.0.1) (2025-03-23)
 
 
