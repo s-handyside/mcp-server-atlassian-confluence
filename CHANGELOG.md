@@ -1,16 +1,14 @@
 ## [1.0.2](https://github.com/aashari/boilerplate-mcp-server/compare/v1.0.1...v1.0.2) (2025-03-23)
 
-
 ### Bug Fixes
 
-* improve error logging with IP address details ([121f516](https://github.com/aashari/boilerplate-mcp-server/commit/121f51655517ddbea7d25968372bd6476f1b3e0f))
+- improve error logging with IP address details ([121f516](https://github.com/aashari/boilerplate-mcp-server/commit/121f51655517ddbea7d25968372bd6476f1b3e0f))
 
 ## [1.0.1](https://github.com/aashari/boilerplate-mcp-server/compare/v1.0.0...v1.0.1) (2025-03-23)
 
-
 ### Bug Fixes
 
-* ensure executable permissions for bin script ([395f1dc](https://github.com/aashari/boilerplate-mcp-server/commit/395f1dcb5f3b5efee99048d1b91e3b083e9e544f))
+- ensure executable permissions for bin script ([395f1dc](https://github.com/aashari/boilerplate-mcp-server/commit/395f1dcb5f3b5efee99048d1b91e3b083e9e544f))
 
 # 1.0.0 (2025-03-22)
 
