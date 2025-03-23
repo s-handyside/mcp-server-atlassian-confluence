@@ -9,7 +9,7 @@ const VERSION = '1.8.1';
  * Update: Added better documentation
  */
 export function greet(name?: string): void {
-	console.log(`Hello ${name || 'World'}`);
+	console.log(`Hello ${name && name.trim() ? name.trim() : 'World'}`);
 }
 
 /**
