@@ -10,6 +10,48 @@ The Model Context Protocol (MCP) is an open standard developed by Anthropic to s
 
 A TypeScript-based Model Context Protocol (MCP) server for integrating with Atlassian Confluence. This server provides tools for searching and accessing Confluence spaces, pages, and content, allowing Claude/Anthropic AI systems to retrieve information directly from your organization's Confluence knowledge base.
 
+## Configuration Options
+
+Before setting up with any integration method, you should understand the available configuration options:
+
+### Available Configuration Options
+
+- **DEBUG**: Set to `true` to enable debug logging.
+- **ATLASSIAN_SITE_NAME**: Your Atlassian site name, e.g., 'your-instance' for 'your-instance.atlassian.net' (required)
+- **ATLASSIAN_USER_EMAIL**: Your Atlassian account email address (required)
+- **ATLASSIAN_API_TOKEN**: API token for Atlassian API access (required)
+
+### Configuration Methods
+
+You can configure the server in two ways:
+
+#### Option 1: Direct Configuration (Environment Variables)
+
+Pass configuration directly as environment variables before the start command:
+
+```bash
+DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token npx -y @aashari/mcp-server-atlassian-confluence
+```
+
+#### Option 2: Global Configuration File (Recommended)
+
+Create a global configuration file at `$HOME/.mcp/configs.json`:
+
+```json
+{
+	"@aashari/mcp-server-atlassian-confluence": {
+		"environments": {
+			"DEBUG": "true",
+			"ATLASSIAN_SITE_NAME": "your-instance",
+			"ATLASSIAN_USER_EMAIL": "your-email@example.com",
+			"ATLASSIAN_API_TOKEN": "your_api_token"
+		}
+	}
+}
+```
+
+This approach keeps your configuration in one secure location and simplifies your AI assistant setup.
+
 ## Setting Up with Claude Desktop
 
 To use this Confluence MCP server with Claude Desktop:
@@ -26,10 +68,12 @@ To use this Confluence MCP server with Claude Desktop:
 
 3. **Update Configuration File**:
 
-    - Add one of the configuration options from below to the file
+    - Add configuration using one of the methods below
     - Save the file
 
-    Example with global configuration file already set up:
+    #### Method 1: Using Global Configuration File (Recommended)
+
+    First, create the global config file as described in the "Configuration Options" section above, then use this simplified configuration:
 
     ```json
     {
@@ -37,6 +81,28 @@ To use this Confluence MCP server with Claude Desktop:
     		"aashari/mcp-server-atlassian-confluence": {
     			"command": "npx",
     			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
+    		}
+    	}
+    }
+    ```
+
+    #### Method 2: Direct Configuration in Claude Desktop
+
+    Pass configuration directly in the Claude Desktop config:
+
+    ```json
+    {
+    	"mcpServers": {
+    		"aashari/mcp-server-atlassian-confluence": {
+    			"command": "npx",
+    			"args": [
+    				"-y",
+    				"DEBUG=true",
+    				"ATLASSIAN_SITE_NAME=your-instance",
+    				"ATLASSIAN_USER_EMAIL=your-email@example.com",
+    				"ATLASSIAN_API_TOKEN=your_api_token",
+    				"@aashari/mcp-server-atlassian-confluence"
+    			]
     		}
     	}
     }
@@ -76,15 +142,19 @@ To use this MCP server with Cursor AI:
 
     - **Name**: Enter `aashari/mcp-server-atlassian-confluence`
     - **Type**: Select `command` from the dropdown
-    - **Command**: Choose one of the following based on your configuration approach:
+    - **Command**: Choose one of the following configuration methods:
 
-    If using global configuration file (recommended):
+    #### Method 1: Using Global Configuration File (Recommended)
+
+    First, create the global config file at `$HOME/.mcp/configs.json` as described in the "Configuration Options" section, then use this command:
 
     ```
     npx -y @aashari/mcp-server-atlassian-confluence
     ```
 
-    If passing configuration directly:
+    #### Method 2: Direct Configuration with Environment Variables
+
+    Pass configuration directly in the command:
 
     ```
     DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token npx -y @aashari/mcp-server-atlassian-confluence
@@ -136,70 +206,21 @@ mcp-confluence list-spaces
 mcp-confluence get-space 123456789
 ```
 
-## Configuration Options for End Users
+### CLI Configuration
 
-Before setting up with Claude Desktop or Cursor AI, you can configure the server. There are two recommended options for end users:
+The CLI tool uses the same configuration options as the MCP server:
 
-### Option 1: Direct Configuration in Claude/Cursor
+#### Method 1: Using Global Configuration File (Recommended)
 
-Pass your configuration directly in the Claude Desktop config or Cursor AI command:
+Create a global configuration file at `$HOME/.mcp/configs.json` as described above.
 
-```json
-{
-	"mcpServers": {
-		"aashari/mcp-server-atlassian-confluence": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"DEBUG=true",
-				"ATLASSIAN_SITE_NAME=your-instance",
-				"ATLASSIAN_USER_EMAIL=your-email@example.com",
-				"ATLASSIAN_API_TOKEN=your_api_token",
-				"@aashari/mcp-server-atlassian-confluence"
-			]
-		}
-	}
-}
+#### Method 2: Direct Environment Variables
+
+Run commands with environment variables:
+
+```bash
+DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token mcp-confluence list-spaces
 ```
-
-### Option 2: Global Configuration File (Recommended)
-
-1. Create a global configuration file at `$HOME/.mcp/configs.json`:
-
-```json
-{
-	"@aashari/mcp-server-atlassian-confluence": {
-		"environments": {
-			"DEBUG": "true",
-			"ATLASSIAN_SITE_NAME": "your-instance",
-			"ATLASSIAN_USER_EMAIL": "your-email@example.com",
-			"ATLASSIAN_API_TOKEN": "your_api_token"
-		}
-	}
-}
-```
-
-2. Then use a simplified configuration in Claude Desktop or Cursor AI:
-
-```json
-{
-	"mcpServers": {
-		"aashari/mcp-server-atlassian-confluence": {
-			"command": "npx",
-			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
-		}
-	}
-}
-```
-
-This approach keeps your configuration in one secure location and simplifies your AI assistant setup.
-
-### Available Configuration Options
-
-- **DEBUG**: Set to `true` to enable debug logging.
-- **ATLASSIAN_SITE_NAME**: Your Atlassian site name, e.g., 'your-instance' for 'your-instance.atlassian.net' (required)
-- **ATLASSIAN_USER_EMAIL**: Your Atlassian account email address (required)
-- **ATLASSIAN_API_TOKEN**: API token for Atlassian API access (required)
 
 ## Core Features
 
