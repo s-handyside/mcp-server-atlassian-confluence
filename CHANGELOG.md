@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.0.1...v1.1.0) (2025-03-23)
+
+
+### Bug Fixes
+
+* remove incorrect limit expectation in transport utility tests ([6f7b689](https://github.com/aashari/mcp-server-atlassian-confluence/commit/6f7b689a7eb5db8a8592db88e7fa27ac04d641c8))
+
+
+### Features
+
+* improve development workflow and update documentation ([4458957](https://github.com/aashari/mcp-server-atlassian-confluence/commit/445895777be6287a624cb19b8cd8a12590a28c7b))
+
 ## [1.0.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.0.0...v1.0.1) (2025-03-23)
 
 ### Bug Fixes
