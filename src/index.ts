@@ -10,6 +10,9 @@ import { runCli } from './cli/index.js';
 import ipAddressTools from './tools/ipaddress.tool.js';
 import ipLookupResources from './resources/ipaddress.resource.js';
 
+// Define version constant for easier management and consistent versioning
+const VERSION = '1.0.0';
+
 let serverInstance: McpServer | null = null;
 let transportInstance: SSEServerTransport | StdioServerTransport | null = null;
 
@@ -31,7 +34,7 @@ export async function startServer(mode: 'stdio' | 'sse' = 'stdio') {
 
 	serverInstance = new McpServer({
 		name: '@aashari/boilerplate-mcp-server',
-		version: '1.0.0',
+		version: VERSION,
 	});
 
 	if (mode === 'stdio') {

@@ -52,7 +52,7 @@ const versionFiles = [
 	},
 	{
 		path: path.join(rootDir, 'src', 'index.ts'),
-		pattern: /version: ['"]([^'"]*)['"]/,
+		pattern: /const VERSION = ['"]([^'"]*)['"]/,
 		replacement: (match, currentVersion) =>
 			match.replace(currentVersion, newVersion),
 	},
@@ -62,10 +62,11 @@ const versionFiles = [
 		pattern: /const VERSION = ['"]([^'"]*)['"]/,
 		replacement: (match, currentVersion) =>
 			match.replace(currentVersion, newVersion),
+		optional: true, // Mark this file as optional
 	},
 	{
 		path: path.join(rootDir, 'dist', 'index.js'),
-		pattern: /version: ['"]([^'"]*)['"]/,
+		pattern: /const VERSION = ['"]([^'"]*)['"]/,
 		replacement: (match, currentVersion) =>
 			match.replace(currentVersion, newVersion),
 		optional: true, // Mark this file as optional

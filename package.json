@@ -86,5 +86,49 @@
 	},
 	"directories": {
 		"example": "examples"
+	},
+	"jest": {
+		"preset": "ts-jest",
+		"testEnvironment": "node",
+		"testMatch": [
+			"**/src/**/*.test.ts"
+		],
+		"collectCoverageFrom": [
+			"src/**/*.ts",
+			"!src/**/*.test.ts",
+			"!src/**/*.spec.ts"
+		],
+		"coveragePathIgnorePatterns": [
+			"/node_modules/",
+			"/dist/",
+			"/coverage/"
+		],
+		"coverageReporters": [
+			"text",
+			"lcov",
+			"json-summary"
+		],
+		"transform": {
+			"^.+\\.tsx?$": [
+				"ts-jest",
+				{
+					"useESM": true
+				}
+			]
+		},
+		"moduleNameMapper": {
+			"(.*)\\.(js|jsx)$": "$1"
+		},
+		"extensionsToTreatAsEsm": [
+			".ts"
+		],
+		"moduleFileExtensions": [
+			"ts",
+			"tsx",
+			"js",
+			"jsx",
+			"json",
+			"node"
+		]
 	}
 }
