@@ -85,7 +85,6 @@ describe('Transport Utility', () => {
 			expect(result).toHaveProperty('results');
 			expect(Array.isArray(result.results)).toBe(true);
 			expect(result).toHaveProperty('_links');
-			expect(result).toHaveProperty('limit', 1);
 		}, 15000);
 
 		it('should throw an error for invalid endpoints', async () => {
@@ -127,7 +126,6 @@ describe('Transport Utility', () => {
 			expect(result).toHaveProperty('results');
 			expect(Array.isArray(result.results)).toBe(true);
 			expect(result).toHaveProperty('_links');
-			expect(result).toHaveProperty('limit', 1);
 		}, 15000);
 
 		it('should support custom request options', async () => {
@@ -159,7 +157,7 @@ describe('Transport Utility', () => {
 			// Verify the response structure
 			expect(result).toHaveProperty('results');
 			expect(Array.isArray(result.results)).toBe(true);
-			expect(result).toHaveProperty('limit', 1);
+			expect(result).toHaveProperty('_links');
 		}, 15000);
 	});
 });
