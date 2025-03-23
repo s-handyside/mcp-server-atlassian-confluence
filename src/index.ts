@@ -2,7 +2,7 @@
 import { Command } from 'commander';
 
 // Version is updated by the update-version.js script
-const VERSION = '1.8.1';
+const VERSION = '1.8.2';
 
 /**
  * Prints "Hello World" to the console

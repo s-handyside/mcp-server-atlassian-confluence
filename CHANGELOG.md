@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/aashari/boilerplate-npm-package/compare/v1.8.1...v1.8.2) (2025-03-23)
+
+
+### Bug Fixes
+
+* handle empty strings properly in greet function ([546d3a8](https://github.com/aashari/boilerplate-npm-package/commit/546d3a84209e1065af46b2213053f589340158df))
+
 ## [1.8.1](https://github.com/aashari/boilerplate-npm-package/compare/v1.8.0...v1.8.1) (2025-03-23)
 
 
