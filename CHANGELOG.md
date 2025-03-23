@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.0.0...v1.0.1) (2025-03-23)
+
+
+### Bug Fixes
+
+* update package name in config loader ([3b8157b](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3b8157b076441e4dde562cddfe31671f3696434d))
+
 # 1.0.0 (2025-03-23)
 
 
