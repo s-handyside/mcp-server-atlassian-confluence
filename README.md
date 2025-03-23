@@ -1,5 +1,7 @@
 # Atlassian Confluence MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@aashari/boilerplate-mcp-server)](https://smithery.ai/server/@aashari/boilerplate-mcp-server)
+
 ## About MCP
 
 The Model Context Protocol (MCP) is an open standard developed by Anthropic to simplify how AI systems connect to external data sources and tools. This implementation provides an MCP server for connecting Claude Desktop and other MCP-compatible AI systems to Atlassian Confluence.
