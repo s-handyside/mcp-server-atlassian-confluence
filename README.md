@@ -50,6 +50,35 @@ Create a global configuration file at `$HOME/.mcp/configs.json`:
 }
 ```
 
+You can also configure multiple MCP servers in the same file:
+
+```json
+{
+	"@aashari/boilerplate-mcp-server": {
+		"environments": {
+			"DEBUG": "true",
+			"IPAPI_API_TOKEN": "your_token"
+		}
+	},
+	"@aashari/mcp-server-atlassian-confluence": {
+		"environments": {
+			"DEBUG": "true",
+			"ATLASSIAN_SITE_NAME": "your-instance",
+			"ATLASSIAN_USER_EMAIL": "your-email@example.com",
+			"ATLASSIAN_API_TOKEN": "your_api_token"
+		}
+	},
+	"@aashari/mcp-server-atlassian-jira": {
+		"environments": {
+			"DEBUG": "true",
+			"ATLASSIAN_SITE_NAME": "your-instance",
+			"ATLASSIAN_USER_EMAIL": "your-email@example.com",
+			"ATLASSIAN_API_TOKEN": "your_api_token"
+		}
+	}
+}
+```
+
 This approach keeps your configuration in one secure location and simplifies your AI assistant setup.
 
 ## Setting Up with Claude Desktop
