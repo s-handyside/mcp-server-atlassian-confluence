@@ -30,7 +30,7 @@ async function getIpAddressDetails(
 		};
 	} catch (error) {
 		logger.error(
-			`[src/tools/ipaddress.tool.ts@getIpAddressDetails] Error getting IP details`,
+			`[src/tools/ipaddress.tool.ts@getIpAddressDetails] Error getting details for IP: ${args.ipAddress || 'current IP'}`,
 			error,
 		);
 		return formatErrorForMcpTool(error);
