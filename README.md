@@ -93,7 +93,7 @@ To use this MCP server with Cursor AI:
 4. **Verify Server Configuration**:
 
     - The server should now be listed with a green indicator
-    - You should see the `get_ip_details` tool listed under the server
+    - You should see the Confluence tools listed under the server
 
 5. **Test the Tool**:
     - In the chat sidebar, ensure Agent mode is active
@@ -118,14 +118,20 @@ After global installation, you can run the CLI commands directly:
 # Get help
 mcp-confluence --help
 
-# Search for pages in Confluence
-mcp-confluence search-confluence "project documentation"
+# Search for content in Confluence using CQL
+mcp-confluence search "type=page AND space=DOCS"
 
-# Get a specific page by title
-mcp-confluence get-page "Project Overview"
+# Get a specific page by ID
+mcp-confluence get-page 123456789
+
+# List pages with optional filtering
+mcp-confluence list-pages --space-id 123456789 --limit 10
 
 # List all spaces
 mcp-confluence list-spaces
+
+# Get a specific space by ID
+mcp-confluence get-space 123456789
 ```
 
 ## Configuration Options for End Users
@@ -197,9 +203,28 @@ This approach keeps your configuration in one secure location and simplifies you
 
 - **STDIO MCP Server**: Designed for AI clients like Claude Desktop, providing Confluence tools and resources via the Model Context Protocol.
 - **CLI Support**: Human-friendly command-line interface for the same functionality, making it easy to test and use directly.
-- **Confluence Integration**: Search spaces, pages, and retrieve content from your Confluence knowledge base.
+- **Confluence Integration**: Three main modules for complete Confluence access:
+    - **Spaces**: List and retrieve detailed information about Confluence spaces.
+    - **Pages**: Access and retrieve page content with Markdown conversion for better readability.
+    - **Search**: Powerful search capabilities using Confluence Query Language (CQL).
 - **Flexible Configuration**: Support for environment variables, .env files, and global config files.
 - **Testing & Development Tools**: Built-in inspection, testing, and development utilities.
+
+## Available Tools
+
+### Confluence Spaces
+
+- **list_spaces**: List Confluence spaces with filtering options for type, status, and pagination support.
+- **get_space**: Get detailed information about a specific Confluence space by ID.
+
+### Confluence Pages
+
+- **list_pages**: List Confluence pages with filtering options for space, status, sorting, and pagination.
+- **get_page**: Get detailed information about a specific Confluence page by ID, including content converted to Markdown.
+
+### Confluence Search
+
+- **search**: Search for content in Confluence using Confluence Query Language (CQL) with pagination support.
 
 ## For Developers
 
@@ -234,8 +259,7 @@ To add your own tools and resources:
 1. Create service files in the `src/services` directory
 2. Implement controllers in `src/controllers`
 3. Create tool implementations in `src/tools`
-4. Create resource implementations in `src/resources`
-5. Register your new tools and resources in `src/index.ts`
+4. Register your new tools in `src/index.ts`
 
 ## Developer Tools
 
@@ -254,14 +278,14 @@ npm run lint
 # Format code
 npm run format
 
-# Run the server with live reload during development
+# Build the project
+npm run build
+
+# Start the server
+npm start
+
+# Run development mode with auto-reload
 npm run dev
-
-# Use the MCP Inspector to visually test your server
-npm run inspect
-
-# Use the MCP Inspector with debug mode enabled
-npm run inspect:debug
 ```
 
 ## License

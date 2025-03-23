@@ -1,13 +1,15 @@
 import { Command } from 'commander';
 import { logger } from '../utils/logger.util.js';
 
-import ipAddressCli from './ipaddress.cli.js';
+import atlassianSpacesCli from './atlassian.spaces.cli.js';
+import atlassianPagesCli from './atlassian.pages.cli.js';
+import atlassianSearchCli from './atlassian.search.cli.js';
 
 // Get the version from package.json
-const VERSION = '1.0.1'; // This should match the version in src/index.ts
-const NAME = '@aashari/boilerplate-mcp-server';
+const VERSION = '1.0.0'; // This should match the version in src/index.ts
+const NAME = '@aashari/mcp-atlassian-confluence';
 const DESCRIPTION =
-	'A boilerplate Model Context Protocol (MCP) server implementation using TypeScript';
+	'A Model Context Protocol (MCP) server for Atlassian Confluence integration';
 
 export async function runCli(args: string[]) {
 	const program = new Command();
@@ -15,7 +17,9 @@ export async function runCli(args: string[]) {
 	program.name(NAME).description(DESCRIPTION).version(VERSION);
 
 	// Register CLI commands
-	ipAddressCli.register(program);
+	atlassianSpacesCli.register(program);
+	atlassianPagesCli.register(program);
+	atlassianSearchCli.register(program);
 
 	// Handle unknown commands
 	program.on('command:*', (operands) => {

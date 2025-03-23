@@ -7,11 +7,13 @@ import { config } from './utils/config.util.js';
 import { createUnexpectedError } from './utils/error.util.js';
 import { runCli } from './cli/index.js';
 
-import ipAddressTools from './tools/ipaddress.tool.js';
-import ipLookupResources from './resources/ipaddress.resource.js';
+// Import Confluence-specific tools
+import atlassianSpacesTools from './tools/atlassian.spaces.tool.js';
+import atlassianPagesTools from './tools/atlassian.pages.tool.js';
+import atlassianSearchTools from './tools/atlassian.search.tool.js';
 
 // Define version constant for easier management and consistent versioning
-const VERSION = '1.0.3';
+const VERSION = '1.0.0';
 
 let serverInstance: McpServer | null = null;
 let transportInstance: SSEServerTransport | StdioServerTransport | null = null;
@@ -28,12 +30,12 @@ export async function startServer(mode: 'stdio' | 'sse' = 'stdio') {
 	// Log the DEBUG value to verify configuration loading
 	logger.info(`[src/index.ts] DEBUG value: ${process.env.DEBUG}`);
 	logger.info(
-		`[src/index.ts] IPAPI_API_TOKEN value exists: ${Boolean(process.env.IPAPI_API_TOKEN)}`,
+		`[src/index.ts] ATLASSIAN_API_TOKEN value exists: ${Boolean(process.env.ATLASSIAN_API_TOKEN)}`,
 	);
 	logger.info(`[src/index.ts] Config DEBUG value: ${config.get('DEBUG')}`);
 
 	serverInstance = new McpServer({
-		name: '@aashari/boilerplate-mcp-server',
+		name: '@aashari/mcp-atlassian-confluence',
 		version: VERSION,
 	});
 
@@ -44,14 +46,13 @@ export async function startServer(mode: 'stdio' | 'sse' = 'stdio') {
 	}
 
 	logger.info(
-		`[src/index.ts] Starting server with ${mode.toUpperCase()} transport...`,
+		`[src/index.ts] Starting Confluence MCP server with ${mode.toUpperCase()} transport...`,
 	);
 
 	// register tools
-	ipAddressTools.register(serverInstance);
-
-	// register resources
-	ipLookupResources.register(serverInstance);
+	atlassianSpacesTools.register(serverInstance);
+	atlassianPagesTools.register(serverInstance);
+	atlassianSearchTools.register(serverInstance);
 
 	return serverInstance.connect(transportInstance).catch((err) => {
 		logger.error(`[src/index.ts] Failed to start server`, err);
@@ -67,7 +68,7 @@ async function main() {
 	// Log the DEBUG value to verify configuration loading
 	logger.info(`[src/index.ts] DEBUG value: ${process.env.DEBUG}`);
 	logger.info(
-		`[src/index.ts] IPAPI_API_TOKEN value exists: ${Boolean(process.env.IPAPI_API_TOKEN)}`,
+		`[src/index.ts] ATLASSIAN_API_TOKEN value exists: ${Boolean(process.env.ATLASSIAN_API_TOKEN)}`,
 	);
 	logger.info(`[src/index.ts] Config DEBUG value: ${config.get('DEBUG')}`);
 
