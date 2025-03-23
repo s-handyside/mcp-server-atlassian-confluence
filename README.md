@@ -10,6 +10,44 @@ The Model Context Protocol (MCP) is an open standard developed by Anthropic to s
 
 A TypeScript-based Model Context Protocol (MCP) server boilerplate for building AI-connected tools. Features IP lookup tools, CLI support, MCP Inspector integration, and extensible architecture for connecting Claude/Anthropic AI systems to external data sources.
 
+## Configuration Options
+
+Before setting up with any integration method, you should understand the available configuration options:
+
+### Available Configuration Options
+
+- **DEBUG**: Set to `true` to enable debug logging.
+- **IPAPI_API_TOKEN**: API token for the IP API service (if required).
+
+### Configuration Methods
+
+You can configure the server in two ways:
+
+#### Option 1: Direct Configuration (Environment Variables)
+
+Pass configuration directly as environment variables before the start command:
+
+```bash
+DEBUG=true IPAPI_API_TOKEN=your_token npx -y @aashari/boilerplate-mcp-server
+```
+
+#### Option 2: Global Configuration File (Recommended)
+
+Create a global configuration file at `$HOME/.mcp/configs.json`:
+
+```json
+{
+	"@aashari/boilerplate-mcp-server": {
+		"environments": {
+			"DEBUG": "true",
+			"IPAPI_API_TOKEN": "your_token"
+		}
+	}
+}
+```
+
+This approach keeps your configuration in one secure location and simplifies your AI assistant setup.
+
 ## Setting Up with Claude Desktop
 
 To use this MCP server with Claude Desktop:
@@ -26,10 +64,12 @@ To use this MCP server with Claude Desktop:
 
 3. **Update Configuration File**:
 
-    - Add one of the configuration options from below to the file
+    - Add configuration using one of the methods below
     - Save the file
 
-    Example with global configuration file already set up:
+    #### Method 1: Using Global Configuration File (Recommended)
+
+    First, create the global config file as described in the "Configuration Options" section above, then use this simplified configuration:
 
     ```json
     {
@@ -37,6 +77,26 @@ To use this MCP server with Claude Desktop:
     		"aashari/boilerplate-mcp-server": {
     			"command": "npx",
     			"args": ["-y", "@aashari/boilerplate-mcp-server"]
+    		}
+    	}
+    }
+    ```
+
+    #### Method 2: Direct Configuration in Claude Desktop
+
+    Pass configuration directly in the Claude Desktop config:
+
+    ```json
+    {
+    	"mcpServers": {
+    		"aashari/boilerplate-mcp-server": {
+    			"command": "npx",
+    			"args": [
+    				"-y",
+    				"DEBUG=true",
+    				"IPAPI_API_TOKEN=your_token",
+    				"@aashari/boilerplate-mcp-server"
+    			]
     		}
     	}
     }
@@ -76,15 +136,19 @@ To use this MCP server with Cursor AI:
 
     - **Name**: Enter `aashari/boilerplate-mcp-server`
     - **Type**: Select `command` from the dropdown
-    - **Command**: Choose one of the following based on your configuration approach:
+    - **Command**: Choose one of the following configuration methods:
 
-    If using global configuration file (recommended):
+    #### Method 1: Using Global Configuration File (Recommended)
+
+    First, create the global config file at `$HOME/.mcp/configs.json` as described in the "Configuration Options" section, then use this command:
 
     ```
     npx -y @aashari/boilerplate-mcp-server
     ```
 
-    If passing configuration directly:
+    #### Method 2: Direct Configuration with Environment Variables
+
+    Pass configuration directly in the command:
 
     ```
     DEBUG=true IPAPI_API_TOKEN=your_token npx -y @aashari/boilerplate-mcp-server
@@ -127,64 +191,21 @@ mcp-server get-ip-details
 mcp-server get-ip-details 8.8.8.8
 ```
 
-## Configuration Options for End Users
+### CLI Configuration
 
-Before setting up with Claude Desktop or Cursor AI, you can configure the server. There are two recommended options for end users:
+The CLI tool uses the same configuration options as the MCP server:
 
-### Option 1: Direct Configuration in Claude/Cursor
+#### Method 1: Using Global Configuration File (Recommended)
 
-Pass your configuration directly in the Claude Desktop config or Cursor AI command:
+Create a global configuration file at `$HOME/.mcp/configs.json` as described above.
 
-```json
-{
-	"mcpServers": {
-		"aashari/boilerplate-mcp-server": {
-			"command": "npx",
-			"args": [
-				"-y",
-				"DEBUG=true",
-				"IPAPI_API_TOKEN=your_token",
-				"@aashari/boilerplate-mcp-server"
-			]
-		}
-	}
-}
+#### Method 2: Direct Environment Variables
+
+Run commands with environment variables:
+
+```bash
+DEBUG=true IPAPI_API_TOKEN=your_token mcp-server get-ip-details
 ```
-
-### Option 2: Global Configuration File (Recommended)
-
-1. Create a global configuration file at `$HOME/.mcp/configs.json`:
-
-```json
-{
-	"@aashari/boilerplate-mcp-server": {
-		"environments": {
-			"DEBUG": "true",
-			"IPAPI_API_TOKEN": "your_token"
-		}
-	}
-}
-```
-
-2. Then use a simplified configuration in Claude Desktop or Cursor AI:
-
-```json
-{
-	"mcpServers": {
-		"aashari/boilerplate-mcp-server": {
-			"command": "npx",
-			"args": ["-y", "@aashari/boilerplate-mcp-server"]
-		}
-	}
-}
-```
-
-This approach keeps your configuration in one secure location and simplifies your AI assistant setup.
-
-### Available Configuration Options
-
-- **DEBUG**: Set to `true` to enable debug logging.
-- **IPAPI_API_TOKEN**: API token for the IP API service (if required).
 
 ## Core Features
 
