@@ -1,16 +1,16 @@
 {
-	"name": "@aashari/boilerplate-mcp-server",
-	"version": "1.0.3",
-	"description": "A TypeScript-based Model Context Protocol (MCP) server boilerplate for building AI-connected tools. Features IP lookup tools, CLI support, MCP Inspector integration, and extensible architecture for connecting Claude/Anthropic AI systems to external data sources.",
+	"name": "@aashari/mcp-server-atlassian-confluence",
+	"version": "1.0.0",
+	"description": "A TypeScript-based Model Context Protocol (MCP) server for Atlassian Confluence integration. Provides tools for accessing and searching Confluence spaces, pages, and content to connect Claude/Anthropic AI systems to Confluence knowledge bases.",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "commonjs",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/aashari/boilerplate-mcp-server.git"
+		"url": "https://github.com/aashari/mcp-server-atlassian-confluence.git"
 	},
 	"bin": {
-		"mcp-server": "./dist/index.js"
+		"mcp-confluence": "./dist/index.js"
 	},
 	"scripts": {
 		"build": "tsc",
@@ -35,7 +35,10 @@
 		"claude",
 		"anthropic",
 		"ai",
-		"boilerplate",
+		"atlassian",
+		"confluence",
+		"wiki",
+		"knowledge-base",
 		"server",
 		"model-context-protocol",
 		"tools",

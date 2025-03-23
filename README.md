@@ -1,16 +1,16 @@
-# Boilerplate MCP Server
+# Atlassian Confluence MCP Server
 
 ## About MCP
 
-The Model Context Protocol (MCP) is an open standard developed by Anthropic to simplify how AI systems connect to external data sources and tools. This boilerplate implementation provides a starting point for creating MCP servers that can be used with Claude Desktop and other MCP-compatible AI systems.
+The Model Context Protocol (MCP) is an open standard developed by Anthropic to simplify how AI systems connect to external data sources and tools. This implementation provides an MCP server for connecting Claude Desktop and other MCP-compatible AI systems to Atlassian Confluence.
 
 ## Overview
 
-A TypeScript-based Model Context Protocol (MCP) server boilerplate for building AI-connected tools. Features IP lookup tools, CLI support, MCP Inspector integration, and extensible architecture for connecting Claude/Anthropic AI systems to external data sources.
+A TypeScript-based Model Context Protocol (MCP) server for integrating with Atlassian Confluence. This server provides tools for searching and accessing Confluence spaces, pages, and content, allowing Claude/Anthropic AI systems to retrieve information directly from your organization's Confluence knowledge base.
 
 ## Setting Up with Claude Desktop
 
-To use this MCP server with Claude Desktop:
+To use this Confluence MCP server with Claude Desktop:
 
 1. **Open Claude Desktop Settings**:
 
@@ -32,9 +32,9 @@ To use this MCP server with Claude Desktop:
     ```json
     {
     	"mcpServers": {
-    		"aashari/boilerplate-mcp-server": {
+    		"aashari/mcp-server-atlassian-confluence": {
     			"command": "npx",
-    			"args": ["-y", "@aashari/boilerplate-mcp-server"]
+    			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
     		}
     	}
     }
@@ -48,11 +48,11 @@ To use this MCP server with Claude Desktop:
 
     - On the Claude home page, look for the hammer icon on the right side
     - Click it to see available tools
-    - Ensure the `get-ip-details` tool is listed
+    - Ensure the Confluence tools are listed
 
 6. **Test the Tool**:
-    - Try asking Claude: "give me my public IP" or "analyze this IP: 8.8.8.8"
-    - Claude will use the MCP tool to fetch and display the requested information
+    - Try asking Claude: "search Confluence for information about project X" or "get the contents of the Confluence page with title Y"
+    - Claude will use the MCP tool to fetch and display the requested information from your Confluence instance
 
 ## Setting Up with Cursor AI
 
@@ -72,20 +72,20 @@ To use this MCP server with Cursor AI:
 
 3. **Configure MCP Server**:
 
-    - **Name**: Enter `aashari/boilerplate-mcp-server`
+    - **Name**: Enter `aashari/mcp-server-atlassian-confluence`
     - **Type**: Select `command` from the dropdown
     - **Command**: Choose one of the following based on your configuration approach:
 
     If using global configuration file (recommended):
 
     ```
-    npx -y @aashari/boilerplate-mcp-server
+    npx -y @aashari/mcp-server-atlassian-confluence
     ```
 
     If passing configuration directly:
 
     ```
-    DEBUG=true IPAPI_API_TOKEN=your_token npx -y @aashari/boilerplate-mcp-server
+    DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token npx -y @aashari/mcp-server-atlassian-confluence
     ```
 
     - Click "Add"
@@ -97,8 +97,8 @@ To use this MCP server with Cursor AI:
 
 5. **Test the Tool**:
     - In the chat sidebar, ensure Agent mode is active
-    - Try asking: "give me my public IP" or "analyze this IP: 8.8.8.8"
-    - Cursor AI will use the MCP tool to fetch and display the requested information
+    - Try asking: "search Confluence for information about project X" or "show me the Confluence page with title Y"
+    - Cursor AI will use the MCP tool to fetch and display the requested information from your Confluence instance
 
 ## Using as a CLI Tool
 
@@ -109,20 +109,23 @@ This package can also be used as a command-line tool:
 You can install this package globally to use as a CLI tool:
 
 ```bash
-npm install -g @aashari/boilerplate-mcp-server
+npm install -g @aashari/mcp-server-atlassian-confluence
 ```
 
 After global installation, you can run the CLI commands directly:
 
 ```bash
 # Get help
-mcp-server --help
+mcp-confluence --help
 
-# Get current IP details
-mcp-server get-ip-details
+# Search for pages in Confluence
+mcp-confluence search-confluence "project documentation"
 
-# Get details for a specific IP
-mcp-server get-ip-details 8.8.8.8
+# Get a specific page by title
+mcp-confluence get-page "Project Overview"
+
+# List all spaces
+mcp-confluence list-spaces
 ```
 
 ## Configuration Options for End Users
@@ -136,13 +139,15 @@ Pass your configuration directly in the Claude Desktop config or Cursor AI comma
 ```json
 {
 	"mcpServers": {
-		"aashari/boilerplate-mcp-server": {
+		"aashari/mcp-server-atlassian-confluence": {
 			"command": "npx",
 			"args": [
 				"-y",
 				"DEBUG=true",
-				"IPAPI_API_TOKEN=your_token",
-				"@aashari/boilerplate-mcp-server"
+				"ATLASSIAN_SITE_NAME=your-instance",
+				"ATLASSIAN_USER_EMAIL=your-email@example.com",
+				"ATLASSIAN_API_TOKEN=your_api_token",
+				"@aashari/mcp-server-atlassian-confluence"
 			]
 		}
 	}
@@ -155,10 +160,12 @@ Pass your configuration directly in the Claude Desktop config or Cursor AI comma
 
 ```json
 {
-	"@aashari/boilerplate-mcp-server": {
+	"@aashari/mcp-server-atlassian-confluence": {
 		"environments": {
 			"DEBUG": "true",
-			"IPAPI_API_TOKEN": "your_token"
+			"ATLASSIAN_SITE_NAME": "your-instance",
+			"ATLASSIAN_USER_EMAIL": "your-email@example.com",
+			"ATLASSIAN_API_TOKEN": "your_api_token"
 		}
 	}
 }
@@ -169,9 +176,9 @@ Pass your configuration directly in the Claude Desktop config or Cursor AI comma
 ```json
 {
 	"mcpServers": {
-		"aashari/boilerplate-mcp-server": {
+		"aashari/mcp-server-atlassian-confluence": {
 			"command": "npx",
-			"args": ["-y", "@aashari/boilerplate-mcp-server"]
+			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
 		}
 	}
 }
@@ -182,13 +189,15 @@ This approach keeps your configuration in one secure location and simplifies you
 ### Available Configuration Options
 
 - **DEBUG**: Set to `true` to enable debug logging.
-- **IPAPI_API_TOKEN**: API token for the IP API service (if required).
+- **ATLASSIAN_SITE_NAME**: Your Atlassian site name, e.g., 'your-instance' for 'your-instance.atlassian.net' (required)
+- **ATLASSIAN_USER_EMAIL**: Your Atlassian account email address (required)
+- **ATLASSIAN_API_TOKEN**: API token for Atlassian API access (required)
 
 ## Core Features
 
-- **STDIO MCP Server**: Designed for AI clients like Claude Desktop, providing tools and resources via the Model Context Protocol.
+- **STDIO MCP Server**: Designed for AI clients like Claude Desktop, providing Confluence tools and resources via the Model Context Protocol.
 - **CLI Support**: Human-friendly command-line interface for the same functionality, making it easy to test and use directly.
-- **IP Address Lookup**: Get details about any IP address or your current device's IP.
+- **Confluence Integration**: Search spaces, pages, and retrieve content from your Confluence knowledge base.
 - **Flexible Configuration**: Support for environment variables, .env files, and global config files.
 - **Testing & Development Tools**: Built-in inspection, testing, and development utilities.
 
