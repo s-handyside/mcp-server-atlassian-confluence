@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/aashari/boilerplate-npm-package/compare/v1.8.0...v1.8.1) (2025-03-23)
+
+
+### Bug Fixes
+
+* ensure executable permissions for bin script ([395f1dc](https://github.com/aashari/boilerplate-npm-package/commit/395f1dcb5f3b5efee99048d1b91e3b083e9e544f))
+
 # [1.8.0](https://github.com/aashari/boilerplate-npm-package/compare/v1.7.2...v1.8.0) (2025-03-22)
 
 
