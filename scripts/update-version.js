@@ -44,12 +44,13 @@ const versionFiles = [
 		replacement: (match, currentVersion) =>
 			match.replace(currentVersion, newVersion),
 	},
-	// Also update the compiled JavaScript file if it exists
+	// Also update the compiled JavaScript file if it exists (but don't fail if it doesn't)
 	{
 		path: path.join(rootDir, 'dist', 'index.js'),
 		pattern: /const VERSION = ['"]([^'"]*)['"]/,
 		replacement: (match, currentVersion) =>
 			match.replace(currentVersion, newVersion),
+		optional: true, // Mark this file as optional
 	},
 	// Additional files can be added here with their patterns and replacement logic
 ];
@@ -102,12 +103,21 @@ function validateVersion(version) {
  * @param {Object} fileConfig - Configuration for the file to update
  */
 function updateFileVersion(fileConfig) {
-	const { path: filePath, pattern, replacement } = fileConfig;
+	const {
+		path: filePath,
+		pattern,
+		replacement,
+		optional = false,
+	} = fileConfig;
 
 	try {
 		log(`Checking ${filePath}...`, true);
 
 		if (!fs.existsSync(filePath)) {
+			if (optional) {
+				log(`Optional file not found (skipping): ${filePath}`, true);
+				return;
+			}
 			console.warn(`Warning: File not found: ${filePath}`);
 			return;
 		}
@@ -150,6 +160,10 @@ function updateFileVersion(fileConfig) {
 			);
 		}
 	} catch (error) {
+		if (optional) {
+			log(`Error with optional file ${filePath}: ${error.message}`, true);
+			return;
+		}
 		console.error(`Error updating ${filePath}: ${error.message}`);
 		process.exit(1);
 	}
