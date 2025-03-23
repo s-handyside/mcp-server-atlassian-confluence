@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/aashari/boilerplate-mcp-server/compare/v1.0.2...v1.0.3) (2025-03-23)
+
+
+### Bug Fixes
+
+* handle empty strings properly in greet function ([546d3a8](https://github.com/aashari/boilerplate-mcp-server/commit/546d3a84209e1065af46b2213053f589340158df))
+
 ## [1.0.2](https://github.com/aashari/boilerplate-mcp-server/compare/v1.0.1...v1.0.2) (2025-03-23)
 
 ### Bug Fixes
