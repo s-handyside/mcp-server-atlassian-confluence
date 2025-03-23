@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/aashari/boilerplate-mcp-server/compare/v1.0.0...v1.0.1) (2025-03-23)
+
+
+### Bug Fixes
+
+* ensure executable permissions for bin script ([395f1dc](https://github.com/aashari/boilerplate-mcp-server/commit/395f1dcb5f3b5efee99048d1b91e3b083e9e544f))
+
 # 1.0.0 (2025-03-22)
 
 ### Bug Fixes
