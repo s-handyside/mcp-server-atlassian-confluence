@@ -11,7 +11,7 @@ import ipAddressTools from './tools/ipaddress.tool.js';
 import ipLookupResources from './resources/ipaddress.resource.js';
 
 // Define version constant for easier management and consistent versioning
-const VERSION = '1.0.3';
+const VERSION = '1.1.0';
 
 let serverInstance: McpServer | null = null;
 let transportInstance: SSEServerTransport | StdioServerTransport | null = null;

@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/aashari/boilerplate-mcp-server/compare/v1.0.3...v1.1.0) (2025-03-23)
+
+
+### Features
+
+* improve development workflow and update documentation ([4458957](https://github.com/aashari/boilerplate-mcp-server/commit/445895777be6287a624cb19b8cd8a12590a28c7b))
+
 ## [1.0.3](https://github.com/aashari/boilerplate-mcp-server/compare/v1.0.2...v1.0.3) (2025-03-23)
 
 
