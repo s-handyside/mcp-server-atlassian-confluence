@@ -14,14 +14,22 @@ This project is a customizable Model Context Protocol (MCP) server written in Ty
 - **Flexible Configuration**: Supports direct environment variables for quick use or a global config file at `$HOME/.mcp/configs.json` for managing multiple servers.
 - **Development Tools**: Built-in MCP Inspector for debugging, plus testing and linting utilities.
 
+### Available Tools
+
+- **`search`**: Search Confluence content using Confluence Query Language (CQL).
+- **`list-spaces`**: Get a list of all available Confluence spaces.
+- **`get-space`**: Retrieve detailed information about a specific space.
+- **`list-pages`**: Get a list of pages in a space with optional filtering.
+- **`get-page`**: Retrieve the full content of a specific page.
+
 ## User Guide
 
 ### Configuration Options
 
 - **DEBUG**: Set to `true` for detailed logging (default: `false`).
-- **ATLASSIAN_SITE_NAME**: Your Atlassian site name, e.g., 'your-instance' for 'your-instance.atlassian.net' (required)
-- **ATLASSIAN_USER_EMAIL**: Your Atlassian account email address (required)
-- **ATLASSIAN_API_TOKEN**: API token for Atlassian API access (required)
+- **ATLASSIAN_SITE_NAME**: Your Atlassian site name (e.g., `your-instance` for `your-instance.atlassian.net`) – required.
+- **ATLASSIAN_USER_EMAIL**: Your Atlassian account email address – required.
+- **ATLASSIAN_API_TOKEN**: API token for Atlassian API access – required.
 
 #### Method 1: Environment Variables
 
@@ -106,7 +114,7 @@ You can also configure multiple MCP servers in the same file:
         				"DEBUG=true",
         				"ATLASSIAN_SITE_NAME=your-instance",
         				"ATLASSIAN_USER_EMAIL=your-email@example.com",
-        				"ATLASSIAN_API_TOKEN=your_api_token",
+        				"ATLASSIAN_API_TOKEN=your_token",
         				"@aashari/mcp-server-atlassian-confluence"
         			]
         		}
@@ -114,7 +122,7 @@ You can also configure multiple MCP servers in the same file:
         }
         ```
 4. **Restart**: Close and reopen Claude Desktop.
-5. **Test**: Click the hammer icon, verify Confluence tools are listed, then ask queries like "Search Confluence for project documentation" or "Show me the contents of the Getting Started page in Confluence".
+5. **Test**: Click the hammer icon, verify Confluence tools are listed, then ask: "Search Confluence for project documentation" or "Show me the contents of the 'Getting Started' page."
 
 ### Using with Cursor AI
 
@@ -128,8 +136,8 @@ You can also configure multiple MCP servers in the same file:
         - Global config: `npx -y @aashari/mcp-server-atlassian-confluence`.
         - Direct: `DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token npx -y @aashari/mcp-server-atlassian-confluence`.
     - Click "Add".
-3. **Verify**: Check for a green indicator and Confluence tools listed under the server.
-4. **Test**: In Agent mode, ask: "Find information about project X in our Confluence" or "Get the content from the 'Onboarding' page in Confluence".
+3. **Verify**: Check for a green indicator and Confluence tools listed.
+4. **Test**: In Agent mode, ask: "Find info about project X in Confluence" or "Get the 'Onboarding' page content."
 
 ### Using as a CLI Tool
 
@@ -138,9 +146,9 @@ Run without installation:
 ```bash
 # Help
 npx -y @aashari/mcp-server-atlassian-confluence -- --help
-# Search for content in Confluence using CQL
-npx -y @aashari/mcp-server-atlassian-confluence -- search "type=page AND space=DOCS"
-# Get a specific page by ID
+# Search using CQL
+npx -y @aashari/mcp-server-atlassian-confluence -- search "type=page space=DOCS"
+# Get a page by ID
 npx -y @aashari/mcp-server-atlassian-confluence -- get-page 123456789
 # List spaces
 npx -y @aashari/mcp-server-atlassian-confluence -- list-spaces
@@ -157,22 +165,22 @@ Then run:
 ```bash
 # Help
 mcp-confluence --help
-# Search for content in Confluence using CQL
-mcp-confluence search "type=page AND space=DOCS"
-# Get a specific page by ID
+# Search using CQL
+mcp-confluence search "type=page space=DOCS"
+# Get a page by ID
 mcp-confluence get-page 123456789
 # List pages with optional filtering
 mcp-confluence list-pages --space-id 123456789 --limit 10
 # List all spaces
 mcp-confluence list-spaces
-# Get a specific space by ID
+# Get a space by ID
 mcp-confluence get-space 123456789
 ```
 
 Use the global config file or prefix with environment variables:
 
 ```bash
-DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token mcp-confluence search "type=page AND space=DOCS"
+DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token mcp-confluence search "type=page space=DOCS"
 ```
 
 ## Developer Guide
@@ -186,29 +194,6 @@ To add custom tools or resources:
 3. **Tools**: Define new tools in `src/tools`.
 4. **Resources**: Add data sources in `src/resources`.
 5. **Register**: Update `src/index.ts` with your tools/resources.
-
-### Available Tools
-
-This MCP server provides the following tools for working with Confluence:
-
-1. **Search**: Search Confluence content using Confluence Query Language (CQL)
-
-    - Usage: `search "type=page AND space=DEV"`
-
-2. **List Spaces**: Get a list of all available Confluence spaces
-
-    - Usage: `list-spaces`
-
-3. **Get Space**: Retrieve detailed information about a specific space
-
-    - Usage: `get-space SPACEID`
-
-4. **List Pages**: Get a list of pages in a space with optional filtering
-
-    - Usage: `list-pages --space-id SPACEID --limit 10`
-
-5. **Get Page**: Retrieve the full content of a specific page
-    - Usage: `get-page PAGEID`
 
 ### Development Tools
 
