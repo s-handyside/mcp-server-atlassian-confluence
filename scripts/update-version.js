@@ -39,12 +39,31 @@ const log = (message, verbose = false) => {
 // File paths that may contain version information
 const versionFiles = [
 	{
+		path: path.join(rootDir, 'package.json'),
+		pattern: /"version": "([^"]*)"/,
+		replacement: (match, currentVersion) =>
+			match.replace(currentVersion, newVersion),
+	},
+	{
+		path: path.join(rootDir, 'src', 'cli', 'index.ts'),
+		pattern: /const VERSION = ['"]([^'"]*)['"]/,
+		replacement: (match, currentVersion) =>
+			match.replace(currentVersion, newVersion),
+	},
+	{
 		path: path.join(rootDir, 'src', 'index.ts'),
 		pattern: /const VERSION = ['"]([^'"]*)['"]/,
 		replacement: (match, currentVersion) =>
 			match.replace(currentVersion, newVersion),
 	},
-	// Also update the compiled JavaScript file if it exists (but don't fail if it doesn't)
+	// Also update the compiled JavaScript files if they exist
+	{
+		path: path.join(rootDir, 'dist', 'cli', 'index.js'),
+		pattern: /const VERSION = ['"]([^'"]*)['"]/,
+		replacement: (match, currentVersion) =>
+			match.replace(currentVersion, newVersion),
+		optional: true, // Mark this file as optional
+	},
 	{
 		path: path.join(rootDir, 'dist', 'index.js'),
 		pattern: /const VERSION = ['"]([^'"]*)['"]/,
