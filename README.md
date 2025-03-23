@@ -1,5 +1,7 @@
 # Boilerplate MCP Server
 
+[![smithery badge](https://smithery.ai/badge/@aashari/boilerplate-mcp-server)](https://smithery.ai/server/@aashari/boilerplate-mcp-server)
+
 ## About MCP
 
 The Model Context Protocol (MCP) is an open standard developed by Anthropic to simplify how AI systems connect to external data sources and tools. This boilerplate implementation provides a starting point for creating MCP servers that can be used with Claude Desktop and other MCP-compatible AI systems.
