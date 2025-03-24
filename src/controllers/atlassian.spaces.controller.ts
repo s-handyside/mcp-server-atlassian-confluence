@@ -1,7 +1,7 @@
 import atlassianSpacesService from '../services/vendor.atlassian.spaces.service.js';
 import atlassianPagesController from './atlassian.pages.controller.js';
 import { logger } from '../utils/logger.util.js';
-import { McpError, createUnexpectedError } from '../utils/error.util.js';
+import { McpError, createApiError } from '../utils/error.util.js';
 import {
 	SpaceStatus,
 	SpaceType,
@@ -91,14 +91,39 @@ async function list(
 			error,
 		);
 
+		// Get the error message
+		const errorMessage =
+			error instanceof Error ? error.message : String(error);
+
 		// Pass through McpErrors
 		if (error instanceof McpError) {
 			throw error;
 		}
 
-		// Wrap other errors
-		throw createUnexpectedError(
-			`Error listing Confluence spaces: ${error instanceof Error ? error.message : String(error)}`,
+		// Handle specific error patterns
+
+		// 1. Invalid cursor format
+		if (
+			errorMessage.includes('cursor') &&
+			errorMessage.includes('invalid')
+		) {
+			logger.warn(
+				`[src/controllers/atlassian.spaces.controller.ts@list] Invalid cursor detected`,
+			);
+
+			throw createApiError(
+				`${errorMessage}. Use the exact cursor string returned from previous results.`,
+				400,
+				error,
+			);
+		}
+
+		// Default: preserve original message
+		throw createApiError(
+			errorMessage,
+			error instanceof Error && 'statusCode' in error
+				? (error as { statusCode: number }).statusCode
+				: undefined,
 			error,
 		);
 	}
@@ -106,16 +131,19 @@ async function list(
 
 /**
  * Get details of a specific Confluence space
- * @param id - The ID of the space to retrieve
+ * @param idOrKey - The ID or key of the space to retrieve
  * @returns Promise with formatted space details content
  * @throws Error if space retrieval fails
  */
-async function get(id: string): Promise<ControllerResponse> {
+async function get(idOrKey: string): Promise<ControllerResponse> {
 	logger.debug(
-		`[src/controllers/atlassian.spaces.controller.ts@get] Getting Confluence space with ID: ${id}...`,
+		`[src/controllers/atlassian.spaces.controller.ts@get] Getting Confluence space with ID or Key: ${idOrKey}...`,
 	);
 
 	try {
+		// Determine if the input is a numeric ID or a space key
+		const isNumericId = /^\d+$/.test(idOrKey);
+
 		// Hardcoded parameters for the service call
 		const params = {
 			// Content format
@@ -133,7 +161,44 @@ async function get(id: string): Promise<ControllerResponse> {
 			params,
 		);
 
-		const spaceData = await atlassianSpacesService.get(id, params);
+		let spaceData;
+
+		if (isNumericId) {
+			// If it's a numeric ID, use the get method directly
+			logger.debug(
+				`[src/controllers/atlassian.spaces.controller.ts@get] Treating input as numeric space ID`,
+			);
+			spaceData = await atlassianSpacesService.get(idOrKey, params);
+		} else {
+			// If it's a space key, use the list method with keys filter
+			logger.debug(
+				`[src/controllers/atlassian.spaces.controller.ts@get] Treating input as space key, using list method with keys filter`,
+			);
+
+			const spacesResponse = await atlassianSpacesService.list({
+				keys: [idOrKey],
+				limit: 1,
+				...params,
+			});
+
+			// Check if space was found
+			if (
+				!spacesResponse.results ||
+				spacesResponse.results.length === 0
+			) {
+				throw createApiError(
+					`Space not found with key: ${idOrKey}. Verify the space key is correct and that you have access to this space.`,
+					404,
+				);
+			}
+
+			// Get the first space from the results
+			const spaceId = spacesResponse.results[0].id;
+
+			// Get full space details using the ID
+			spaceData = await atlassianSpacesService.get(spaceId, params);
+		}
+
 		// Log only key information instead of the entire response
 		logger.debug(
 			`[src/controllers/atlassian.spaces.controller.ts@get] Retrieved space: ${spaceData.name} (${spaceData.id})`,
@@ -197,14 +262,41 @@ async function get(id: string): Promise<ControllerResponse> {
 			error,
 		);
 
+		// Get the error message
+		const errorMessage =
+			error instanceof Error ? error.message : String(error);
+
 		// Pass through McpErrors
 		if (error instanceof McpError) {
 			throw error;
 		}
 
-		// Wrap other errors
-		throw createUnexpectedError(
-			`Error getting Confluence space: ${error instanceof Error ? error.message : String(error)}`,
+		// Handle specific error patterns
+
+		// 1. Space not found
+		if (
+			errorMessage.includes('not found') ||
+			(error instanceof Error &&
+				'statusCode' in error &&
+				(error as { statusCode: number }).statusCode === 404)
+		) {
+			logger.warn(
+				`[src/controllers/atlassian.spaces.controller.ts@get] Space not found: ${idOrKey}`,
+			);
+
+			throw createApiError(
+				`Space not found: ${idOrKey}. Verify the space ID or key is correct and that you have access to this space.`,
+				404,
+				error,
+			);
+		}
+
+		// Default: preserve original message
+		throw createApiError(
+			errorMessage,
+			error instanceof Error && 'statusCode' in error
+				? (error as { statusCode: number }).statusCode
+				: undefined,
 			error,
 		);
 	}

@@ -110,7 +110,7 @@ export async function fetchAtlassian<T>(
 			);
 
 			// Try to parse the error response
-			let errorMessage = `Atlassian API error: ${response.status} ${response.statusText}`;
+			let errorMessage = `${response.status} ${response.statusText}`;
 			let parsedError = null;
 
 			try {
@@ -129,11 +129,11 @@ export async function fetchAtlassian<T>(
 						// Format: {"errors":[{"status":400,"code":"INVALID_REQUEST_PARAMETER","title":"..."}]}
 						const atlassianError = parsedError.errors[0];
 						if (atlassianError.title) {
-							errorMessage = `Atlassian API error: ${atlassianError.title}`;
+							errorMessage = atlassianError.title;
 						}
 					} else if (parsedError.message) {
 						// Format: {"message":"Some error message"}
-						errorMessage = `Atlassian API error: ${parsedError.message}`;
+						errorMessage = parsedError.message;
 					}
 				}
 			} catch (parseError) {
@@ -150,7 +150,7 @@ export async function fetchAtlassian<T>(
 			} else if (response.status === 404) {
 				throw createApiError(`Resource not found`, 404, errorText);
 			} else {
-				// For other API errors, extract the actual error message from Atlassian API
+				// For other API errors, preserve the original error message from Atlassian API
 				throw createApiError(errorMessage, response.status, errorText);
 			}
 		}

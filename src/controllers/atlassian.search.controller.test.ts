@@ -86,10 +86,10 @@ describe('Atlassian Search Controller', () => {
 				return; // Skip this test if no credentials
 			}
 
-			// Call with an invalid CQL query
+			// Call with an invalid CQL query using incorrect operator syntax
 			await expect(
 				atlassianSearchController.search({
-					cql: 'invalid query syntax',
+					cql: 'type===page', // Using invalid operator === instead of =
 				}),
 			).rejects.toThrow(McpError);
 		}, 15000);

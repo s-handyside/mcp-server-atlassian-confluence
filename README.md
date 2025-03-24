@@ -16,7 +16,7 @@ This project is a customizable Model Context Protocol (MCP) server written in Ty
 
 - **`search`**: Search Confluence content using Confluence Query Language (CQL).
 - **`list-spaces`**: Get a list of all available Confluence spaces.
-- **`get-space`**: Retrieve detailed information about a specific space.
+- **`get-space`**: Retrieve detailed information about a specific space (supports both numeric IDs and space keys).
 - **`list-pages`**: Get a list of pages in a space with optional filtering.
 - **`get-page`**: Retrieve the full content of a specific page.
 
@@ -174,6 +174,8 @@ mcp-confluence list-pages --space-id 123456789 --limit 10
 mcp-confluence list-spaces
 # Get a space by ID
 mcp-confluence get-space 123456789
+# Or get a space by key
+mcp-confluence get-space DOCS
 ```
 
 Use the global config file or prefix with environment variables:

@@ -119,7 +119,7 @@ describe('Vendor Atlassian Pages Service', () => {
 					limit: 5,
 				}),
 			).rejects.toThrow(
-				/Atlassian API error.*'space-id' is not the correct type/,
+				/Provided value {invalid-space-id} for 'space-id' is not the correct type/,
 			);
 		}, 15000);
 	});

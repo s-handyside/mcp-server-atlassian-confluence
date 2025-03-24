@@ -1,10 +1,6 @@
 import atlassianSearchService from '../services/vendor.atlassian.search.service.js';
 import { logger } from '../utils/logger.util.js';
-import {
-	McpError,
-	createUnexpectedError,
-	createApiError,
-} from '../utils/error.util.js';
+import { McpError, createApiError } from '../utils/error.util.js';
 import { SearchOptions, ControllerResponse } from './atlassian.search.type.js';
 import {
 	formatSearchResults,
@@ -88,38 +84,75 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 		const errorMessage =
 			error instanceof Error ? error.message : String(error);
 
-		// Check for reserved keyword errors
+		// Already a McpError - pass it through without modification
+		if (error instanceof McpError) {
+			logger.debug(
+				`[src/controllers/atlassian.search.controller.ts@search] Passing through McpError: ${errorMessage}`,
+			);
+			throw error;
+		}
+
+		// Check for specific error patterns and enhance them with helpful context
+
+		// 1. Reserved keyword errors
 		if (
 			errorMessage.includes('Could not parse cql') &&
 			(errorMessage.includes('reserved keyword') ||
 				errorMessage.includes('reserved word'))
 		) {
 			logger.warn(
-				`[src/controllers/atlassian.search.controller.ts@search] Reserved keyword error detected, suggesting proper format`,
+				`[src/controllers/atlassian.search.controller.ts@search] Reserved keyword error detected, providing guidance`,
 			);
 
-			// Create a specific API error for reserved keywords
-			const userMessage =
-				'Your search contains a reserved keyword that needs to be quoted. ' +
-				'For example, if searching for space=IN, use space="IN" instead.';
+			// Provide specific guidance for fixing the query but preserve the original error
+			const guidance =
+				'Put quotes around reserved words like AND, OR, IN, etc. Example: space="IN" instead of space=IN.';
 
-			// Use just the error message that includes the user-friendly message
-			throw createApiError(`${errorMessage}: ${userMessage}`, 400, error);
+			// We create a new API error but maintain the original message as the prefix
+			throw createApiError(`${errorMessage}. ${guidance}`, 400, error);
 		}
 
+		// 2. Syntax errors in CQL
+		if (errorMessage.includes('Could not parse cql')) {
+			logger.warn(
+				`[src/controllers/atlassian.search.controller.ts@search] CQL syntax error detected`,
+			);
+
+			// General CQL syntax guidance while preserving the original message
+			const guidance =
+				'Check your CQL syntax. For complex queries, enclose terms with spaces in quotes.';
+
+			throw createApiError(`${errorMessage}. ${guidance}`, 400, error);
+		}
+
+		// 3. Invalid cursor format
+		if (
+			errorMessage.includes('cursor') &&
+			errorMessage.includes('invalid')
+		) {
+			logger.warn(
+				`[src/controllers/atlassian.search.controller.ts@search] Invalid cursor detected`,
+			);
+
+			throw createApiError(
+				`${errorMessage}. Use the exact cursor string returned from previous results.`,
+				400,
+				error,
+			);
+		}
+
+		// Log the unhandled error
 		logger.error(
 			`[src/controllers/atlassian.search.controller.ts@search] Error searching Confluence`,
 			error,
 		);
 
-		// Pass through McpErrors (they already have userMessage)
-		if (error instanceof McpError) {
-			throw error;
-		}
-
-		// Wrap other errors
-		throw createUnexpectedError(
-			`Error searching Confluence: ${errorMessage}. Search error details: ${errorMessage}`,
+		// Default: pass through with minimal wrapping to preserve original message
+		throw createApiError(
+			`${errorMessage}`,
+			error instanceof Error && 'statusCode' in error
+				? (error as { statusCode: number }).statusCode
+				: undefined,
 			error,
 		);
 	}

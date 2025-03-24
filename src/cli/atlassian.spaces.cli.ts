@@ -94,14 +94,18 @@ function registerGetSpaceCommand(program: Command): void {
 		.description(
 			'Get detailed information about a specific Confluence space',
 		)
-		.argument('<spaceId>', 'ID of the space to retrieve')
-		.action(async (spaceId: string) => {
+		.argument(
+			'<spaceIdOrKey>',
+			'ID or key of the space to retrieve (supports both numeric ID and space key)',
+		)
+		.action(async (spaceIdOrKey: string) => {
 			const logPrefix = '[src/cli/atlassian.spaces.cli.ts@get-space]';
 			try {
 				logger.debug(
-					`${logPrefix} Fetching details for space ID: ${spaceId}`,
+					`${logPrefix} Fetching details for space ID/Key: ${spaceIdOrKey}`,
 				);
-				const result = await atlassianSpacesController.get(spaceId);
+				const result =
+					await atlassianSpacesController.get(spaceIdOrKey);
 				logger.debug(
 					`${logPrefix} Successfully retrieved space details`,
 				);

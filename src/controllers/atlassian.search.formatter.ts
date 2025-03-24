@@ -86,11 +86,51 @@ export function processCqlQuery(cql: string): string {
 		'DESC',
 	];
 
-	// Check for space=KEYWORD pattern and quote the keyword if it's reserved
-	return cql.replace(/space\s*=\s*(\w+)(?!\s*")/g, (match, spaceKey) => {
-		if (reservedKeywords.includes(spaceKey.toUpperCase())) {
-			return `space="${spaceKey}"`;
+	// Process the CQL query in multiple steps
+	let processedCql = cql;
+
+	// Step 1: Check for space=KEYWORD pattern and quote the keyword if it's reserved
+	processedCql = processedCql.replace(
+		/space\s*=\s*(\w+)(?!\s*")/g,
+		(match, spaceKey) => {
+			if (reservedKeywords.includes(spaceKey.toUpperCase())) {
+				return `space="${spaceKey}"`;
+			}
+			return match;
+		},
+	);
+
+	// Step 2: Check for other property=KEYWORD patterns with reserved keywords
+	processedCql = processedCql.replace(
+		/(\w+)\s*=\s*(\w+)(?!\s*")/g,
+		(match, property, value) => {
+			if (reservedKeywords.includes(value.toUpperCase())) {
+				return `${property}="${value}"`;
+			}
+			return match;
+		},
+	);
+
+	// Step 3: Handle space-separated search terms by converting to AND syntax if needed
+	if (
+		!processedCql.includes(' AND ') &&
+		!processedCql.includes(' OR ') &&
+		!processedCql.includes(' NOT ') &&
+		processedCql.includes(' ')
+	) {
+		// Simple space-separated query without logical operators
+		// Split by spaces and reconstruct with AND
+		const terms = processedCql.split(' ').filter((term) => term.trim());
+		if (terms.length > 1) {
+			// Only apply the conversion if there are multiple terms and not already in a complex query
+			const hasComplexSyntax = /[=~()]/.test(processedCql);
+			if (!hasComplexSyntax) {
+				processedCql = terms
+					.map((term) => `text~"${term}"`)
+					.join(' AND ');
+			}
 		}
-		return match;
-	});
+	}
+
+	return processedCql;
 }

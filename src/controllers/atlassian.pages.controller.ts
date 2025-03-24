@@ -6,11 +6,12 @@ import {
 	GetPageOptions,
 	ControllerResponse,
 } from './atlassian.pages.type.js';
-import { McpError, createUnexpectedError } from '../utils/error.util.js';
+import { McpError } from '../utils/error.util.js';
 import {
 	formatPagesList,
 	formatPageDetails,
 } from './atlassian.pages.formatter.js';
+import { createApiError } from '../utils/error.util.js';
 
 /**
  * Controller for managing Confluence pages.
@@ -92,14 +93,39 @@ async function list(
 			error,
 		);
 
+		// Get the error message
+		const errorMessage =
+			error instanceof Error ? error.message : String(error);
+
 		// Pass through McpErrors
 		if (error instanceof McpError) {
 			throw error;
 		}
 
-		// Wrap other errors
-		throw createUnexpectedError(
-			`Error listing Confluence pages: ${error instanceof Error ? error.message : String(error)}`,
+		// Handle specific error patterns
+
+		// 1. Invalid cursor format
+		if (
+			errorMessage.includes('cursor') &&
+			errorMessage.includes('invalid')
+		) {
+			logger.warn(
+				`[src/controllers/atlassian.pages.controller.ts@list] Invalid cursor detected`,
+			);
+
+			throw createApiError(
+				`${errorMessage}. Use the exact cursor string returned from previous results.`,
+				400,
+				error,
+			);
+		}
+
+		// Default: preserve original message
+		throw createApiError(
+			errorMessage,
+			error instanceof Error && 'statusCode' in error
+				? (error as { statusCode: number }).statusCode
+				: undefined,
 			error,
 		);
 	}
@@ -157,14 +183,41 @@ async function get(
 			error,
 		);
 
+		// Get the error message
+		const errorMessage =
+			error instanceof Error ? error.message : String(error);
+
 		// Pass through McpErrors
 		if (error instanceof McpError) {
 			throw error;
 		}
 
-		// Wrap other errors
-		throw createUnexpectedError(
-			`Error getting Confluence page: ${error instanceof Error ? error.message : String(error)}`,
+		// Handle specific error patterns
+
+		// 1. Page not found
+		if (
+			errorMessage.includes('not found') ||
+			(error instanceof Error &&
+				'statusCode' in error &&
+				(error as { statusCode: number }).statusCode === 404)
+		) {
+			logger.warn(
+				`[src/controllers/atlassian.pages.controller.ts@get] Page not found: ${id}`,
+			);
+
+			throw createApiError(
+				`Page not found: ${id}. Verify the page ID is correct and that you have access to this page.`,
+				404,
+				error,
+			);
+		}
+
+		// Default: preserve original message
+		throw createApiError(
+			errorMessage,
+			error instanceof Error && 'statusCode' in error
+				? (error as { statusCode: number }).statusCode
+				: undefined,
 			error,
 		);
 	}
