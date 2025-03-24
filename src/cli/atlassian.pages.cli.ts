@@ -101,14 +101,14 @@ function registerGetPageCommand(program: Command): void {
 		.description(
 			'Get detailed information about a specific Confluence page',
 		)
-		.argument('<pageId>', 'ID of the page to retrieve')
-		.action(async (pageId: string) => {
+		.argument('<id>', 'ID of the page to retrieve')
+		.action(async (id: string) => {
 			const logPrefix = '[src/cli/atlassian.pages.cli.ts@get-page]';
 			try {
 				logger.debug(
-					`${logPrefix} Fetching details for page ID: ${pageId}`,
+					`${logPrefix} Fetching details for page ID: ${id}`,
 				);
-				const result = await atlassianPagesController.get(pageId);
+				const result = await atlassianPagesController.get(id);
 				logger.debug(
 					`${logPrefix} Successfully retrieved page details`,
 				);
