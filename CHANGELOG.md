@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.0...v1.2.1) (2025-03-24)
+
+
+### Bug Fixes
+
+* improve documentation with additional section ([6849f9b](https://github.com/aashari/mcp-server-atlassian-confluence/commit/6849f9b2339c049e0017ef40aedadd184350cee0))
+
 # [1.2.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.1.0...v1.2.0) (2025-03-24)
 
 
