@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.1.0...v1.2.0) (2025-03-24)
+
+
+### Features
+
+* enhance get-space command to support both numeric IDs and space keys ([2913153](https://github.com/aashari/mcp-server-atlassian-confluence/commit/29131536f302abf1923c0c6521d544c51ad222fa))
+
 # [1.1.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.0.1...v1.1.0) (2025-03-23)
 
 
