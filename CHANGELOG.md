@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.3...v1.2.4) (2025-03-24)
+
+
+### Bug Fixes
+
+* remove dist directory from git tracking ([7343e65](https://github.com/aashari/mcp-server-atlassian-confluence/commit/7343e65746001cb3465f9d0b0db30297ee43fb09))
+
 ## [1.2.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.2...v1.2.3) (2025-03-24)
 
 
