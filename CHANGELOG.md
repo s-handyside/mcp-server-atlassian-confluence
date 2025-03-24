@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.2...v1.2.3) (2025-03-24)
+
+
+### Bug Fixes
+
+* remove dist files from release commit assets ([74e53ce](https://github.com/aashari/mcp-server-atlassian-confluence/commit/74e53cee60c6a7785561354c81cbdf611323df5a))
+
 ## [1.2.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.1...v1.2.2) (2025-03-24)
 
 
