@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.5...v1.3.0) (2025-03-25)
+
+
+### Bug Fixes
+
+* standardize logging patterns and fix linter errors ([74c879f](https://github.com/aashari/mcp-server-atlassian-confluence/commit/74c879f6d7c4caced10ab6121a31e2b286689da7))
+
+
+### Features
+
+* **pages:** enhance page and space controllers ([ba21a0d](https://github.com/aashari/mcp-server-atlassian-confluence/commit/ba21a0d6b974eedbbf261265290526ca317b550e))
+
 ## [1.2.5](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.4...v1.2.5) (2025-03-25)
 
 
