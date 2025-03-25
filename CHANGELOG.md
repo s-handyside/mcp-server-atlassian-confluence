@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.4.0...v1.5.0) (2025-03-25)
+
+
+### Features
+
+* **pagination:** standardize pagination display across all CLI commands ([442a449](https://github.com/aashari/mcp-server-atlassian-confluence/commit/442a4495dd07039e3acd74541583645118fbe0cb))
+
 # [1.4.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.3.0...v1.4.0) (2025-03-25)
 
 
