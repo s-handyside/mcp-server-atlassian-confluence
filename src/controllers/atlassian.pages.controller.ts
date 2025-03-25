@@ -1,5 +1,5 @@
 import atlassianPagesService from '../services/vendor.atlassian.pages.service.js';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import { BodyFormat } from '../services/vendor.atlassian.pages.types.js';
 import {
 	extractPaginationInfo,
@@ -22,6 +22,14 @@ import {
  * Provides functionality for listing pages and retrieving page details.
  */
 
+// Create a contextualized logger for this file
+const controllerLogger = Logger.forContext(
+	'controllers/atlassian.pages.controller.ts',
+);
+
+// Log controller initialization
+controllerLogger.debug('Confluence pages controller initialized');
+
 /**
  * List Confluence pages with optional filtering
  * @param options - Optional filter options for the pages list
@@ -34,8 +42,11 @@ import {
 async function list(
 	options: ListPagesOptions = {},
 ): Promise<ControllerResponse> {
-	const source = `[src/controllers/atlassian.pages.controller.ts@list]`;
-	logger.debug(`${source} Listing Confluence pages...`, options);
+	const methodLogger = Logger.forContext(
+		'controllers/atlassian.pages.controller.ts',
+		'list',
+	);
+	methodLogger.debug('Listing Confluence pages...', options);
 
 	try {
 		// Set default filters and hardcoded values
@@ -54,19 +65,17 @@ async function list(
 			includeVersions: false,
 		};
 
-		logger.debug(`${source} Using filters:`, filters);
+		methodLogger.debug('Using filters:', filters);
 
 		const pagesData = await atlassianPagesService.list(filters);
 		// Log only the count of pages returned instead of the entire response
-		logger.debug(
-			`${source} Retrieved ${pagesData.results?.length || 0} pages`,
-		);
+		methodLogger.debug(`Retrieved ${pagesData.results?.length || 0} pages`);
 
 		// Extract pagination information using the utility
 		const pagination = extractPaginationInfo(
 			pagesData,
 			PaginationType.CURSOR,
-			source,
+			'controllers/atlassian.pages.controller.ts@list',
 		);
 
 		// Format the pages data for display using the formatter
@@ -84,7 +93,7 @@ async function list(
 		handleControllerError(error, {
 			entityType: 'Pages',
 			operation: 'listing',
-			source: 'src/controllers/atlassian.pages.controller.ts@list',
+			source: 'controllers/atlassian.pages.controller.ts@list',
 			additionalInfo: { options },
 		});
 	}
@@ -103,11 +112,12 @@ async function get(
 	options: GetPageOptions = {},
 ): Promise<ControllerResponse> {
 	const { id } = identifier;
-
-	logger.debug(
-		`[src/controllers/atlassian.pages.controller.ts@get] Getting Confluence page with ID: ${id}...`,
-		options,
+	const methodLogger = Logger.forContext(
+		'controllers/atlassian.pages.controller.ts',
+		'get',
 	);
+
+	methodLogger.debug(`Getting Confluence page with ID: ${id}...`, options);
 
 	try {
 		// Hardcoded parameters for the service call
@@ -122,15 +132,12 @@ async function get(
 			includeVersions: false,
 		};
 
-		logger.debug(
-			`[src/controllers/atlassian.pages.controller.ts@get] Using params:`,
-			params,
-		);
+		methodLogger.debug('Using params:', params);
 
 		const pageData = await atlassianPagesService.get(id, params);
 		// Log only key information instead of the entire response
-		logger.debug(
-			`[src/controllers/atlassian.pages.controller.ts@get] Retrieved page: ${pageData.title} (${pageData.id})`,
+		methodLogger.debug(
+			`Retrieved page: ${pageData.title} (${pageData.id})`,
 		);
 
 		// Format the page data for display using the formatter
@@ -145,7 +152,7 @@ async function get(
 			entityType: 'Page',
 			entityId: identifier,
 			operation: 'retrieving',
-			source: 'src/controllers/atlassian.pages.controller.ts@get',
+			source: 'controllers/atlassian.pages.controller.ts@get',
 			additionalInfo: { options },
 		});
 	}
