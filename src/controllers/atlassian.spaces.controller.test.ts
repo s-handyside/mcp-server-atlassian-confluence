@@ -71,7 +71,9 @@ describe('Atlassian Spaces Controller', () => {
 			const spaceId = match[1];
 
 			// Call the function with the extracted ID
-			const result = await atlassianSpacesController.get({ idOrKey: spaceId });
+			const result = await atlassianSpacesController.get({
+				idOrKey: spaceId,
+			});
 
 			// Verify the response structure
 			expect(result).toHaveProperty('content');
