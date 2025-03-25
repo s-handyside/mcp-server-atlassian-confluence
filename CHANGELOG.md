@@ -1,3 +1,11 @@
+# [1.4.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.3.0...v1.4.0) (2025-03-25)
+
+
+### Features
+
+* **cli:** standardize CLI command descriptions with detailed explanations ([42d11c6](https://github.com/aashari/mcp-server-atlassian-confluence/commit/42d11c6e2670cc3bcc83016ab9d65287454ab1fa))
+* **format:** implement standardized formatters and update CLI documentation ([d7aad41](https://github.com/aashari/mcp-server-atlassian-confluence/commit/d7aad41dd9bd7e440b3451c69e508abc310175b7))
+
 # [1.3.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.5...v1.3.0) (2025-03-25)
 
 
