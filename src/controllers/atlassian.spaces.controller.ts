@@ -2,7 +2,7 @@ import atlassianSpacesService from '../services/vendor.atlassian.spaces.service.
 import atlassianPagesController from './atlassian.pages.controller.js';
 import { logger } from '../utils/logger.util.js';
 import { createApiError } from '../utils/error.util.js';
-import { handleControllerError } from '../utils/errorHandler.util.js';
+import { handleControllerError } from '../utils/error-handler.util.js';
 import {
 	extractPaginationInfo,
 	PaginationType,

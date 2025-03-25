@@ -4,7 +4,7 @@ import {
 	formatBulletList,
 	formatSeparator,
 	formatNumberedList,
-} from '../utils/formatters/common.formatter.js';
+} from '../utils/formatter.util.js';
 
 /**
  * Format search results for display
