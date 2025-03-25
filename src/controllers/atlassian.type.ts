@@ -11,6 +11,11 @@ export interface ResponsePagination {
 	 * Whether more results are available
 	 */
 	hasMore: boolean;
+
+	/**
+	 * The number of items in the current result set
+	 */
+	count?: number;
 }
 
 /**

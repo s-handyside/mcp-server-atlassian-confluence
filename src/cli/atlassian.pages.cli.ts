@@ -3,10 +3,9 @@ import { logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
 import {
-	ContentStatus,
-	PageSortOrder,
-	ListPagesParams,
-} from '../services/vendor.atlassian.pages.types.js';
+	ListPagesOptions,
+	GetPageOptions,
+} from '../controllers/atlassian.pages.type.js';
 
 /**
  * CLI module for managing Confluence pages.
@@ -39,14 +38,13 @@ function registerListPagesCommand(program: Command): void {
 		.description(
 			'List Confluence pages with optional filtering\n\n  Retrieves pages from your Confluence instance with filtering by space, status, and sorting options.',
 		)
-		.option('-s, --space-id <spaceIds...>', 'Filter pages by space IDs')
 		.option(
-			'--status <statuses...>',
-			'Filter by status (current, trashed, deleted, draft, archived, historical)',
+			'-s, --space-id <id>',
+			'Filter by space ID. Use this option to limit results to a specific space.',
 		)
 		.option(
-			'--sort <order>',
-			'Sort by field (id, -id, created-date, -created-date, modified-date, -modified-date, title, -title)',
+			'-u, --status <status>',
+			'Filter by page status (current, archived).',
 		)
 		.option(
 			'-l, --limit <number>',
@@ -64,14 +62,11 @@ function registerListPagesCommand(program: Command): void {
 					options,
 				);
 
-				const filterOptions: ListPagesParams = {
-					...(options.spaceId && { spaceId: options.spaceId }),
-					...(options.status && {
-						status: options.status as ContentStatus[],
+				const filterOptions: ListPagesOptions = {
+					...(options.spaceId && {
+						spaceId: [options.spaceId],
 					}),
-					...(options.sort && {
-						sort: options.sort as PageSortOrder,
-					}),
+					...(options.status && { status: options.status }),
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
 					}),
@@ -85,10 +80,23 @@ function registerListPagesCommand(program: Command): void {
 				const result =
 					await atlassianPagesController.list(filterOptions);
 				logger.debug(
-					`${logPrefix} Successfully retrieved ${result.content.length} pages`,
+					`${logPrefix} Successfully retrieved ${
+						result.pagination?.count || 'all'
+					} pages`,
 				);
 
 				console.log(result.content);
+
+				// Display pagination information if available
+				if (result.pagination?.hasMore) {
+					console.log('\n## Pagination');
+					console.log(
+						`*Showing ${result.pagination.count || ''} items. More results are available.*`,
+					);
+					console.log(
+						`\nTo see more results, use --cursor "${result.pagination.nextCursor}"`,
+					);
+				}
 			} catch (error) {
 				logger.error(`${logPrefix} Operation failed:`, error);
 				handleCliError(error);
@@ -107,13 +115,67 @@ function registerGetPageCommand(program: Command): void {
 			'Get detailed information about a specific Confluence page\n\n  Retrieves comprehensive details for a page including content, version history, and relationships.',
 		)
 		.argument('<id>', 'ID of the page to retrieve')
-		.action(async (id: string) => {
+		.option(
+			'-f, --body-format <format>',
+			'Format for the body content (storage, view, editor). Defaults to view.',
+		)
+		.option(
+			'-l, --include-labels',
+			'Include labels associated with the page.',
+			false,
+		)
+		.option(
+			'-p, --include-properties',
+			'Include properties associated with the page.',
+			false,
+		)
+		.option(
+			'-w, --include-webresources',
+			'Include web resources associated with the page.',
+			false,
+		)
+		.option(
+			'-c, --include-collaborators',
+			'Include collaborator information for the page.',
+			false,
+		)
+		.option(
+			'-v, --include-version',
+			'Include version information for the page.',
+			false,
+		)
+		.action(async (id: string, options) => {
 			const logPrefix = '[src/cli/atlassian.pages.cli.ts@get-page]';
 			try {
 				logger.debug(
 					`${logPrefix} Fetching details for page ID: ${id}`,
 				);
-				const result = await atlassianPagesController.get({ id });
+
+				const pageOptions: GetPageOptions = {
+					...(options.bodyFormat && {
+						bodyFormat: options.bodyFormat,
+					}),
+					...(options.includeLabels && {
+						includeLabels: options.includeLabels,
+					}),
+					...(options.includeProperties && {
+						includeProperties: options.includeProperties,
+					}),
+					...(options.includeWebresources && {
+						includeWebresources: options.includeWebresources,
+					}),
+					...(options.includeCollaborators && {
+						includeCollaborators: options.includeCollaborators,
+					}),
+					...(options.includeVersion && {
+						includeVersion: options.includeVersion,
+					}),
+				};
+
+				const result = await atlassianPagesController.get(
+					{ id },
+					pageOptions,
+				);
 				logger.debug(
 					`${logPrefix} Successfully retrieved page details`,
 				);
