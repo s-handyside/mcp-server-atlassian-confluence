@@ -76,7 +76,9 @@ async function getSpace(
 	logger.debug(`${logPrefix} Retrieving space details for ID: ${args.id}`);
 
 	try {
-		const message = await atlassianSpacesController.get(args.id);
+		const message = await atlassianSpacesController.get({
+			idOrKey: args.id,
+		});
 		logger.debug(
 			`${logPrefix} Successfully retrieved space details from controller`,
 			message,

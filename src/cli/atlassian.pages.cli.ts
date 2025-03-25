@@ -108,7 +108,7 @@ function registerGetPageCommand(program: Command): void {
 				logger.debug(
 					`${logPrefix} Fetching details for page ID: ${id}`,
 				);
-				const result = await atlassianPagesController.get(id);
+				const result = await atlassianPagesController.get({ id });
 				logger.debug(
 					`${logPrefix} Successfully retrieved page details`,
 				);

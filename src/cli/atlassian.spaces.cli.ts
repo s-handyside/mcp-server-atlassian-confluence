@@ -104,8 +104,9 @@ function registerGetSpaceCommand(program: Command): void {
 				logger.debug(
 					`${logPrefix} Fetching details for space ID/Key: ${spaceIdOrKey}`,
 				);
-				const result =
-					await atlassianSpacesController.get(spaceIdOrKey);
+				const result = await atlassianSpacesController.get({
+					idOrKey: spaceIdOrKey,
+				});
 				logger.debug(
 					`${logPrefix} Successfully retrieved space details`,
 				);

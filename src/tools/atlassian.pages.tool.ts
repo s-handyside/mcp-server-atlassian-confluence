@@ -73,7 +73,7 @@ async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
 	logger.debug(`${logPrefix} Retrieving page details for ID: ${args.id}`);
 
 	try {
-		const message = await atlassianPagesController.get(args.id);
+		const message = await atlassianPagesController.get({ id: args.id });
 		logger.debug(
 			`${logPrefix} Successfully retrieved page details from controller`,
 			message,
