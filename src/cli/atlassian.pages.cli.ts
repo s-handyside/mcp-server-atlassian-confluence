@@ -36,7 +36,9 @@ function register(program: Command): void {
 function registerListPagesCommand(program: Command): void {
 	program
 		.command('list-pages')
-		.description('List Confluence pages with optional filtering')
+		.description(
+			'List Confluence pages with optional filtering\n\n  Retrieves pages from your Confluence instance with filtering by space, status, and sorting options.',
+		)
 		.option('-s, --space-id <spaceIds...>', 'Filter pages by space IDs')
 		.option(
 			'--status <statuses...>',
@@ -102,7 +104,7 @@ function registerGetPageCommand(program: Command): void {
 	program
 		.command('get-page')
 		.description(
-			'Get detailed information about a specific Confluence page',
+			'Get detailed information about a specific Confluence page\n\n  Retrieves comprehensive details for a page including content, version history, and relationships.',
 		)
 		.argument('<id>', 'ID of the page to retrieve')
 		.action(async (id: string) => {

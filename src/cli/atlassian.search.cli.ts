@@ -31,7 +31,7 @@ function registerSearchCommand(program: Command): void {
 	program
 		.command('search')
 		.description(
-			'Search for content in Confluence using Confluence Query Language (CQL)',
+			'Search for content in Confluence using Confluence Query Language (CQL)\n\n  Provides powerful search capabilities to find content across spaces, pages, and attachments using CQL syntax.',
 		)
 		.argument(
 			'<cql>',

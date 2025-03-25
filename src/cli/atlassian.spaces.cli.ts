@@ -36,7 +36,9 @@ function register(program: Command): void {
 function registerListSpacesCommand(program: Command): void {
 	program
 		.command('list-spaces')
-		.description('List Confluence spaces with optional filtering')
+		.description(
+			'List Confluence spaces with optional filtering\n\n  Retrieves spaces from your Confluence instance with filtering by type, status, and pagination options.',
+		)
 		.option(
 			'-t, --type <type>',
 			'Filter by type (global, personal, collaboration, knowledge_base)',
@@ -95,7 +97,7 @@ function registerGetSpaceCommand(program: Command): void {
 	program
 		.command('get-space')
 		.description(
-			'Get detailed information about a specific Confluence space',
+			'Get detailed information about a specific Confluence space\n\n  Retrieves comprehensive details for a space including metadata, permissions, and content overview.',
 		)
 		.argument(
 			'<spaceIdOrKey>',
