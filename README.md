@@ -1,51 +1,41 @@
 # Atlassian Confluence MCP Server
 
-## About
+## What is MCP and Why Use It?
 
-This project is a customizable Model Context Protocol (MCP) server written in TypeScript, designed to extend AI assistants like Claude or Cursor with access to Atlassian Confluence data. MCP is an open-source protocol by Anthropic for connecting AI systems to external capabilities securely and efficiently. For more details on MCP, see [https://modelcontextprotocol.io/docs/](https://modelcontextprotocol.io/docs/). This server allows AI assistants to search and access Confluence spaces, pages, and content directly from your organization's knowledge base.
+Model Context Protocol (MCP) is a technology that allows AI assistants like Claude to access external tools and information. Think of it as giving AI the ability to "see" and interact with your organization's systems - in this case, your Confluence spaces and pages.
 
-## Project Features
+**Benefits:**
 
-- **MCP Server**: Exposes Confluence tools and resources to AI clients (e.g., Claude Desktop, Cursor AI) via STDIO or HTTP.
-- **Confluence Integration**: Access spaces, pages, and search functionality from your Confluence instance.
-- **CLI Support**: Run Confluence queries directly from the command line without an AI client.
-- **Flexible Configuration**: Supports direct environment variables for quick use or a global config file at `$HOME/.mcp/configs.json` for managing multiple servers.
-- **Development Tools**: Built-in MCP Inspector for debugging, plus testing and linting utilities.
+- Your AI assistant can directly access real-time Confluence content
+- No need to copy/paste information between tools
+- AI can help search, summarize, and analyze your Confluence documentation
+- Keeps sensitive information secure (the AI only sees what you share)
 
-### Available Tools
+This MCP server connects Claude, Cursor, or other compatible AI assistants with your Confluence instance, allowing them to search content, list spaces and pages, and access detailed documentation.
 
-- **`search`**: Search Confluence content using Confluence Query Language (CQL).
-- **`list-spaces`**: Get a list of all available Confluence spaces.
-- **`get-space`**: Retrieve detailed information about a specific space (supports both numeric IDs and space keys).
-- **`list-pages`**: Get a list of pages in a space with optional filtering.
-- **`get-page`**: Retrieve the full content of a specific page.
+## Quick Start Guide
 
-## User Guide
+### Step 1: Get Your Atlassian API Token
 
-### Configuration Options
+1. **Create an API token** in your Atlassian account:
+    - Go to [https://id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens)
+    - Click "Create API token"
+    - Give it a name (e.g., "MCP Connection")
+    - Copy the generated token to a secure location
 
-- **DEBUG**: Set to `true` for detailed logging (default: `false`).
-- **ATLASSIAN_SITE_NAME**: Your Atlassian site name (e.g., `your-instance` for `your-instance.atlassian.net`) – required.
-- **ATLASSIAN_USER_EMAIL**: Your Atlassian account email address – required.
-- **ATLASSIAN_API_TOKEN**: API token for Atlassian API access – required.
+### Step 2: Set Up Configuration
 
-#### Method 1: Environment Variables
+Choose one of these methods:
 
-Pass configs directly when running:
+#### Easy Setup: Create a Config File (Recommended)
 
-```bash
-DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token npx -y @aashari/mcp-server-atlassian-confluence
-```
-
-#### Method 2: Global Config File (Recommended)
-
-Create `$HOME/.mcp/configs.json`:
+1. Create a folder called `.mcp` in your home directory
+2. Create a file called `configs.json` inside it with this content:
 
 ```json
 {
 	"@aashari/mcp-server-atlassian-confluence": {
 		"environments": {
-			"DEBUG": "true",
 			"ATLASSIAN_SITE_NAME": "your-instance",
 			"ATLASSIAN_USER_EMAIL": "your-email@example.com",
 			"ATLASSIAN_API_TOKEN": "your_api_token"
@@ -54,19 +44,86 @@ Create `$HOME/.mcp/configs.json`:
 }
 ```
 
-You can also configure multiple MCP servers in the same file:
+Replace the values with your actual information:
+
+- `your-instance`: Your Atlassian site name (e.g., for `example.atlassian.net`, enter `example`)
+- `your-email@example.com`: Your Atlassian account email address
+- `your_api_token`: The API token you created in Step 1
+
+#### Alternative: Use Environment Variables
+
+If you prefer, you can provide the configuration directly when running commands:
+
+```bash
+ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token npx -y @aashari/mcp-server-atlassian-confluence
+```
+
+### Step 3: Connect Your AI Assistant
+
+#### For Claude Desktop
+
+1. Open Claude Desktop and click the **gear icon** (Settings) in the top-right
+2. Click **Edit Config**
+3. Add the following to your configuration file:
 
 ```json
 {
-	"@aashari/boilerplate-mcp-server": {
-		"environments": {
-			"DEBUG": "true",
-			"IPAPI_API_TOKEN": "your_token"
+	"mcpServers": {
+		"aashari/mcp-server-atlassian-confluence": {
+			"command": "npx",
+			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
 		}
-	},
+	}
+}
+```
+
+4. Save and close the file
+5. Restart Claude Desktop
+6. Click the **hammer icon** to verify Confluence tools are listed
+
+#### For Cursor AI
+
+1. Open Cursor and press `CMD + SHIFT + P` (macOS) or `CTRL + SHIFT + P` (Windows/Linux)
+2. Select **Cursor Settings > MCP**
+3. Click **+ Add new MCP server**
+4. Fill in the details:
+    - **Name**: `aashari/mcp-server-atlassian-confluence`
+    - **Type**: `command`
+    - **Command**: `npx -y @aashari/mcp-server-atlassian-confluence`
+5. Click **Add**
+6. Look for a green indicator showing the server is active
+
+### Step 4: Start Using It!
+
+In your AI assistant, try asking:
+
+- "List all the Confluence spaces I have access to"
+- "Search Confluence for information about project X"
+- "Show me the 'Getting Started' page content"
+- "Find Confluence pages about API documentation"
+
+## Available Tools
+
+This MCP server provides the following tools:
+
+| Tool            | Purpose                       | Example Usage                         |
+| --------------- | ----------------------------- | ------------------------------------- |
+| **search**      | Search across spaces with CQL | "Find pages about API documentation"  |
+| **list-spaces** | View all available spaces     | "Show me all Confluence spaces"       |
+| **get-space**   | Get details about a space     | "Tell me about the DEV space"         |
+| **list-pages**  | View pages in a space         | "Show pages in the Engineering space" |
+| **get-page**    | Get full content of a page    | "Show me the Getting Started page"    |
+
+## Advanced Configuration
+
+### Using Multiple MCP Servers
+
+You can configure multiple MCP servers in your global config file (`$HOME/.mcp/configs.json`):
+
+```json
+{
 	"@aashari/mcp-server-atlassian-confluence": {
 		"environments": {
-			"DEBUG": "true",
 			"ATLASSIAN_SITE_NAME": "your-instance",
 			"ATLASSIAN_USER_EMAIL": "your-email@example.com",
 			"ATLASSIAN_API_TOKEN": "your_api_token"
@@ -74,7 +131,6 @@ You can also configure multiple MCP servers in the same file:
 	},
 	"@aashari/mcp-server-atlassian-jira": {
 		"environments": {
-			"DEBUG": "true",
 			"ATLASSIAN_SITE_NAME": "your-instance",
 			"ATLASSIAN_USER_EMAIL": "your-email@example.com",
 			"ATLASSIAN_API_TOKEN": "your_api_token"
@@ -83,164 +139,96 @@ You can also configure multiple MCP servers in the same file:
 }
 ```
 
-### Using with Claude Desktop
+Then add both to your AI assistant's configuration.
 
-1. **Open Settings**:
-    - Launch Claude Desktop, click the gear icon (top-right).
-2. **Edit Config**:
-    - Click "Edit Config" to open `claude_desktop_config.json` (e.g., `~/Library/Application Support/Claude` on macOS or `%APPDATA%\Claude` on Windows).
-    - Click "Edit Config" to open `claude_desktop_config.json` (e.g., `~/Library/Application Support/Claude` on macOS or `%APPDATA%\Claude` on Windows).
-3. **Add Server**:
-    - Use the global config file (recommended):
-        ```json
-        {
-        	"mcpServers": {
-        		"aashari/mcp-server-atlassian-confluence": {
-        			"command": "npx",
-        			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
-        		}
-        	}
-        }
-        ```
-    - Or configure directly:
-        ```json
-        {
-        	"mcpServers": {
-        		"aashari/mcp-server-atlassian-confluence": {
-        			"command": "npx",
-        			"args": [
-        				"-y",
-        				"DEBUG=true",
-        				"ATLASSIAN_SITE_NAME=your-instance",
-        				"ATLASSIAN_USER_EMAIL=your-email@example.com",
-        				"ATLASSIAN_API_TOKEN=your_token",
-        				"@aashari/mcp-server-atlassian-confluence"
-        			]
-        		}
-        	}
-        }
-        ```
-4. **Restart**: Close and reopen Claude Desktop.
-5. **Test**: Click the hammer icon, verify Confluence tools are listed, then ask: "Search Confluence for project documentation" or "Show me the contents of the 'Getting Started' page."
+### Debugging
 
-### Using with Cursor AI
+To enable debug logging:
 
-1. **Open Settings**:
-    - Launch Cursor, press `CMD + SHIFT + P` (or `CTRL + SHIFT + P`), select "Cursor Settings" > "MCP".
-2. **Add Server**:
-    - Click "+ Add new MCP server".
-    - **Name**: `aashari/mcp-server-atlassian-confluence`.
-    - **Type**: `command`.
-    - **Command**:
-        - Global config: `npx -y @aashari/mcp-server-atlassian-confluence`.
-        - Direct: `DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token npx -y @aashari/mcp-server-atlassian-confluence`.
-    - Click "Add".
-3. **Verify**: Check for a green indicator and Confluence tools listed.
-4. **Test**: In Agent mode, ask: "Find info about project X in Confluence" or "Get the 'Onboarding' page content."
+- Add `"DEBUG": "true"` to your environment configuration
+- Or prefix commands with `DEBUG=true`
 
-### Using as a CLI Tool
+### Using as a Command-Line Tool
 
-Run without installation:
+You can also use this as a standalone command-line tool:
 
 ```bash
-# Help
-npx -y @aashari/mcp-server-atlassian-confluence -- --help
-# Search using CQL
-npx -y @aashari/mcp-server-atlassian-confluence -- search "type=page space=DOCS"
-# Get a page by ID
-npx -y @aashari/mcp-server-atlassian-confluence -- get-page 123456789
-# List spaces
-npx -y @aashari/mcp-server-atlassian-confluence -- list-spaces
-```
-
-Or install globally:
-
-```bash
+# Install globally
 npm install -g @aashari/mcp-server-atlassian-confluence
-```
 
-Then run:
-
-```bash
-# Help
-mcp-confluence --help
-# Search using CQL
-mcp-confluence search "type=page space=DOCS"
-# Get a page by ID
-mcp-confluence get-page 123456789
-# List pages with optional filtering
-mcp-confluence list-pages --space-id 123456789 --limit 10
-# List all spaces
+# Then run commands
 mcp-confluence list-spaces
-# Get a space by ID
-mcp-confluence get-space 123456789
-# Or get a space by key
-mcp-confluence get-space DOCS
+mcp-confluence get-page 123456789
+mcp-confluence search "type=page AND text~API"
 ```
 
-Use the global config file or prefix with environment variables:
+## For Developers: Contributing to This Project
 
-```bash
-DEBUG=true ATLASSIAN_SITE_NAME=your-instance ATLASSIAN_USER_EMAIL=your-email@example.com ATLASSIAN_API_TOKEN=your_token mcp-confluence search "type=page space=DOCS"
-```
+### Project Architecture
 
-## Developer Guide
+This MCP server follows a layered architecture:
+
+1. **CLI/Tool Layer**: End-user interfaces with minimal logic
+2. **Controller Layer**: Business logic, validation, and formatting
+3. **Service Layer**: API communication and data retrieval
+4. **Utilities**: Shared functionality (error handling, pagination, etc.)
+
+The flow of data is: User → CLI/Tool → Controller → Service → Atlassian API → back up the chain with responses.
+
+### Setting Up Development Environment
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Run in development mode: `npm run dev:server`
 
 ### Development Scripts
 
-The project includes several scripts for development and production use:
+- `npm run dev:server`: Run with hot reloading and debug logging
+- `npm test`: Run test suite
+- `npm run lint`: Check for code issues
+- `npm run format`: Format code with Prettier
 
-- **`npm run dev:server`**: Run the server in development mode with MCP Inspector and debug logging.
-- **`npm run dev:cli`**: Run CLI commands in development mode with debug logging.
-- **`npm run start:server`**: Run the server in production mode with MCP Inspector.
-- **`npm run start:cli`**: Run CLI commands in production mode.
+### Adding a New Feature
 
-Example usage:
+1. Implement API access in the Service layer
+2. Add business logic to the Controller layer
+3. Expose functionality via Tool and CLI interfaces
+4. Update tests and documentation
+5. Submit a pull request with a clear description
 
-```bash
-# Start the server with Inspector and debug logging
-npm run dev:server
+### Documentation Standards
 
-# Run a CLI command with debug logging
-npm run dev:cli -- search "type=page AND space=DEV"
+- Use JSDoc comments for all public functions
+- Follow the AI-friendly documentation format for tools
+- Include examples of using your new functionality
+- Update the README if adding major features
 
-# Start the server with Inspector (no debug)
-npm run start:server
+### Standard Formatting Template for Tools
 
-# Run a CLI command (no debug)
-npm run start:cli -- list-spaces
+When documenting new tools, follow our standard template:
+
 ```
+PURPOSE: What the tool does and its main functionality
 
-### Extending the Project
+WHEN TO USE:
+- Primary use case
+- Secondary use cases
+- When this tool is the best choice
 
-To add custom tools or resources:
+WHEN NOT TO USE:
+- When another tool would be better
+- Inefficient use cases
+- Performance considerations
 
-1. **Services**: Add API/data logic in `src/services`.
-2. **Controllers**: Implement business logic in `src/controllers`.
-3. **Tools**: Define new tools in `src/tools`.
-4. **Resources**: Add data sources in `src/resources`.
-5. **Register**: Update `src/index.ts` with your tools/resources.
+RETURNS: Description of the output format
 
-### Additional Development Tools
+EXAMPLES:
+- Simple example
+- More complex example
 
-```bash
-# Run tests
-npm test
-# Test coverage
-npm run test:coverage
-# Lint
-npm run lint
-# Format
-npm run format
+ERRORS:
+- Common error scenarios and how to resolve them
 ```
-
-### MCP Inspector
-
-The MCP Inspector provides a visual interface for debugging and testing your MCP server:
-
-1. The Inspector starts your MCP server.
-2. It launches a web UI (typically at `http://localhost:5173`).
-3. Use the UI to test Confluence tools, view requests/responses, and check errors.
 
 ## Versioning Note
 
