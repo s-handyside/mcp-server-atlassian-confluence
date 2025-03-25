@@ -186,6 +186,7 @@ export function formatSpaceDetails(
 	lines.push(formatHeading('Links', 2));
 
 	const links: string[] = [];
+	links.push(`- **Web UI**: ${fullUrl}`);
 	links.push(`- ${formatUrl(fullUrl, 'Open in Confluence')}`);
 
 	if (spaceData.homepageId) {

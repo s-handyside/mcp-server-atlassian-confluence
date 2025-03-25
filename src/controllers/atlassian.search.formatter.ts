@@ -1,6 +1,5 @@
 import { SearchResult } from '../services/vendor.atlassian.search.types.js';
 import {
-	formatPagination,
 	formatHeading,
 	formatBulletList,
 	formatSeparator,
@@ -61,7 +60,12 @@ export function formatSearchResults(
 		lines.push('');
 		lines.push(formatSeparator());
 		lines.push('');
-		lines.push(formatPagination(searchData.length, true, nextCursor));
+		lines.push(formatHeading('Pagination', 2));
+		lines.push(
+			`*Showing ${searchData.length} items. More results are available.*`,
+		);
+		lines.push('');
+		lines.push(`To see more results, use --cursor "${nextCursor}"`);
 	}
 
 	return lines.join('\n');

@@ -140,6 +140,7 @@ export function formatPageDetails(pageData: PageDetailed): string {
 	// Links section
 	lines.push('');
 	lines.push(formatHeading('Links', 2));
+	lines.push(`- **Web UI**: ${fullUrl}`);
 	lines.push(`- ${formatUrl(fullUrl, 'Open in Confluence')}`);
 
 	// Footer
