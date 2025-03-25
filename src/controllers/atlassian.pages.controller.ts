@@ -2,16 +2,20 @@ import atlassianPagesService from '../services/vendor.atlassian.pages.service.js
 import { logger } from '../utils/logger.util.js';
 import { BodyFormat } from '../services/vendor.atlassian.pages.types.js';
 import {
+	extractPaginationInfo,
+	PaginationType,
+} from '../utils/pagination.util.js';
+import {
 	ListPagesOptions,
 	GetPageOptions,
 	ControllerResponse,
+	PageIdentifier,
 } from './atlassian.pages.type.js';
-import { McpError } from '../utils/error.util.js';
+import { handleControllerError } from '../utils/errorHandler.util.js';
 import {
 	formatPagesList,
 	formatPageDetails,
 } from './atlassian.pages.formatter.js';
-import { createApiError } from '../utils/error.util.js';
 
 /**
  * Controller for managing Confluence pages.
@@ -30,10 +34,8 @@ import { createApiError } from '../utils/error.util.js';
 async function list(
 	options: ListPagesOptions = {},
 ): Promise<ControllerResponse> {
-	logger.debug(
-		`[src/controllers/atlassian.pages.controller.ts@list] Listing Confluence pages...`,
-		options,
-	);
+	const source = `[src/controllers/atlassian.pages.controller.ts@list]`;
+	logger.debug(`${source} Listing Confluence pages...`, options);
 
 	try {
 		// Set default filters and hardcoded values
@@ -52,96 +54,56 @@ async function list(
 			includeVersions: false,
 		};
 
-		logger.debug(
-			`[src/controllers/atlassian.pages.controller.ts@list] Using filters:`,
-			filters,
-		);
+		logger.debug(`${source} Using filters:`, filters);
 
 		const pagesData = await atlassianPagesService.list(filters);
 		// Log only the count of pages returned instead of the entire response
 		logger.debug(
-			`[src/controllers/atlassian.pages.controller.ts@list] Retrieved ${pagesData.results?.length || 0} pages`,
+			`${source} Retrieved ${pagesData.results?.length || 0} pages`,
 		);
 
-		// Extract pagination information
-		let nextCursor: string | undefined;
-		if (pagesData._links.next) {
-			// Extract cursor from the next URL
-			const nextUrl = pagesData._links.next;
-			const cursorMatch = nextUrl.match(/cursor=([^&]+)/);
-			if (cursorMatch && cursorMatch[1]) {
-				nextCursor = decodeURIComponent(cursorMatch[1]);
-				logger.debug(
-					`[src/controllers/atlassian.pages.controller.ts@list] Next cursor: ${nextCursor}`,
-				);
-			}
-		}
+		// Extract pagination information using the utility
+		const pagination = extractPaginationInfo(
+			pagesData,
+			PaginationType.CURSOR,
+			source,
+		);
 
 		// Format the pages data for display using the formatter
-		const formattedPages = formatPagesList(pagesData.results, nextCursor);
+		const formattedPages = formatPagesList(
+			pagesData.results,
+			pagination.nextCursor,
+		);
 
 		return {
 			content: formattedPages,
-			pagination: {
-				nextCursor,
-				hasMore: !!nextCursor,
-			},
+			pagination,
 		};
 	} catch (error) {
-		logger.error(
-			`[src/controllers/atlassian.pages.controller.ts@list] Error listing pages`,
-			error,
-		);
-
-		// Get the error message
-		const errorMessage =
-			error instanceof Error ? error.message : String(error);
-
-		// Pass through McpErrors
-		if (error instanceof McpError) {
-			throw error;
-		}
-
-		// Handle specific error patterns
-
-		// 1. Invalid cursor format
-		if (
-			errorMessage.includes('cursor') &&
-			errorMessage.includes('invalid')
-		) {
-			logger.warn(
-				`[src/controllers/atlassian.pages.controller.ts@list] Invalid cursor detected`,
-			);
-
-			throw createApiError(
-				`${errorMessage}. Use the exact cursor string returned from previous results.`,
-				400,
-				error,
-			);
-		}
-
-		// Default: preserve original message
-		throw createApiError(
-			errorMessage,
-			error instanceof Error && 'statusCode' in error
-				? (error as { statusCode: number }).statusCode
-				: undefined,
-			error,
-		);
+		// Use the standardized error handler
+		handleControllerError(error, {
+			entityType: 'Pages',
+			operation: 'listing',
+			source: 'src/controllers/atlassian.pages.controller.ts@list',
+			additionalInfo: { options },
+		});
 	}
 }
 
 /**
  * Get details of a specific Confluence page
- * @param id - The ID of the page to retrieve
+ * @param identifier - Object containing the ID of the page to retrieve
+ * @param identifier.id - The ID of the page
  * @param options - Optional parameters for the request
  * @returns Promise with formatted page details content
  * @throws Error if page retrieval fails
  */
 async function get(
-	id: string,
+	identifier: PageIdentifier,
 	options: GetPageOptions = {},
 ): Promise<ControllerResponse> {
+	const { id } = identifier;
+
 	logger.debug(
 		`[src/controllers/atlassian.pages.controller.ts@get] Getting Confluence page with ID: ${id}...`,
 		options,
@@ -178,48 +140,14 @@ async function get(
 			content: formattedPage,
 		};
 	} catch (error) {
-		logger.error(
-			`[src/controllers/atlassian.pages.controller.ts@get] Error getting page`,
-			error,
-		);
-
-		// Get the error message
-		const errorMessage =
-			error instanceof Error ? error.message : String(error);
-
-		// Pass through McpErrors
-		if (error instanceof McpError) {
-			throw error;
-		}
-
-		// Handle specific error patterns
-
-		// 1. Page not found
-		if (
-			errorMessage.includes('not found') ||
-			(error instanceof Error &&
-				'statusCode' in error &&
-				(error as { statusCode: number }).statusCode === 404)
-		) {
-			logger.warn(
-				`[src/controllers/atlassian.pages.controller.ts@get] Page not found: ${id}`,
-			);
-
-			throw createApiError(
-				`Page not found: ${id}. Verify the page ID is correct and that you have access to this page.`,
-				404,
-				error,
-			);
-		}
-
-		// Default: preserve original message
-		throw createApiError(
-			errorMessage,
-			error instanceof Error && 'statusCode' in error
-				? (error as { statusCode: number }).statusCode
-				: undefined,
-			error,
-		);
+		// Use the standardized error handler
+		handleControllerError(error, {
+			entityType: 'Page',
+			entityId: identifier,
+			operation: 'retrieving',
+			source: 'src/controllers/atlassian.pages.controller.ts@get',
+			additionalInfo: { options },
+		});
 	}
 }
 

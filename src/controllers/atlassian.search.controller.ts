@@ -1,6 +1,10 @@
 import atlassianSearchService from '../services/vendor.atlassian.search.service.js';
 import { logger } from '../utils/logger.util.js';
-import { McpError, createApiError } from '../utils/error.util.js';
+import { handleControllerError } from '../utils/errorHandler.util.js';
+import {
+	extractPaginationInfo,
+	PaginationType,
+} from '../utils/pagination.util.js';
 import { SearchOptions, ControllerResponse } from './atlassian.search.type.js';
 import {
 	formatSearchResults,
@@ -19,19 +23,32 @@ import { ExcerptStrategy } from '../services/vendor.atlassian.types.js';
  * @returns Promise with formatted search results and pagination information
  */
 async function search(options: SearchOptions): Promise<ControllerResponse> {
+	const source = `[src/controllers/atlassian.search.controller.ts@search]`;
 	logger.debug(
-		`[src/controllers/atlassian.search.controller.ts@search] Searching Confluence with CQL: ${options.cql}`,
+		`${source} Searching Confluence with CQL: ${options.cql}`,
 		options,
 	);
 
 	try {
+		if (!options.cql) {
+			// Instead of throwing createApiError directly, use handleControllerError
+			handleControllerError(
+				new Error('CQL query is required for search'),
+				{
+					entityType: 'Search',
+					operation: 'validating',
+					source: 'src/controllers/atlassian.search.controller.ts@search',
+				},
+			);
+		}
+
 		// Process the CQL query to handle reserved keywords
 		const processedCql = processCqlQuery(options.cql);
 
 		// If the query was modified, log the change
 		if (processedCql !== options.cql) {
 			logger.debug(
-				`[src/controllers/atlassian.search.controller.ts@search] Modified CQL query to handle reserved keywords: ${processedCql}`,
+				`${source} Modified CQL query to handle reserved keywords: ${processedCql}`,
 			);
 		}
 
@@ -43,118 +60,38 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 			excerpt: 'highlight' as ExcerptStrategy, // Always include highlighted excerpts in search results
 		};
 
-		logger.debug(
-			`[src/controllers/atlassian.search.controller.ts@search] Using search params:`,
-			searchParams,
-		);
+		logger.debug(`${source} Using search params:`, searchParams);
 
 		const searchData = await atlassianSearchService.search(searchParams);
 		logger.debug(
-			`[src/controllers/atlassian.search.controller.ts@search] Retrieved ${searchData.results?.length || 0} results`,
+			`${source} Retrieved ${searchData.results?.length || 0} results`,
 		);
 
-		// Extract pagination information
-		let nextCursor: string | undefined;
-		if (searchData._links.next) {
-			// Extract cursor from the next URL
-			const nextUrl = searchData._links.next;
-			const cursorMatch = nextUrl.match(/cursor=([^&]+)/);
-			if (cursorMatch && cursorMatch[1]) {
-				nextCursor = decodeURIComponent(cursorMatch[1]);
-				logger.debug(
-					`[src/controllers/atlassian.search.controller.ts@search] Next cursor: ${nextCursor}`,
-				);
-			}
-		}
+		// Extract pagination information using the utility
+		const pagination = extractPaginationInfo(
+			searchData,
+			PaginationType.CURSOR,
+			source,
+		);
 
 		// Format the search results for display using the formatter
 		const formattedResults = formatSearchResults(
 			searchData.results,
-			nextCursor,
+			pagination.nextCursor,
 		);
 
 		return {
 			content: formattedResults,
-			pagination: {
-				nextCursor,
-				hasMore: !!nextCursor,
-			},
+			pagination,
 		};
 	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : String(error);
-
-		// Already a McpError - pass it through without modification
-		if (error instanceof McpError) {
-			logger.debug(
-				`[src/controllers/atlassian.search.controller.ts@search] Passing through McpError: ${errorMessage}`,
-			);
-			throw error;
-		}
-
-		// Check for specific error patterns and enhance them with helpful context
-
-		// 1. Reserved keyword errors
-		if (
-			errorMessage.includes('Could not parse cql') &&
-			(errorMessage.includes('reserved keyword') ||
-				errorMessage.includes('reserved word'))
-		) {
-			logger.warn(
-				`[src/controllers/atlassian.search.controller.ts@search] Reserved keyword error detected, providing guidance`,
-			);
-
-			// Provide specific guidance for fixing the query but preserve the original error
-			const guidance =
-				'Put quotes around reserved words like AND, OR, IN, etc. Example: space="IN" instead of space=IN.';
-
-			// We create a new API error but maintain the original message as the prefix
-			throw createApiError(`${errorMessage}. ${guidance}`, 400, error);
-		}
-
-		// 2. Syntax errors in CQL
-		if (errorMessage.includes('Could not parse cql')) {
-			logger.warn(
-				`[src/controllers/atlassian.search.controller.ts@search] CQL syntax error detected`,
-			);
-
-			// General CQL syntax guidance while preserving the original message
-			const guidance =
-				'Check your CQL syntax. For complex queries, enclose terms with spaces in quotes.';
-
-			throw createApiError(`${errorMessage}. ${guidance}`, 400, error);
-		}
-
-		// 3. Invalid cursor format
-		if (
-			errorMessage.includes('cursor') &&
-			errorMessage.includes('invalid')
-		) {
-			logger.warn(
-				`[src/controllers/atlassian.search.controller.ts@search] Invalid cursor detected`,
-			);
-
-			throw createApiError(
-				`${errorMessage}. Use the exact cursor string returned from previous results.`,
-				400,
-				error,
-			);
-		}
-
-		// Log the unhandled error
-		logger.error(
-			`[src/controllers/atlassian.search.controller.ts@search] Error searching Confluence`,
-			error,
-		);
-
-		// Default: pass through with minimal wrapping to preserve original message
-		throw createApiError(
-			`${errorMessage}`,
-			error instanceof Error && 'statusCode' in error
-				? (error as { statusCode: number }).statusCode
-				: undefined,
-			error,
-		);
+		// Use the standardized error handler
+		handleControllerError(error, {
+			entityType: 'Search',
+			operation: 'searching',
+			source: 'src/controllers/atlassian.search.controller.ts@search',
+			additionalInfo: { options, cql: options.cql },
+		});
 	}
 }
 

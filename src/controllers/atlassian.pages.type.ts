@@ -2,7 +2,21 @@ import {
 	ContentStatus,
 	BodyFormat,
 } from '../services/vendor.atlassian.pages.types.js';
-import { ControllerResponse, PaginationOptions } from './atlassian.type.js';
+import {
+	ControllerResponse,
+	PaginationOptions,
+	EntityIdentifier,
+} from './atlassian.type.js';
+
+/**
+ * Page identifier for retrieving specific pages
+ */
+export interface PageIdentifier extends EntityIdentifier {
+	/**
+	 * The ID of the page to retrieve
+	 */
+	id: string;
+}
 
 /**
  * Options for listing Confluence pages

@@ -1,13 +1,19 @@
 import atlassianSpacesService from '../services/vendor.atlassian.spaces.service.js';
 import atlassianPagesController from './atlassian.pages.controller.js';
 import { logger } from '../utils/logger.util.js';
-import { McpError, createApiError } from '../utils/error.util.js';
+import { createApiError } from '../utils/error.util.js';
+import { handleControllerError } from '../utils/errorHandler.util.js';
+import {
+	extractPaginationInfo,
+	PaginationType,
+} from '../utils/pagination.util.js';
 import {
 	SpaceStatus,
 	SpaceType,
 } from '../services/vendor.atlassian.spaces.types.js';
 import {
 	ListSpacesOptions,
+	SpaceIdentifier,
 	ControllerResponse,
 } from './atlassian.spaces.type.js';
 import {
@@ -32,10 +38,8 @@ import {
 async function list(
 	options: ListSpacesOptions = {},
 ): Promise<ControllerResponse> {
-	logger.debug(
-		`[src/controllers/atlassian.spaces.controller.ts@list] Listing Confluence spaces...`,
-		options,
-	);
+	const source = `[src/controllers/atlassian.spaces.controller.ts@list]`;
+	logger.debug(`${source} Listing Confluence spaces...`, options);
 
 	try {
 		// Set default filters and hardcoded values
@@ -50,92 +54,52 @@ async function list(
 			includeIcon: false,
 		};
 
-		logger.debug(
-			`[src/controllers/atlassian.spaces.controller.ts@list] Using filters:`,
-			filters,
-		);
+		logger.debug(`${source} Using filters:`, filters);
 
 		const spacesData = await atlassianSpacesService.list(filters);
 		// Log only the count of spaces returned instead of the entire response
 		logger.debug(
-			`[src/controllers/atlassian.spaces.controller.ts@list] Retrieved ${spacesData.results?.length || 0} spaces`,
+			`${source} Retrieved ${spacesData.results?.length || 0} spaces`,
 		);
 
-		// Extract pagination information
-		let nextCursor: string | undefined;
-		if (spacesData._links.next) {
-			// Extract cursor from the next URL
-			const nextUrl = spacesData._links.next;
-			const cursorMatch = nextUrl.match(/cursor=([^&]+)/);
-			if (cursorMatch && cursorMatch[1]) {
-				nextCursor = decodeURIComponent(cursorMatch[1]);
-				logger.debug(
-					`[src/controllers/atlassian.spaces.controller.ts@list] Next cursor: ${nextCursor}`,
-				);
-			}
-		}
+		// Extract pagination information using the utility
+		const pagination = extractPaginationInfo(
+			spacesData,
+			PaginationType.CURSOR,
+			source,
+		);
 
 		// Format the spaces data for display using the formatter
-		const formattedSpaces = formatSpacesList(spacesData, nextCursor);
+		const formattedSpaces = formatSpacesList(
+			spacesData,
+			pagination.nextCursor,
+		);
 
 		return {
 			content: formattedSpaces,
-			pagination: {
-				nextCursor,
-				hasMore: !!nextCursor,
-			},
+			pagination,
 		};
 	} catch (error) {
-		logger.error(
-			`[src/controllers/atlassian.spaces.controller.ts@list] Error listing spaces`,
-			error,
-		);
-
-		// Get the error message
-		const errorMessage =
-			error instanceof Error ? error.message : String(error);
-
-		// Pass through McpErrors
-		if (error instanceof McpError) {
-			throw error;
-		}
-
-		// Handle specific error patterns
-
-		// 1. Invalid cursor format
-		if (
-			errorMessage.includes('cursor') &&
-			errorMessage.includes('invalid')
-		) {
-			logger.warn(
-				`[src/controllers/atlassian.spaces.controller.ts@list] Invalid cursor detected`,
-			);
-
-			throw createApiError(
-				`${errorMessage}. Use the exact cursor string returned from previous results.`,
-				400,
-				error,
-			);
-		}
-
-		// Default: preserve original message
-		throw createApiError(
-			errorMessage,
-			error instanceof Error && 'statusCode' in error
-				? (error as { statusCode: number }).statusCode
-				: undefined,
-			error,
-		);
+		// Use the standardized error handler
+		handleControllerError(error, {
+			entityType: 'Spaces',
+			operation: 'listing',
+			source: 'src/controllers/atlassian.spaces.controller.ts@list',
+			additionalInfo: { options },
+		});
 	}
 }
 
 /**
  * Get details of a specific Confluence space
- * @param idOrKey - The ID or key of the space to retrieve
+ * @param identifier - Object containing the ID or key of the space to retrieve
+ * @param identifier.idOrKey - The ID or key of the space
  * @returns Promise with formatted space details content
  * @throws Error if space retrieval fails
  */
-async function get(idOrKey: string): Promise<ControllerResponse> {
+async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
+	const { idOrKey } = identifier;
+
 	logger.debug(
 		`[src/controllers/atlassian.spaces.controller.ts@get] Getting Confluence space with ID or Key: ${idOrKey}...`,
 	);
@@ -211,9 +175,9 @@ async function get(idOrKey: string): Promise<ControllerResponse> {
 				logger.debug(
 					`[src/controllers/atlassian.spaces.controller.ts@get] Fetching homepage content for ID: ${spaceData.homepageId}`,
 				);
-				const homepageResult = await atlassianPagesController.get(
-					spaceData.homepageId,
-				);
+				const homepageResult = await atlassianPagesController.get({
+					id: spaceData.homepageId,
+				});
 
 				// Extract content from the homepage result
 				const content = homepageResult.content;
@@ -257,48 +221,13 @@ async function get(idOrKey: string): Promise<ControllerResponse> {
 			content: formattedSpace,
 		};
 	} catch (error) {
-		logger.error(
-			`[src/controllers/atlassian.spaces.controller.ts@get] Error getting space`,
-			error,
-		);
-
-		// Get the error message
-		const errorMessage =
-			error instanceof Error ? error.message : String(error);
-
-		// Pass through McpErrors
-		if (error instanceof McpError) {
-			throw error;
-		}
-
-		// Handle specific error patterns
-
-		// 1. Space not found
-		if (
-			errorMessage.includes('not found') ||
-			(error instanceof Error &&
-				'statusCode' in error &&
-				(error as { statusCode: number }).statusCode === 404)
-		) {
-			logger.warn(
-				`[src/controllers/atlassian.spaces.controller.ts@get] Space not found: ${idOrKey}`,
-			);
-
-			throw createApiError(
-				`Space not found: ${idOrKey}. Verify the space ID or key is correct and that you have access to this space.`,
-				404,
-				error,
-			);
-		}
-
-		// Default: preserve original message
-		throw createApiError(
-			errorMessage,
-			error instanceof Error && 'statusCode' in error
-				? (error as { statusCode: number }).statusCode
-				: undefined,
-			error,
-		);
+		// Use the standardized error handler
+		handleControllerError(error, {
+			entityType: 'Space',
+			entityId: identifier,
+			operation: 'retrieving',
+			source: 'src/controllers/atlassian.spaces.controller.ts@get',
+		});
 	}
 }
 

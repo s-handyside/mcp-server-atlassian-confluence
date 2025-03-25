@@ -1,4 +1,20 @@
-import { ControllerResponse, PaginationOptions } from './atlassian.type.js';
+import {
+	ControllerResponse,
+	PaginationOptions,
+	EntityIdentifier,
+} from './atlassian.type.js';
+
+/**
+ * Search identifier for retrieving specific search results
+ * Note: Search operations don't typically use identifiers, but this is included
+ * for consistency with other controllers
+ */
+export interface SearchIdentifier extends EntityIdentifier {
+	/**
+	 * The CQL query to use for searching
+	 */
+	cql: string;
+}
 
 /**
  * Options for searching Confluence content

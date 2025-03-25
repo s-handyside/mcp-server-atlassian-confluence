@@ -71,7 +71,7 @@ describe('Atlassian Spaces Controller', () => {
 			const spaceId = match[1];
 
 			// Call the function with the extracted ID
-			const result = await atlassianSpacesController.get(spaceId);
+			const result = await atlassianSpacesController.get({ idOrKey: spaceId });
 
 			// Verify the response structure
 			expect(result).toHaveProperty('content');
@@ -107,12 +107,12 @@ describe('Atlassian Spaces Controller', () => {
 
 			// Expect the function to throw an error
 			await expect(
-				atlassianSpacesController.get(invalidId),
+				atlassianSpacesController.get({ idOrKey: invalidId }),
 			).rejects.toThrow(McpError);
 
 			// Try to catch the error to verify its properties
 			try {
-				await atlassianSpacesController.get(invalidId);
+				await atlassianSpacesController.get({ idOrKey: invalidId });
 				fail('Expected an error to be thrown');
 			} catch (error) {
 				expect(error).toBeInstanceOf(McpError);
