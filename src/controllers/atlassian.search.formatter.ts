@@ -1,4 +1,11 @@
 import { SearchResult } from '../services/vendor.atlassian.search.types.js';
+import {
+	formatPagination,
+	formatHeading,
+	formatBulletList,
+	formatSeparator,
+	formatNumberedList,
+} from '../utils/formatters/common.formatter.js';
 
 /**
  * Format search results for display
@@ -14,51 +21,47 @@ export function formatSearchResults(
 		return 'No Confluence content found matching your query.';
 	}
 
-	const lines: string[] = ['# Confluence Search Results'];
+	const lines: string[] = [formatHeading('Confluence Search Results', 1), ''];
 
-	searchData.forEach((result, index) => {
+	// Use the numbered list formatter for consistent formatting
+	const formattedList = formatNumberedList(searchData, (result) => {
+		const itemLines: string[] = [];
 		const content = result.content;
-		lines.push(`\n## ${index + 1}. ${content.title}`);
-		lines.push(`- **ID**: ${content.id}`);
-		lines.push(`- **Type**: ${content.type}`);
-		lines.push(`- **Status**: ${content.status}`);
 
-		// Handle space information safely
-		if (result.resultGlobalContainer) {
-			lines.push(`- **Space**: ${result.resultGlobalContainer.title}`);
-		}
+		// Basic information
+		itemLines.push(formatHeading(content.title, 2));
 
-		// Check if URL is available in the result
-		if (result.url) {
-			lines.push(`- **URL**: [View in Confluence](${result.url})`);
-		}
+		// Create an object with all the properties to display
+		const properties: Record<string, unknown> = {
+			ID: content.id,
+			Type: content.type,
+			Status: content.status,
+			Space: result.resultGlobalContainer?.title,
+			URL: result.url
+				? {
+						url: result.url,
+						title: 'View in Confluence',
+					}
+				: undefined,
+			Excerpt: result.excerpt
+				? result.excerpt.replace(/\n/g, ' ')
+				: undefined,
+		};
 
-		// Add excerpt if available in a more compact format
-		if (result.excerpt) {
-			lines.push(
-				`- **Excerpt**: \`${result.excerpt.replace(/\n/g, ' ')}\``,
-			);
-		}
+		// Format as a bullet list with proper formatting for each value type
+		itemLines.push(formatBulletList(properties, (key) => key));
+
+		return itemLines.join('\n');
 	});
 
-	// Pagination information
+	lines.push(formattedList);
+
+	// Add pagination information
 	if (nextCursor) {
-		lines.push('\n---');
-		lines.push('## Pagination');
-		lines.push(
-			'*More results available. Use the following cursor to retrieve the next page:*',
-		);
 		lines.push('');
-		lines.push(`\`${nextCursor}\``);
+		lines.push(formatSeparator());
 		lines.push('');
-		lines.push(
-			'*For CLI: Use `--cursor "' +
-				nextCursor +
-				'"` to get the next page*',
-		);
-		lines.push(
-			'*For MCP tools: Set the `cursor` parameter to retrieve the next page*',
-		);
+		lines.push(formatPagination(searchData.length, true, nextCursor));
 	}
 
 	return lines.join('\n');

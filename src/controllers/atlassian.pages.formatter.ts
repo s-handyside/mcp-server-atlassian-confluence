@@ -4,6 +4,15 @@ import {
 } from '../services/vendor.atlassian.pages.types.js';
 import { Label } from '../services/vendor.atlassian.types.js';
 import { htmlToMarkdown } from '../utils/markdown.util.js';
+import {
+	formatUrl,
+	formatDate,
+	formatPagination,
+	formatHeading,
+	formatBulletList,
+	formatSeparator,
+	formatNumberedList,
+} from '../utils/formatters/common.formatter.js';
 
 /**
  * Format a list of pages for display
@@ -19,47 +28,51 @@ export function formatPagesList(
 		return 'No Confluence pages found.';
 	}
 
-	const lines: string[] = ['# Confluence Pages'];
+	const lines: string[] = [formatHeading('Confluence Pages', 1), ''];
 
-	pagesData.forEach((page, index) => {
-		lines.push(`\n## ${index + 1}. ${page.title}`);
-		lines.push(`- **ID**: ${page.id}`);
-		lines.push(`- **Title**: ${page.title}`);
-		lines.push(`- **Space ID**: ${page.spaceId}`);
-		lines.push(`- **Status**: ${page.status}`);
-		lines.push(
-			`- **Created**: ${new Date(page.createdAt).toLocaleString()}`,
-		);
-		lines.push(`- **Author ID**: ${page.authorId}`);
+	// Use the numbered list formatter for consistent formatting
+	const formattedList = formatNumberedList(pagesData, (page) => {
+		const itemLines: string[] = [];
+
+		// Basic information
+		itemLines.push(formatHeading(page.title, 2));
+
+		let contentPreview;
 		if (page.body?.view?.value) {
-			lines.push(
-				`- **Content Preview**: ${htmlToMarkdown(page.body.view.value).substring(0, 100)}...`,
-			);
+			contentPreview =
+				htmlToMarkdown(page.body.view.value).substring(0, 100) + '...';
 		}
-		lines.push(`- **URL**: [${page.title}](${page._links.webui})`);
-		if (page.parentId) {
-			lines.push(`- **Parent ID**: ${page.parentId}`);
-		}
+
+		// Create an object with all the properties to display
+		const properties: Record<string, unknown> = {
+			ID: page.id,
+			Title: page.title,
+			'Space ID': page.spaceId,
+			Status: page.status,
+			Created: page.createdAt,
+			'Author ID': page.authorId,
+			'Content Preview': contentPreview,
+			URL: {
+				url: page._links.webui,
+				title: page.title,
+			},
+			'Parent ID': page.parentId,
+		};
+
+		// Format as a bullet list with proper formatting for each value type
+		itemLines.push(formatBulletList(properties, (key) => key));
+
+		return itemLines.join('\n');
 	});
 
-	// Pagination information
+	lines.push(formattedList);
+
+	// Add pagination information
 	if (nextCursor) {
-		lines.push('\n---');
-		lines.push('## Pagination');
-		lines.push(
-			'*More pages available. Use the following cursor to retrieve the next page:*',
-		);
 		lines.push('');
-		lines.push(`\`${nextCursor}\``);
+		lines.push(formatSeparator());
 		lines.push('');
-		lines.push(
-			'*For CLI: Use `--cursor "' +
-				nextCursor +
-				'"` to get the next page*',
-		);
-		lines.push(
-			'*For MCP tools: Set the `cursor` parameter to retrieve the next page*',
-		);
+		lines.push(formatPagination(pagesData.length, true, nextCursor));
 	}
 
 	return lines.join('\n');
@@ -71,9 +84,6 @@ export function formatPagesList(
  * @returns Formatted string with page details in markdown format
  */
 export function formatPageDetails(pageData: PageDetailed): string {
-	// Format creation date
-	const createdDate = new Date(pageData.createdAt).toLocaleString();
-
 	// Create URL
 	const baseUrl = pageData._links.base || '';
 	const pageUrl = pageData._links.webui || '';
@@ -81,65 +91,61 @@ export function formatPageDetails(pageData: PageDetailed): string {
 		? pageUrl
 		: `${baseUrl}${pageUrl}`;
 
-	const lines: string[] = [];
+	const lines: string[] = [
+		formatHeading(`Confluence Page: ${pageData.title}`, 1),
+		'',
+		`> A ${pageData.status} page in space \`${pageData.spaceId}\` created on ${formatDate(pageData.createdAt)}.`,
+		'',
+		formatHeading('Basic Information', 2),
+	];
 
-	// Title and summary
-	lines.push(`# Confluence Page: ${pageData.title}`);
-	lines.push('');
-	lines.push(
-		`> A ${pageData.status} page in space \`${pageData.spaceId}\` created on ${createdDate}.`,
-	);
-	lines.push('');
+	// Format basic information as a bullet list
+	const basicProperties: Record<string, unknown> = {
+		ID: pageData.id,
+		Title: pageData.title,
+		'Space ID': pageData.spaceId,
+		Status: pageData.status,
+		'Created At': pageData.createdAt,
+		'Author ID': pageData.authorId,
+		'Parent ID': pageData.parentId,
+	};
 
-	// Basic information
-	lines.push('## Basic Information');
-	lines.push(`- **ID**: ${pageData.id}`);
-	lines.push(`- **Title**: ${pageData.title}`);
-	lines.push(`- **Space ID**: ${pageData.spaceId}`);
-	lines.push(`- **Status**: ${pageData.status}`);
-	lines.push(`- **Created At**: ${createdDate}`);
-	lines.push(`- **Author ID**: ${pageData.authorId}`);
-
-	// Additional metadata
-	if (pageData.parentId) {
-		lines.push(`- **Parent ID**: ${pageData.parentId}`);
-	}
+	lines.push(formatBulletList(basicProperties, (key) => key));
 
 	// Content section
+	lines.push('');
+	lines.push(formatHeading('Content', 2));
 	if (pageData.body?.view?.value) {
-		lines.push('');
-		lines.push('## Content');
 		// Convert HTML content to Markdown
 		const markdownContent = htmlToMarkdown(pageData.body.view.value.trim());
 		lines.push(markdownContent);
 	} else {
-		lines.push('');
-		lines.push('## Content');
 		lines.push('*No content available*');
 	}
 
 	// Labels section
 	lines.push('');
-	lines.push('## Labels');
+	lines.push(formatHeading('Labels', 2));
+
 	if (pageData.labels?.results && pageData.labels.results.length > 0) {
+		const labelLines: string[] = [];
 		pageData.labels.results.forEach((label: Label) => {
-			lines.push(`- **${label.name}** (ID: ${label.id})`);
+			labelLines.push(`- **${label.name}** (ID: ${label.id})`);
 		});
+		lines.push(labelLines.join('\n'));
 	} else {
 		lines.push('*No labels assigned to this page*');
 	}
 
 	// Links section
 	lines.push('');
-	lines.push('## Links');
-	lines.push(`- **Web UI**: [Open in Confluence](${fullUrl})`);
+	lines.push(formatHeading('Links', 2));
+	lines.push(`- ${formatUrl(fullUrl, 'Open in Confluence')}`);
 
 	// Footer
 	lines.push('');
-	lines.push('---');
-	lines.push(
-		`*Page information retrieved at ${new Date().toLocaleString()}*`,
-	);
+	lines.push(formatSeparator());
+	lines.push(`*Page information retrieved at ${formatDate(new Date())}*`);
 	lines.push(`*To view this page in Confluence, visit: ${fullUrl}*`);
 
 	return lines.join('\n');

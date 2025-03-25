@@ -46,10 +46,13 @@ function registerListPagesCommand(program: Command): void {
 			'--sort <order>',
 			'Sort by field (id, -id, created-date, -created-date, modified-date, -modified-date, title, -title)',
 		)
-		.option('-l, --limit <number>', 'Maximum number of pages to return')
+		.option(
+			'-l, --limit <number>',
+			'Maximum number of pages to return (1-100). Use this to control the response size. If omitted, defaults to 25.',
+		)
 		.option(
 			'-c, --cursor <cursor>',
-			'Pagination cursor for retrieving the next set of results',
+			'Pagination cursor for retrieving the next set of results. Obtain this value from the previous response when more results are available.',
 		)
 		.action(async (options) => {
 			const logPrefix = '[src/cli/atlassian.pages.cli.ts@list-pages]';

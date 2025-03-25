@@ -42,10 +42,13 @@ function registerListSpacesCommand(program: Command): void {
 			'Filter by type (global, personal, collaboration, knowledge_base)',
 		)
 		.option('-s, --status <status>', 'Filter by status (current, archived)')
-		.option('-l, --limit <number>', 'Maximum number of spaces to return')
+		.option(
+			'-l, --limit <number>',
+			'Maximum number of spaces to return (1-100). Use this to control the response size. If omitted, defaults to 25.',
+		)
 		.option(
 			'-c, --cursor <cursor>',
-			'Pagination cursor for retrieving the next set of results',
+			'Pagination cursor for retrieving the next set of results. Obtain this value from the previous response when more results are available.',
 		)
 		.action(async (options) => {
 			const logPrefix = '[src/cli/atlassian.spaces.cli.ts@list-spaces]';

@@ -2,6 +2,15 @@ import {
 	SpaceDetailed,
 	SpacesResponse,
 } from '../services/vendor.atlassian.spaces.types.js';
+import {
+	formatUrl,
+	formatDate,
+	formatPagination,
+	formatHeading,
+	formatBulletList,
+	formatSeparator,
+	formatNumberedList,
+} from '../utils/formatters/common.formatter.js';
 
 /**
  * Format a list of spaces for display
@@ -17,67 +26,60 @@ export function formatSpacesList(
 		return 'No Confluence spaces found.';
 	}
 
-	const lines: string[] = ['# Confluence Spaces', ''];
+	const lines: string[] = [formatHeading('Confluence Spaces', 1), ''];
 
-	spacesData.results.forEach((space, index) => {
-		// Format creation date
-		const createdDate = new Date(space.createdAt).toLocaleString();
+	// Use the numbered list formatter for consistent formatting
+	const formattedList = formatNumberedList(spacesData.results, (space) => {
+		const itemLines: string[] = [];
 
 		// Basic information
-		lines.push(`## ${index + 1}. ${space.name}`);
-		lines.push(`- **ID**: ${space.id}`);
-		lines.push(`- **Key**: ${space.key}`);
-		lines.push(`- **Type**: ${space.type}`);
-		lines.push(`- **Status**: ${space.status}`);
-		lines.push(`- **Created**: ${createdDate}`);
-		lines.push(`- **Homepage ID**: ${space.homepageId}`);
+		itemLines.push(formatHeading(space.name, 2));
 
-		// Description preview
-		if (space.description?.view?.value) {
-			const description = space.description.view.value.trim();
-			if (description) {
-				lines.push(`- **Description**: ${description}`);
-			}
-		} else if (space.description?.plain?.value) {
-			const description = space.description.plain.value.trim();
-			if (description) {
-				lines.push(`- **Description**: ${description}`);
-			}
-		}
-
-		// URL and navigation
+		// Create an object with all the properties to display
 		const baseUrl = spacesData._links.base || '';
 		const spaceUrl = space._links.webui;
 		const fullUrl = spaceUrl.startsWith('http')
 			? spaceUrl
 			: `${baseUrl}${spaceUrl}`;
-		lines.push(`- **URL**: [${space.key}](${fullUrl})`);
 
-		// Additional metadata
-		if (space.currentActiveAlias) {
-			lines.push(`- **Alias**: ${space.currentActiveAlias}`);
+		// Create description from available content
+		let description = 'Not available';
+		if (space.description?.view?.value) {
+			description = space.description.view.value.trim();
+		} else if (space.description?.plain?.value) {
+			description = space.description.plain.value.trim();
 		}
 
-		lines.push('');
+		const properties: Record<string, unknown> = {
+			ID: space.id,
+			Key: space.key,
+			Type: space.type,
+			Status: space.status,
+			Created: space.createdAt,
+			'Homepage ID': space.homepageId,
+			Description: description || undefined,
+			URL: {
+				url: fullUrl,
+				title: space.key,
+			},
+			Alias: space.currentActiveAlias,
+		};
+
+		// Format as a bullet list with proper formatting for each value type
+		itemLines.push(formatBulletList(properties, (key) => key));
+
+		return itemLines.join('\n');
 	});
 
-	// Pagination information
+	lines.push(formattedList);
+
+	// Add pagination information
 	if (nextCursor) {
-		lines.push('---');
-		lines.push('## Pagination');
-		lines.push(
-			'*More spaces available. Use the following cursor to retrieve the next page:*',
-		);
 		lines.push('');
-		lines.push(`\`${nextCursor}\``);
+		lines.push(formatSeparator());
 		lines.push('');
 		lines.push(
-			'*For CLI: Use `--cursor "' +
-				nextCursor +
-				'"` to get the next page*',
-		);
-		lines.push(
-			'*For MCP tools: Set the `cursor` parameter to retrieve the next page*',
+			formatPagination(spacesData.results.length, true, nextCursor),
 		);
 	}
 
@@ -94,9 +96,6 @@ export function formatSpaceDetails(
 	spaceData: SpaceDetailed,
 	homepageContent?: string,
 ): string {
-	// Format creation date
-	const createdDate = new Date(spaceData.createdAt).toLocaleString();
-
 	// Create URL
 	const baseUrl = spaceData._links.base || '';
 	const spaceUrl = spaceData._links.webui || '';
@@ -104,30 +103,27 @@ export function formatSpaceDetails(
 		? spaceUrl
 		: `${baseUrl}${spaceUrl}`;
 
-	const lines: string[] = [];
+	const lines: string[] = [
+		formatHeading(`Confluence Space: ${spaceData.name}`, 1),
+		'',
+		`> A ${spaceData.status} ${spaceData.type} space with key \`${spaceData.key}\` created on ${formatDate(spaceData.createdAt)}.`,
+		'',
+		formatHeading('Basic Information', 2),
+	];
 
-	// Title and summary
-	lines.push(`# Confluence Space: ${spaceData.name}`);
-	lines.push('');
-	lines.push(
-		`> A ${spaceData.status} ${spaceData.type} space with key \`${spaceData.key}\` created on ${createdDate}.`,
-	);
-	lines.push('');
+	// Format basic information as a bullet list
+	const basicProperties: Record<string, unknown> = {
+		ID: spaceData.id,
+		Key: spaceData.key,
+		Type: spaceData.type,
+		Status: spaceData.status,
+		'Created At': spaceData.createdAt,
+		'Author ID': spaceData.authorId,
+		'Homepage ID': spaceData.homepageId,
+		'Current Alias': spaceData.currentActiveAlias,
+	};
 
-	// Basic information
-	lines.push('## Basic Information');
-	lines.push(`- **ID**: ${spaceData.id}`);
-	lines.push(`- **Key**: ${spaceData.key}`);
-	lines.push(`- **Type**: ${spaceData.type}`);
-	lines.push(`- **Status**: ${spaceData.status}`);
-	lines.push(`- **Created At**: ${createdDate}`);
-	lines.push(`- **Author ID**: ${spaceData.authorId}`);
-	lines.push(`- **Homepage ID**: ${spaceData.homepageId}`);
-
-	// Additional metadata
-	if (spaceData.currentActiveAlias) {
-		lines.push(`- **Current Alias**: ${spaceData.currentActiveAlias}`);
-	}
+	lines.push(formatBulletList(basicProperties, (key) => key));
 
 	// Description section
 	if (
@@ -135,7 +131,7 @@ export function formatSpaceDetails(
 		spaceData.description?.plain?.value
 	) {
 		lines.push('');
-		lines.push('## Description');
+		lines.push(formatHeading('Description', 2));
 
 		const viewValue = spaceData.description?.view?.value;
 		const plainValue = spaceData.description?.plain?.value;
@@ -152,7 +148,7 @@ export function formatSpaceDetails(
 	// Homepage content section (placed after description)
 	if (spaceData.homepageId) {
 		lines.push('');
-		lines.push('## Homepage Content');
+		lines.push(formatHeading('Homepage Content', 2));
 		if (homepageContent) {
 			lines.push(homepageContent);
 		} else {
@@ -163,15 +159,20 @@ export function formatSpaceDetails(
 	// Labels section
 	if (spaceData.labels?.results) {
 		lines.push('');
-		lines.push('## Labels');
+		lines.push(formatHeading('Labels', 2));
 
 		if (spaceData.labels.results.length === 0) {
 			lines.push('*No labels assigned to this space*');
 		} else {
+			const labelLines: string[] = [];
 			spaceData.labels.results.forEach((label) => {
 				const prefix = label.prefix ? `${label.prefix}:` : '';
-				lines.push(`- **${prefix}${label.name}** (ID: ${label.id})`);
+				labelLines.push(
+					`- **${prefix}${label.name}** (ID: ${label.id})`,
+				);
 			});
+
+			lines.push(labelLines.join('\n'));
 
 			if (spaceData.labels.meta?.hasMore) {
 				lines.push('');
@@ -182,19 +183,22 @@ export function formatSpaceDetails(
 
 	// Links section
 	lines.push('');
-	lines.push('## Links');
-	lines.push(`- **Web UI**: [Open in Confluence](${fullUrl})`);
+	lines.push(formatHeading('Links', 2));
+
+	const links: string[] = [];
+	links.push(`- ${formatUrl(fullUrl, 'Open in Confluence')}`);
+
 	if (spaceData.homepageId) {
 		const homepageUrl = `${baseUrl}/wiki/spaces/${spaceData.key}/overview`;
-		lines.push(`- **Homepage**: [View Homepage](${homepageUrl})`);
+		links.push(`- ${formatUrl(homepageUrl, 'View Homepage')}`);
 	}
+
+	lines.push(links.join('\n'));
 
 	// Footer
 	lines.push('');
-	lines.push('---');
-	lines.push(
-		`*Space information retrieved at ${new Date().toLocaleString()}*`,
-	);
+	lines.push(formatSeparator());
+	lines.push(`*Space information retrieved at ${formatDate(new Date())}*`);
 	lines.push(`*To view this space in Confluence, visit: ${fullUrl}*`);
 
 	return lines.join('\n');

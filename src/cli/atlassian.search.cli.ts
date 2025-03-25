@@ -37,10 +37,13 @@ function registerSearchCommand(program: Command): void {
 			'<cql>',
 			'Confluence Query Language (CQL) query to search for',
 		)
-		.option('-l, --limit <number>', 'Maximum number of results to return')
+		.option(
+			'-l, --limit <number>',
+			'Maximum number of results to return (1-100). Use this to control the response size. If omitted, defaults to 25.',
+		)
 		.option(
 			'-c, --cursor <cursor>',
-			'Pagination cursor for retrieving the next set of results',
+			'Pagination cursor for retrieving the next set of results. Obtain this value from the previous response when more results are available.',
 		)
 		.action(async (cql: string, options) => {
 			const logPrefix = '[src/cli/atlassian.search.cli.ts@search]';
