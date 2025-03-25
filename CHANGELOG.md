@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.5.0...v1.5.1) (2025-03-25)
+
+
+### Bug Fixes
+
+* replace any with unknown in defaults.util.ts ([cd70568](https://github.com/aashari/mcp-server-atlassian-confluence/commit/cd70568e4a0ad36b36fd31760da953eba839b43c))
+
 # [1.5.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.4.0...v1.5.0) (2025-03-25)
 
 
