@@ -67,7 +67,37 @@ function register(server: McpServer) {
 	// Register the search tool
 	server.tool(
 		'search',
-		'Search for content in Confluence using Confluence Query Language (CQL). Returns search results with their IDs, titles, excerpts with highlighted matching text, URLs, and space information. This tool is useful for finding specific content across your Confluence instance. CQL is a powerful query language that allows you to search by content type, space, title, text, labels, and more. Examples: "type=page AND space=DEV", "title~Project AND text~API", "label=documentation". Results include pagination information for retrieving additional results.',
+		`Search for content across Confluence using Confluence Query Language (CQL).
+
+PURPOSE: Finds content matching specific criteria with excerpts showing matches, helping you discover relevant information across spaces.
+
+WHEN TO USE:
+- When you need to find specific content across multiple spaces
+- When you want to search by various criteria (text, title, labels, content type)
+- When you need to gather information scattered across different pages
+- When you're unfamiliar with the structure of Confluence and need discovery
+- When looking for content with specific labels or within specific date ranges
+
+WHEN NOT TO USE:
+- When you already know the exact space and page (use get-page instead)
+- When you want to list all spaces or pages systematically (use list-spaces/list-pages)
+- When performing many rapid, consecutive searches (consider rate limits)
+- When you need to retrieve complete page content (use get-page after search)
+
+RETURNS: Search results with titles, excerpts showing matches, content types, spaces, and URLs, plus pagination info.
+
+EXAMPLES:
+- Simple text search: {cql: "text~documentation"}
+- Space-specific search: {cql: "space=DEV AND text~API"}
+- Title search: {cql: "title~Project Plan"}
+- Content type filter: {cql: "type=page AND label=important"}
+- With pagination: {cql: "text~API", limit: 10, cursor: "next-page-token"}
+
+ERRORS:
+- Invalid CQL syntax: Check CQL syntax (example: "type=page AND space=DEV")
+- No results: Try broader search terms or check different spaces
+- Authentication failures: Check your Confluence credentials
+- Rate limiting: Use more specific queries and pagination`,
 		SearchToolArgs.shape,
 		searchContent,
 	);

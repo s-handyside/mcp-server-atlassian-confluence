@@ -108,7 +108,35 @@ function register(server: McpServer) {
 	// Register the list pages tool
 	server.tool(
 		'list-pages',
-		'List Confluence pages with optional filtering. Returns pages with their IDs, titles, space IDs, and URLs. Use this tool to discover available content within Confluence spaces. You can filter by space ID to focus on specific projects, by status to find drafts or archived content, and limit the number of results for better readability.',
+		`List Confluence pages with optional filtering by space and status.
+
+PURPOSE: Finds pages within Confluence spaces with their IDs, titles, and locations to help you discover available content.
+
+WHEN TO USE:
+- When you need to find pages within a specific space
+- When you want to list the most recently updated content
+- When you need to browse available pages before accessing specific content
+- When you need page IDs for use with other Confluence tools
+- When looking for pages with specific statuses (current, draft, trashed)
+
+WHEN NOT TO USE:
+- When you already know the specific page ID (use get-page instead)
+- When you need the actual content of a page (use get-page instead)
+- When you need to search across multiple spaces (use search instead)
+- When you need to find spaces rather than pages (use list-spaces instead)
+
+RETURNS: Formatted list of pages with IDs, titles, space information, and URLs, plus pagination info.
+
+EXAMPLES:
+- Pages in a space: {spaceId: "DEV"}
+- With status filter: {spaceId: "DEV", status: "current"}
+- With pagination: {spaceId: "DEV", limit: 10, cursor: "next-page-token"}
+
+ERRORS:
+- Space not found: Verify the space ID is correct
+- Authentication failures: Check your Confluence credentials
+- No pages found: The space might be empty or you lack permissions
+- Rate limiting: Use pagination and reduce query frequency`,
 		ListPagesToolArgs.shape,
 		listPages,
 	);
@@ -116,7 +144,30 @@ function register(server: McpServer) {
 	// Register the get page details tool
 	server.tool(
 		'get-page',
-		'Get detailed information about a specific Confluence page by ID. Returns the page content in Markdown format along with metadata like creation date, author, and labels. Use this tool when you need to read or analyze the actual content of a Confluence page, such as documentation, meeting notes, or project information.',
+		`Get detailed information and content of a specific Confluence page by ID.
+
+PURPOSE: Retrieves the full content of a page in Markdown format along with comprehensive metadata.
+
+WHEN TO USE:
+- When you need to read the actual content of a page
+- When you need detailed page metadata (author, dates, versions)
+- When you need to extract specific information from a page
+- After using list-pages or search to identify relevant page IDs
+
+WHEN NOT TO USE:
+- When you don't know which page to look for (use list-pages or search first)
+- When you only need basic page information without content (use list-pages instead)
+- When you need to find content across multiple pages (use search instead)
+
+RETURNS: Complete page content in Markdown format with metadata including title, author, version, space, and creation/modification dates.
+
+EXAMPLES:
+- By ID: {id: "123456"}
+
+ERRORS:
+- Page not found: Verify the page ID is correct
+- Permission errors: Ensure you have access to the requested page
+- Rate limiting: Cache page content when possible for frequently accessed pages`,
 		GetPageToolArgs.shape,
 		getPage,
 	);

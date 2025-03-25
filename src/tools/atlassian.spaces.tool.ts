@@ -113,7 +113,33 @@ function register(server: McpServer) {
 	// Register the list spaces tool
 	server.tool(
 		'list-spaces',
-		'List Confluence spaces with optional filtering. Returns spaces with their IDs, keys, types, and URLs. Use this tool to discover available Confluence spaces before accessing specific content. You can filter by type (global, personal, etc.), status (current, archived), and limit the number of results.',
+		`List Confluence spaces with optional filtering capabilities.
+
+PURPOSE: Discovers available spaces in your Confluence instance with their keys, names, types, and URLs.
+
+WHEN TO USE:
+- When you need to discover what spaces exist in your Confluence instance
+- When you want to find spaces by type (global, personal, archived)
+- When you need to browse available spaces before accessing specific pages
+- When you need space keys for use with other Confluence tools
+
+WHEN NOT TO USE:
+- When you already know the specific space key/ID (use get-space instead)
+- When you need detailed information about a specific space (use get-space instead)
+- When you need to find content across multiple spaces (use search instead)
+- When you need to list pages within a specific space (use list-pages instead)
+
+RETURNS: Formatted list of spaces with IDs, keys, names, types, and URLs, plus pagination info.
+
+EXAMPLES:
+- List all spaces: {}
+- Filter by type: {type: "global"}
+- With pagination: {limit: 10, cursor: "next-page-token"}
+
+ERRORS:
+- Authentication failures: Check your Confluence credentials
+- No spaces found: Verify your permissions in Confluence
+- Rate limiting: Use pagination and reduce query frequency`,
 		ListSpacesToolArgs.shape,
 		listSpaces,
 	);
@@ -121,7 +147,31 @@ function register(server: McpServer) {
 	// Register the get space details tool
 	server.tool(
 		'get-space',
-		'Get detailed information about a specific Confluence space by ID. Returns comprehensive metadata including description, labels, and access links. Use this tool when you need in-depth information about a particular space, such as its purpose, creation date, or associated metadata.',
+		`Get detailed information about a specific Confluence space by ID or key.
+
+PURPOSE: Retrieves comprehensive space metadata including description, homepage, permissions, and more.
+
+WHEN TO USE:
+- When you need detailed information about a specific space
+- When you need to find the homepage or key pages within a space
+- When you need to verify space permissions or settings
+- After using list-spaces to identify the relevant space
+
+WHEN NOT TO USE:
+- When you don't know which space to look for (use list-spaces first)
+- When you need to browse multiple spaces (use list-spaces instead)
+- When you need to find specific content (use search or list-pages instead)
+
+RETURNS: Detailed space information including key, name, description, type, homepage, and metadata.
+
+EXAMPLES:
+- By key: {idOrKey: "DEV"}
+- By ID: {idOrKey: "123456"}
+
+ERRORS:
+- Space not found: Verify the space key or ID is correct
+- Permission errors: Ensure you have access to the requested space
+- Rate limiting: Cache space information when possible`,
 		GetSpaceToolArgs.shape,
 		getSpace,
 	);
