@@ -1,3 +1,11 @@
+## [1.2.5](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.4...v1.2.5) (2025-03-25)
+
+
+### Bug Fixes
+
+* trigger new release for parameter and pagination standardization ([cc0138a](https://github.com/aashari/mcp-server-atlassian-confluence/commit/cc0138a6ef16d30ef80a4f048a186886ebdfacfb))
+* update CLI and tool handlers to use object-based identifiers ([cf6b2ac](https://github.com/aashari/mcp-server-atlassian-confluence/commit/cf6b2ac55b22af12b2cb69e9e0e676168bc8a7b2))
+
 ## [1.2.4](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.2.3...v1.2.4) (2025-03-24)
 
 
