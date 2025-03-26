@@ -71,13 +71,6 @@ const GetPageToolArgs = z.object({
 		.describe(
 			'The numeric ID of the Confluence page to retrieve (e.g., "456789"). This is required and must be a valid page ID from your Confluence instance. The page content will be returned in Markdown format for easy reading.',
 		),
-
-	bodyFormat: z
-		.enum(['storage', 'view', 'editor'])
-		.optional()
-		.describe(
-			'Format for the body content. Options include: "storage" (the Confluence storage format), "view" (the rendered HTML), or "editor" (the Confluence editor format). Defaults to "view" if not specified.',
-		),
 });
 
 type GetPageToolArgsType = z.infer<typeof GetPageToolArgs>;

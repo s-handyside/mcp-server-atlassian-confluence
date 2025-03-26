@@ -161,11 +161,10 @@ WHEN NOT TO USE:
 - When you need to browse multiple pages (use list-pages instead)
 - When you need space information rather than page details (use get-space instead)
 
-RETURNS: Detailed page information including title, body content, space, author, version, labels, and creation/update dates. All metadata (labels, properties, collaborators) is included by default for comprehensive information.
+RETURNS: Detailed page information including title, body content, space, author, version, labels, and creation/update dates. All metadata (labels, properties, collaborators) is included by default for comprehensive information. Body content is always returned in the "view" format.
 
 EXAMPLES:
 - Get page content: {pageId: "123456"}
-- With specific format: {pageId: "123456", bodyFormat: "view"}
 
 ERRORS:
 - Page not found: Verify the page ID is correct

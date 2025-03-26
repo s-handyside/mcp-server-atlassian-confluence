@@ -151,10 +151,6 @@ function registerGetPageCommand(program: Command): void {
 				'  $ get-page --page 123456',
 		)
 		.requiredOption('--page <id>', 'ID of the page to retrieve (numeric)')
-		.option(
-			'-f, --body-format <format>',
-			'Format for the body content (storage, view, editor). Defaults to view.',
-		)
 		.action(async (options) => {
 			const logPrefix = '[src/cli/atlassian.pages.cli.ts@get-page]';
 			try {
