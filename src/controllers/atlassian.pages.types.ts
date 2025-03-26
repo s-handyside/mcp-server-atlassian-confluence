@@ -37,7 +37,7 @@ export interface ListPagesOptions extends PaginationOptions {
 	 * Text-based filter for pages.
 	 * Search by title, content, or labels.
 	 */
-	filter?: string;
+	query?: string;
 }
 
 /**

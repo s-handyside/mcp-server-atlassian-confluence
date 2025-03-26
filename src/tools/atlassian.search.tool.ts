@@ -22,12 +22,12 @@ import atlassianSearchController from '../controllers/atlassian.search.controlle
  */
 async function search(args: SearchToolArgsType, _extra: RequestHandlerExtra) {
 	const logPrefix = '[src/tools/atlassian.search.tool.ts@search]';
-	logger.debug(`${logPrefix} Searching Confluence with query:`, args);
+	logger.debug(`${logPrefix} Searching Confluence with filters:`, args);
 
 	try {
-		// Pass the search parameters to the controller
+		// Pass the search options to the controller
 		const message = await atlassianSearchController.search({
-			cql: args.filter,
+			cql: args.cql,
 			limit: args.limit,
 			cursor: args.cursor,
 		});
@@ -66,36 +66,35 @@ function register(server: McpServer) {
 	// Register the search tool
 	server.tool(
 		'search',
-		`Search Confluence content using Confluence Query Language (CQL).
+		`Search for content in Confluence using Confluence Query Language (CQL).
 
-PURPOSE: Allows you to find content across spaces, pages, blogs, and attachments using powerful search syntax.
+PURPOSE: Find pages, blog posts, attachments, and other content across spaces using powerful search queries.
 
 WHEN TO USE:
-- When you need to find content across multiple spaces
-- When searching for specific keywords, phrases, or content types
-- When you need to find content by author, labels, or metadata
-- When you don't know exactly where content is located
-- When you need the most relevant content rather than browsing hierarchically
+- When you need to find content matching specific keywords
+- When you need to search across multiple spaces
+- When you want to find content based on labels, authors, or dates
+- When you need to find attachments or specific file types
+- When you need advanced filtering beyond what list-pages provides
 
 WHEN NOT TO USE:
+- When you only need to browse spaces (use list-spaces instead)
+- When you know the space and just want to list pages (use list-pages instead)
 - When you already know the specific page ID (use get-page instead)
-- When you only want to browse content within a specific space (use list-pages instead)
-- When looking for spaces rather than content (use list-spaces instead)
-- When you need very large result sets (CQL searches have performance limitations)
 
-RETURNS: Formatted list of search results with content IDs, titles, spaces, types, and URLs that match your query.
+RETURNS: Formatted list of search results with titles, spaces, content snippets, and URLs.
 
 EXAMPLES:
-- Search by keyword: {filter: "text ~ 'project plan'"}
-- Content type filter: {filter: "type = 'page' AND space = 'DEV'"}
-- Created date filter: {filter: "created >= '2023-01-01'"}
-- With pagination: {filter: "space = 'DEV'", limit: 10, cursor: "next-page-token"}
+- Basic text search: {cql: "project plan"}
+- Search in specific space: {cql: "space = DEV AND text ~ documentation"}
+- Search by label: {cql: "label = 'getting-started'"}
+- Search by content type: {cql: "type = page AND text ~ API"}
+- With pagination: {cql: "project plan", limit: 20, cursor: "next-page-token"}
 
 ERRORS:
-- Invalid CQL: Check your CQL syntax (refer to Confluence documentation)
-- Authentication failures: Check your Confluence credentials
-- No results: Try broadening your search terms or filters
-- Rate limiting: Use pagination and optimize query frequency`,
+- Invalid CQL: Check your CQL syntax
+- Authentication failures: Verify credentials
+- No results: Try broadening your search terms`,
 		SearchToolArgs.shape,
 		search,
 	);

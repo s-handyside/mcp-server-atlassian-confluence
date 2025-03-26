@@ -30,13 +30,13 @@ async function listPages(
 	logger.debug(`${logPrefix} Listing Confluence pages with filters:`, args);
 
 	try {
-		// Pass the filter options to the controller
+		// Pass the options to the controller
 		const message = await atlassianPagesController.list({
-			spaceId: args.parentId,
+			spaceId: args.spaceId,
+			query: args.query,
 			status: args.status,
 			limit: args.limit,
 			cursor: args.cursor,
-			filter: args.filter,
 		});
 
 		logger.debug(

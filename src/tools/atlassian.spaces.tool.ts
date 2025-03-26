@@ -33,7 +33,7 @@ async function listSpaces(
 		// Pass the filter options to the controller
 		const message = await atlassianSpacesController.list({
 			type: args.type === 'archived' ? 'global' : args.type,
-			query: args.filter,
+			query: args.query,
 			status: args.status,
 			limit: args.limit,
 			cursor: args.cursor,

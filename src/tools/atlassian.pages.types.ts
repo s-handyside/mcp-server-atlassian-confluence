@@ -26,18 +26,18 @@ const PaginationArgs = {
  * Matches the controller's ListPagesOptions interface
  */
 const ListPagesToolArgs = z.object({
-	parentId: z
+	spaceId: z
 		.array(z.string())
 		.optional()
 		.describe(
 			'Filter pages by space IDs. Provide an array of space IDs (e.g., ["123456", "789012"]) to only show pages from specific spaces. Useful when you want to focus on content from particular projects or teams.',
 		),
 
-	filter: z
+	query: z
 		.string()
 		.optional()
 		.describe(
-			'Filter pages by title, content, or labels. Use this to narrow down results to specific topics or content.',
+			'Filter pages by title, content, or labels (text search). Use this to narrow down results to specific topics or content.',
 		),
 
 	status: z

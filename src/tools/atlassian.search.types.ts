@@ -26,7 +26,7 @@ const PaginationArgs = {
  * Matches the controller's search function parameters
  */
 const SearchToolArgs = z.object({
-	filter: z
+	cql: z
 		.string()
 		.describe(
 			'Search query using Confluence Query Language (CQL). Use this to search for content using standard CQL syntax (e.g., "text ~ \'project plan\' AND space = DEV").',

@@ -61,10 +61,10 @@ async function list(
 			`[src/controllers/atlassian.spaces.controller.ts@list] Retrieved ${spacesData.results.length} spaces. Has more: ${spacesData._links?.next ? 'yes' : 'no'}`,
 		);
 
-		// The formatSpacesList function expects a spacesData and nextCursor parameter
+		// The formatSpacesList function expects a spacesData parameter
 		// Extract the nextCursor from the links
 		const nextCursor = spacesData._links?.next?.split('cursor=')[1] || '';
-		const formattedSpaces = formatSpacesList(spacesData, nextCursor);
+		const formattedSpaces = formatSpacesList(spacesData);
 
 		return {
 			content: formattedSpaces,

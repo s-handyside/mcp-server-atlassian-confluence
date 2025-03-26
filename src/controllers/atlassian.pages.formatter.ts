@@ -7,7 +7,6 @@ import { htmlToMarkdown } from '../utils/markdown.util.js';
 import {
 	formatUrl,
 	formatDate,
-	formatPagination,
 	formatHeading,
 	formatBulletList,
 	formatSeparator,
@@ -17,69 +16,55 @@ import {
 /**
  * Format a list of pages for display
  * @param pagesData - Raw pages data from the API
- * @param pagination - Pagination information including count and next cursor
  * @returns Formatted string with pages information in markdown format
  */
-export function formatPagesList(
-	pagesData: Page[],
-	pagination?: { nextCursor?: string; hasMore: boolean; count?: number },
-): string {
-	if (pagesData.length === 0) {
-		return 'No Confluence pages found.';
+export function formatPagesList(pagesData: Page[]): string {
+	if (!pagesData || pagesData.length === 0) {
+		return 'No Confluence pages found matching your criteria.';
 	}
 
 	const lines: string[] = [formatHeading('Confluence Pages', 1), ''];
 
-	// Use the numbered list formatter for consistent formatting
-	const formattedList = formatNumberedList(pagesData, (page) => {
+	// Format each page with its details
+	const formattedList = formatNumberedList(pagesData, (page, index) => {
 		const itemLines: string[] = [];
 
 		// Basic information
 		itemLines.push(formatHeading(page.title, 2));
 
-		let contentPreview;
-		if (page.body?.view?.value) {
-			contentPreview =
-				htmlToMarkdown(page.body.view.value).substring(0, 100) + '...';
-		}
-
 		// Create an object with all the properties to display
+		const pageUrl = `${page._links.base}/pages/viewpage.action?pageId=${page.id}`;
+
 		const properties: Record<string, unknown> = {
 			ID: page.id,
-			Title: page.title,
-			'Space ID': page.spaceId,
 			Status: page.status,
-			Created: page.createdAt,
-			'Author ID': page.authorId,
-			'Content Preview': contentPreview,
-			URL: {
-				url: page._links.webui,
-				title: page.title,
-			},
-			'Parent ID': page.parentId,
+			'Space ID': page.spaceId || 'N/A',
+			Title: page.title,
+			Created: page.createdAt
+				? formatDate(new Date(page.createdAt))
+				: 'Not available',
+			Author: page.authorId || 'Unknown',
+			Version: page.version?.number || 'N/A',
+			URL: formatUrl(pageUrl, page.title),
 		};
 
-		// Format as a bullet list with proper formatting for each value type
+		// Format as a bullet list
 		itemLines.push(formatBulletList(properties, (key) => key));
+
+		// Add separator between pages except for the last one
+		if (index < pagesData.length - 1) {
+			itemLines.push('');
+			itemLines.push(formatSeparator());
+		}
 
 		return itemLines.join('\n');
 	});
 
 	lines.push(formattedList);
 
-	// Add pagination information if available
-	if (pagination) {
-		lines.push('');
-		lines.push(formatSeparator());
-		lines.push('');
-		lines.push(
-			formatPagination(
-				pagination.count || pagesData.length,
-				pagination.hasMore,
-				pagination.nextCursor,
-			),
-		);
-	}
+	// Add timestamp for when this information was retrieved
+	lines.push('');
+	lines.push(`*Page information retrieved at ${formatDate(new Date())}*`);
 
 	return lines.join('\n');
 }

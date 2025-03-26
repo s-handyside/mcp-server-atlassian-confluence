@@ -32,10 +32,13 @@ function registerSearchCommand(program: Command): void {
 	program
 		.command('search')
 		.description(
-			'Search for content in Confluence using Confluence Query Language (CQL)\n\n  Provides powerful search capabilities to find content across spaces, pages, and attachments using CQL syntax.',
+			'Search for content in Confluence using Confluence Query Language (CQL)\n\n  Provides powerful search capabilities to find content across spaces, pages, and attachments using CQL syntax.\n\n' +
+				'Examples:\n' +
+				'  $ search --query "space = TEAM AND title ~ Project"\n' +
+				'  $ search --query "type = page AND label = documentation" --limit 50',
 		)
-		.argument(
-			'<cql>',
+		.requiredOption(
+			'-q, --query <cql>',
 			'Confluence Query Language (CQL) query to search for',
 		)
 		.option(
@@ -46,16 +49,15 @@ function registerSearchCommand(program: Command): void {
 			'-c, --cursor <cursor>',
 			'Pagination cursor for retrieving the next set of results. Obtain this value from the previous response when more results are available.',
 		)
-		.action(async (cql: string, options) => {
+		.action(async (options) => {
 			const logPrefix = '[src/cli/atlassian.search.cli.ts@search]';
 			try {
 				logger.debug(`${logPrefix} Processing command options:`, {
-					cql,
 					...options,
 				});
 
 				const searchOptions = {
-					cql,
+					cql: options.query,
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
 					}),
@@ -79,7 +81,7 @@ function registerSearchCommand(program: Command): void {
 					console.log(
 						'\n' +
 							formatPagination(
-								result.pagination.count || 0,
+								result.pagination.count ?? 0,
 								result.pagination.hasMore,
 								result.pagination.nextCursor,
 							),

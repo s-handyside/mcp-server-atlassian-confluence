@@ -41,9 +41,9 @@ function registerListPagesCommand(program: Command): void {
 			'List Confluence pages with optional filtering\n\n' +
 				'Retrieves pages from your Confluence instance with filtering and pagination options.\n\n' +
 				'Examples:\n' +
-				'  $ list-pages --parent-id TEAM --status current\n' +
-				'  $ list-pages --limit 50 --filter "title:Project"\n' +
-				'  $ list-pages --parent-id TEAM --filter "label:documentation"',
+				'  $ list-pages --space-id TEAM --status current\n' +
+				'  $ list-pages --limit 50 --query "title:Project"\n' +
+				'  $ list-pages --space-id TEAM --query "label:documentation"',
 		)
 		.option(
 			'-l, --limit <number>',
@@ -55,10 +55,10 @@ function registerListPagesCommand(program: Command): void {
 			'Pagination cursor for retrieving the next set of results',
 		)
 		.option(
-			'-f, --filter <string>',
-			'Filter pages by title, content, or labels',
+			'-q, --query <text>',
+			'Filter pages by title, content, or labels (text search)',
 		)
-		.option('-p, --parent-id <id>', 'Filter by space ID')
+		.option('--space-id <id>', 'Filter by space ID (numeric)')
 		.option(
 			'--status <status>',
 			'Filter by page status: current, archived',
@@ -83,8 +83,8 @@ function registerListPagesCommand(program: Command): void {
 				}
 
 				const filterOptions: ListPagesOptions = {
-					...(options.parentId && {
-						spaceId: [options.parentId],
+					...(options.spaceId && {
+						spaceId: [options.spaceId],
 					}),
 					...(options.status && {
 						status: [options.status as ContentStatus],
@@ -93,7 +93,7 @@ function registerListPagesCommand(program: Command): void {
 						limit: parseInt(options.limit, 10),
 					}),
 					...(options.cursor && { cursor: options.cursor }),
-					...(options.filter && { filter: options.filter }),
+					...(options.query && { query: options.query }),
 				};
 
 				logger.debug(
@@ -119,7 +119,7 @@ function registerListPagesCommand(program: Command): void {
 					console.log(
 						'\n' +
 							formatPagination(
-								result.pagination.count || 0,
+								result.pagination.count ?? 0,
 								result.pagination.hasMore,
 								result.pagination.nextCursor,
 							),

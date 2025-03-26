@@ -39,7 +39,7 @@ function registerListSpacesCommand(program: Command): void {
 				'Examples:\n' +
 				'  $ list-spaces --type global\n' +
 				'  $ list-spaces --limit 50 --status current\n' +
-				'  $ list-spaces --filter "Documentation"',
+				'  $ list-spaces --query "Documentation"',
 		)
 		.option(
 			'-l, --limit <number>',
@@ -51,8 +51,8 @@ function registerListSpacesCommand(program: Command): void {
 			'Pagination cursor for retrieving the next set of results',
 		)
 		.option(
-			'-f, --filter <string>',
-			'Filter spaces by name, key, or description',
+			'-q, --query <text>',
+			'Filter spaces by name, key, or description (text search)',
 		)
 		.option(
 			'-t, --type <type>',
@@ -99,7 +99,7 @@ function registerListSpacesCommand(program: Command): void {
 						limit: parseInt(options.limit, 10),
 					}),
 					...(options.cursor && { cursor: options.cursor }),
-					...(options.filter && { query: options.filter }),
+					...(options.query && { query: options.query }),
 				};
 
 				logger.debug(
@@ -121,7 +121,7 @@ function registerListSpacesCommand(program: Command): void {
 					console.log(
 						'\n' +
 							formatPagination(
-								result.pagination.count || 0,
+								result.pagination.count ?? 0,
 								result.pagination.hasMore,
 								result.pagination.nextCursor,
 							),
