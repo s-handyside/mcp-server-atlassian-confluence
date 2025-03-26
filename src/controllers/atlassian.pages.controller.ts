@@ -4,11 +4,11 @@ import {
 	extractPaginationInfo,
 	PaginationType,
 } from '../utils/pagination.util.js';
+import { ControllerResponse } from '../types/common.types.js';
 import {
 	GetPageOptions,
 	ListPagesOptions,
 	PageIdentifier,
-	ControllerResponse,
 } from './atlassian.pages.type.js';
 import {
 	formatPageDetails,

@@ -5,7 +5,8 @@ import {
 	extractPaginationInfo,
 	PaginationType,
 } from '../utils/pagination.util.js';
-import { SearchOptions, ControllerResponse } from './atlassian.search.type.js';
+import { ControllerResponse } from '../types/common.types.js';
+import { SearchOptions } from './atlassian.search.type.js';
 import {
 	formatSearchResults,
 	processCqlQuery,

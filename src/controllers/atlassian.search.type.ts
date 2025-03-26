@@ -1,8 +1,4 @@
-import {
-	ControllerResponse,
-	PaginationOptions,
-	EntityIdentifier,
-} from '../types/common.types.js';
+import { PaginationOptions, EntityIdentifier } from '../types/common.types.js';
 
 /**
  * Search identifier for retrieving specific search results
@@ -25,6 +21,3 @@ export interface SearchOptions extends PaginationOptions {
 	 */
 	cql: string;
 }
-
-// Re-export ControllerResponse for backward compatibility
-export { ControllerResponse };

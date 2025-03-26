@@ -2,11 +2,7 @@ import {
 	ContentStatus,
 	BodyFormat,
 } from '../services/vendor.atlassian.pages.types.js';
-import {
-	ControllerResponse,
-	PaginationOptions,
-	EntityIdentifier,
-} from '../types/common.types.js';
+import { PaginationOptions, EntityIdentifier } from '../types/common.types.js';
 
 /**
  * Page identifier for retrieving specific pages.
@@ -85,6 +81,3 @@ export interface GetPageOptions {
 	 */
 	includeVersion?: boolean;
 }
-
-// Re-export from base types for backward compatibility
-export type { ControllerResponse };

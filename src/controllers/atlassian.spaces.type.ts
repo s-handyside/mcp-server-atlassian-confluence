@@ -2,11 +2,7 @@ import {
 	SpaceType,
 	SpaceStatus,
 } from '../services/vendor.atlassian.spaces.types.js';
-import {
-	ControllerResponse,
-	PaginationOptions,
-	EntityIdentifier,
-} from '../types/common.types.js';
+import { PaginationOptions, EntityIdentifier } from '../types/common.types.js';
 
 /**
  * Space identifier for retrieving specific spaces
@@ -32,6 +28,3 @@ export interface ListSpacesOptions extends PaginationOptions {
 	 */
 	status?: SpaceStatus;
 }
-
-// Re-export ControllerResponse for backward compatibility
-export { ControllerResponse };

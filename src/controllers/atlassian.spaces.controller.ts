@@ -11,11 +11,8 @@ import {
 	SpaceStatus,
 	SpaceType,
 } from '../services/vendor.atlassian.spaces.types.js';
-import {
-	ListSpacesOptions,
-	SpaceIdentifier,
-	ControllerResponse,
-} from './atlassian.spaces.type.js';
+import { ControllerResponse } from '../types/common.types.js';
+import { ListSpacesOptions, SpaceIdentifier } from './atlassian.spaces.type.js';
 import {
 	formatSpacesList,
 	formatSpaceDetails,
