@@ -13,7 +13,7 @@ import atlassianPagesTools from './tools/atlassian.pages.tool.js';
 import atlassianSearchTools from './tools/atlassian.search.tool.js';
 
 // Define version constant for easier management and consistent versioning
-const VERSION = '1.6.0';
+const VERSION = '1.7.0';
 
 let serverInstance: McpServer | null = null;
 let transportInstance: SSEServerTransport | StdioServerTransport | null = null;

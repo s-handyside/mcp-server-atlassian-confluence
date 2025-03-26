@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.6.0...v1.7.0) (2025-03-26)
+
+
+### Features
+
+* standardize CQL queries and clarify text search options ([d405fc5](https://github.com/aashari/mcp-server-atlassian-confluence/commit/d405fc5f7a0381fd329558f5d7b763cd7d97dd0e))
+
 # [1.6.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.5.1...v1.6.0) (2025-03-26)
 
 
