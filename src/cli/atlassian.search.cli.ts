@@ -34,12 +34,12 @@ function registerSearchCommand(program: Command): void {
 		.description(
 			'Search for content in Confluence using Confluence Query Language (CQL)\n\n  Provides powerful search capabilities to find content across spaces, pages, and attachments using CQL syntax.\n\n' +
 				'Examples:\n' +
-				'  $ search --query "space = TEAM AND title ~ Project"\n' +
-				'  $ search --query "type = page AND label = documentation" --limit 50',
+				'  $ search --cql "space = TEAM AND title ~ Project"\n' +
+				'  $ search --cql "type = page AND label = documentation" --limit 50',
 		)
 		.requiredOption(
-			'-q, --query <cql>',
-			'Confluence Query Language (CQL) query to search for',
+			'-q, --cql <cql>',
+			'Filter content using Confluence Query Language (CQL) syntax',
 		)
 		.option(
 			'-l, --limit <number>',
@@ -57,7 +57,7 @@ function registerSearchCommand(program: Command): void {
 				});
 
 				const searchOptions = {
-					cql: options.query,
+					cql: options.cql,
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
 					}),

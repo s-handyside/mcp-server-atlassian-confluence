@@ -57,7 +57,7 @@ function registerListPagesCommand(program: Command): void {
 		)
 		.option(
 			'-q, --query <text>',
-			'Filter pages by title, content, or labels (text search)',
+			'Filter pages by title, content, or labels (simple text search, not query language)',
 		)
 		.option('--space-id <id>', 'Filter by space ID (must be numeric)')
 		.option(
@@ -151,9 +151,9 @@ function registerGetPageCommand(program: Command): void {
 			'Get detailed information about a specific Confluence page\n\n' +
 				'Retrieves comprehensive details for a page including content, version history, and relationships.\n\n' +
 				'Examples:\n' +
-				'  $ get-page --page-id 123456',
+				'  $ get-page --page 123456',
 		)
-		.requiredOption('--page-id <id>', 'ID of the page to retrieve')
+		.requiredOption('--page <id>', 'ID of the page to retrieve (numeric)')
 		.option(
 			'-f, --body-format <format>',
 			'Format for the body content (storage, view, editor). Defaults to view.',
@@ -187,11 +187,11 @@ function registerGetPageCommand(program: Command): void {
 			const logPrefix = '[src/cli/atlassian.pages.cli.ts@get-page]';
 			try {
 				logger.debug(
-					`${logPrefix} Fetching details for page ID: ${options.pageId}`,
+					`${logPrefix} Fetching details for page ID: ${options.page}`,
 				);
 
 				// Validate that the page ID is a proper Confluence ID (numeric)
-				const pageId = options.pageId;
+				const pageId = options.page;
 				if (!pageId.match(/^\d+$/)) {
 					throw new Error(
 						'Page ID must be a numeric string. If you are using a page title or key, please use the search command to find the page ID first.',
