@@ -13,6 +13,33 @@ Model Context Protocol (MCP) is a technology that allows AI assistants like Clau
 
 This MCP server connects Claude, Cursor, or other compatible AI assistants with your Confluence instance, allowing them to search content, list spaces and pages, and access detailed documentation.
 
+## Available Tools
+
+This MCP server provides the following tools:
+
+| Tool            | Purpose                       | Example Usage                         |
+| --------------- | ----------------------------- | ------------------------------------- |
+| **search**      | Search across spaces with CQL | "Find pages about API documentation"  |
+| **list-spaces** | View all available spaces     | "Show me all Confluence spaces"       |
+| **get-space**   | Get details about a space     | "Tell me about the DEV space"         |
+| **list-pages**  | View pages in a space         | "Show pages in the Engineering space" |
+| **get-page**    | Get full content of a page    | "Show me the Getting Started page"    |
+
+## Interface Philosophy
+
+This MCP server follows a "minimal interface, maximal detail" philosophy. This means:
+
+1. **Simple Commands**: Tools require only essential parameters, making them easy to use.
+2. **Comprehensive Results**: All commands return complete information by default without requiring additional flags.
+
+For example, the `get-page` command:
+
+- Only requires the page ID
+- Automatically returns complete content including body, labels, properties, and version information
+- No additional parameters needed to specify what details to include
+
+This approach makes the tools both powerful and simple to use, letting AI assistants focus on analyzing the information rather than configuring requests.
+
 ## Quick Start Guide
 
 ### Step 1: Get Your Atlassian API Token
@@ -102,18 +129,6 @@ In your AI assistant, try asking:
 - "Show me the 'Getting Started' page content"
 - "Find Confluence pages about API documentation"
 
-## Available Tools
-
-This MCP server provides the following tools:
-
-| Tool            | Purpose                       | Example Usage                         |
-| --------------- | ----------------------------- | ------------------------------------- |
-| **search**      | Search across spaces with CQL | "Find pages about API documentation"  |
-| **list-spaces** | View all available spaces     | "Show me all Confluence spaces"       |
-| **get-space**   | Get details about a space     | "Tell me about the DEV space"         |
-| **list-pages**  | View pages in a space         | "Show pages in the Engineering space" |
-| **get-page**    | Get full content of a page    | "Show me the Getting Started page"    |
-
 ## Advanced Configuration
 
 ### Using Multiple MCP Servers
@@ -158,8 +173,8 @@ npm install -g @aashari/mcp-server-atlassian-confluence
 
 # Then run commands
 mcp-confluence list-spaces
-mcp-confluence get-page 123456789
-mcp-confluence search "type=page AND text~API"
+mcp-confluence get-page --page 123456789
+mcp-confluence search --cql "type=page AND text~API"
 ```
 
 ## For Developers: Contributing to This Project
@@ -174,6 +189,18 @@ This MCP server follows a layered architecture:
 4. **Utilities**: Shared functionality (error handling, pagination, etc.)
 
 The flow of data is: User → CLI/Tool → Controller → Service → Atlassian API → back up the chain with responses.
+
+#### Design Principles
+
+The code is structured around several key principles:
+
+1. **Separation of Concerns**: Each layer has distinct responsibilities
+2. **Minimal Interface**: Command options are limited to essential parameters
+3. **Maximal Detail**: Responses include comprehensive information by default
+4. **Consistent Patterns**: Similar commands follow consistent patterns across all tools
+5. **Error Handling**: Robust error handling with clear, actionable messages
+
+These principles ensure a robust, maintainable codebase that delivers a consistent user experience.
 
 ### Setting Up Development Environment
 
