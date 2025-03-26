@@ -62,7 +62,7 @@ async function listPages(
  * MCP Tool: Get Confluence Page Details
  *
  * Retrieves detailed information about a specific Confluence page.
- * Returns a formatted markdown response with page content, metadata, and version history.
+ * Returns a formatted markdown response with page content and metadata.
  *
  * @param {GetPageToolArgsType} args - Tool arguments containing the page ID
  * @param {RequestHandlerExtra} _extra - Extra request handler information (unused)
@@ -72,13 +72,11 @@ async function listPages(
 async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
 	const logPrefix = '[src/tools/atlassian.pages.tool.ts@getPage]';
 
-	logger.debug(
-		`${logPrefix} Retrieving page details for ID: ${args.entityId}`,
-	);
+	logger.debug(`${logPrefix} Retrieving page details for ID: ${args.pageId}`);
 
 	try {
 		const message = await atlassianPagesController.get(
-			{ id: args.entityId },
+			{ id: args.pageId },
 			{
 				bodyFormat: args.bodyFormat,
 				includeLabels: args.includeLabels,
@@ -88,6 +86,7 @@ async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
 				includeVersion: args.includeVersion,
 			},
 		);
+
 		logger.debug(
 			`${logPrefix} Successfully retrieved page details from controller`,
 			message,
@@ -122,35 +121,33 @@ function register(server: McpServer) {
 	// Register the list pages tool
 	server.tool(
 		'list-pages',
-		`List Confluence pages with optional filtering by space and status.
+		`List Confluence pages with optional filtering by space, status, and content.
 
-PURPOSE: Finds pages within Confluence spaces with their IDs, titles, and locations to help you discover available content.
+PURPOSE: Helps you discover pages across Confluence or within specific spaces, providing metadata and access links.
 
 WHEN TO USE:
-- When you need to find pages within a specific space
-- When you want to list the most recently updated content
-- When you need to browse available pages before accessing specific content
+- When you need to find pages in a specific space
+- When you need to list pages matching specific criteria
+- When you need to browse content before viewing specific pages
 - When you need page IDs for use with other Confluence tools
-- When looking for pages with specific statuses (current, draft, trashed)
 
 WHEN NOT TO USE:
 - When you already know the specific page ID (use get-page instead)
-- When you need the actual content of a page (use get-page instead)
-- When you need to search across multiple spaces (use search instead)
-- When you need to find spaces rather than pages (use list-spaces instead)
+- When you need to search by content (use search instead)
+- When you need detailed information about a single page (use get-page instead)
+- When you need to list spaces rather than pages (use list-spaces instead)
 
-RETURNS: Formatted list of pages with IDs, titles, space information, and URLs, plus pagination info.
+RETURNS: Formatted list of pages with titles, IDs, spaces, creation dates, and links.
 
 EXAMPLES:
-- Pages in a space: {parentId: "DEV"}
-- With status filter: {parentId: "DEV", status: "current"}
-- With pagination: {parentId: "DEV", limit: 10, cursor: "next-page-token"}
+- List pages in a space: {spaceId: ["123456"]}
+- Filter by status: {status: ["current"]}
+- With pagination: {limit: 25, cursor: "next-page-token"}
 
 ERRORS:
 - Space not found: Verify the space ID is correct
 - Authentication failures: Check your Confluence credentials
-- No pages found: The space might be empty or you lack permissions
-- Rate limiting: Use pagination and reduce query frequency`,
+- No results: Adjust filters or check permissions`,
 		ListPagesToolArgs.shape,
 		listPages,
 	);
@@ -158,30 +155,33 @@ ERRORS:
 	// Register the get page details tool
 	server.tool(
 		'get-page',
-		`Get detailed information and content of a specific Confluence page by ID.
+		`Get detailed information about a specific Confluence page by ID.
 
-PURPOSE: Retrieves the full content of a page in Markdown format along with comprehensive metadata.
+PURPOSE: Retrieves comprehensive page content and metadata including body, properties, labels, and version history.
 
 WHEN TO USE:
-- When you need to read the actual content of a page
-- When you need detailed page metadata (author, dates, versions)
-- When you need to extract specific information from a page
-- After using list-pages or search to identify relevant page IDs
+- When you need to view the complete content of a page
+- When you need page metadata like labels or properties
+- When you need to check page version history or collaborators
+- After using list-pages or search to identify the page ID
+- When you need to extract information from a specific page
 
 WHEN NOT TO USE:
 - When you don't know which page to look for (use list-pages or search first)
-- When you only need basic page information without content (use list-pages instead)
-- When you need to find content across multiple pages (use search instead)
+- When you need to browse multiple pages (use list-pages instead)
+- When you need space information rather than page details (use get-space instead)
 
-RETURNS: Complete page content in Markdown format with metadata including title, author, version, space, and creation/modification dates.
+RETURNS: Detailed page information including title, body content, space, author, version, labels, and creation/update dates.
 
 EXAMPLES:
-- By ID: {entityId: "123456"}
+- Get page content: {pageId: "123456"}
+- With specific format: {pageId: "123456", bodyFormat: "view"}
+- With all metadata: {pageId: "123456", includeLabels: true, includeProperties: true}
 
 ERRORS:
 - Page not found: Verify the page ID is correct
 - Permission errors: Ensure you have access to the requested page
-- Rate limiting: Cache page content when possible for frequently accessed pages`,
+- Rate limiting: Cache page information when appropriate`,
 		GetPageToolArgs.shape,
 		getPage,
 	);

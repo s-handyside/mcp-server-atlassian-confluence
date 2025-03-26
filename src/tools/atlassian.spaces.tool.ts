@@ -76,12 +76,12 @@ async function getSpace(
 	const logPrefix = '[src/tools/atlassian.spaces.tool.ts@getSpace]';
 
 	logger.debug(
-		`${logPrefix} Retrieving space details for key: ${args.entityId}`,
+		`${logPrefix} Retrieving space details for key: ${args.spaceKey}`,
 	);
 
 	try {
 		const message = await atlassianSpacesController.get({
-			key: args.entityId,
+			key: args.spaceKey,
 		});
 		logger.debug(
 			`${logPrefix} Successfully retrieved space details from controller`,
@@ -172,7 +172,7 @@ WHEN NOT TO USE:
 RETURNS: Detailed space information including key, name, description, type, status, homepage link, and created/updated dates.
 
 EXAMPLES:
-- By key: {entityId: "DEV"}
+- By key: {spaceKey: "DEV"}
 
 ERRORS:
 - Space not found: Verify the space key is correct

@@ -3,24 +3,28 @@
  * These functions should be used by all formatters to ensure consistent formatting.
  */
 
-import { format } from 'date-fns';
-import {
-	formatSpacesList,
-	formatSpaceDetails,
-} from '../controllers/atlassian.spaces.formatter.js';
-
 /**
- * Format a date with standard formatting
- * @param date - The date to format
- * @param formatStr - Optional custom format string
+ * Format a date in a standardized way: YYYY-MM-DD HH:MM:SS UTC
+ * @param dateString - ISO date string or Date object
  * @returns Formatted date string
  */
-export function formatDate(
-	date: Date | string,
-	formatStr: string = 'yyyy-MM-dd HH:mm:ss',
-): string {
-	const dateObj = typeof date === 'string' ? new Date(date) : date;
-	return format(dateObj, formatStr);
+export function formatDate(dateString?: string | Date): string {
+	if (!dateString) {
+		return 'Not available';
+	}
+
+	try {
+		const date =
+			typeof dateString === 'string' ? new Date(dateString) : dateString;
+
+		// Format: YYYY-MM-DD HH:MM:SS UTC
+		return date
+			.toISOString()
+			.replace('T', ' ')
+			.replace(/\.\d+Z$/, ' UTC');
+	} catch {
+		return 'Invalid date';
+	}
 }
 
 /**
@@ -148,9 +152,6 @@ export function formatNumberedList<T>(
 		})
 		.join('\n\n');
 }
-
-// Export space formatters from controller files
-export { formatSpacesList, formatSpaceDetails };
 
 export default {
 	formatDate,

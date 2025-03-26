@@ -145,29 +145,29 @@ function registerGetSpaceCommand(program: Command): void {
 			'Get detailed information about a specific Confluence space\n\n' +
 				'Retrieves comprehensive details for a space including metadata, permissions, and content overview.\n\n' +
 				'Examples:\n' +
-				'  $ get-space DEV',
+				'  $ get-space --space-key DEV',
 		)
-		.argument(
-			'<space-key>',
+		.requiredOption(
+			'--space-key <key>',
 			'Key of the space to retrieve (e.g., DEV, MARKETING)',
 		)
-		.action(async (spaceKey: string) => {
+		.action(async (options) => {
 			const logPrefix = '[src/cli/atlassian.spaces.cli.ts@get-space]';
 			try {
 				logger.debug(
-					`${logPrefix} Fetching details for space key: ${spaceKey}`,
+					`${logPrefix} Fetching details for space key: ${options.spaceKey}`,
 				);
 
 				// Validate that the space key is a proper Confluence space key
 				// Space keys should be alphanumeric with no special characters except underscore
-				if (!spaceKey.match(/^[A-Za-z0-9_]+$/)) {
+				if (!options.spaceKey.match(/^[A-Za-z0-9_]+$/)) {
 					throw new Error(
 						'Space key must contain only letters, numbers, and underscores. If you are using a space name, please use the list-spaces command to find the space key first.',
 					);
 				}
 
 				const result = await atlassianSpacesController.get({
-					key: spaceKey,
+					key: options.spaceKey,
 				});
 				logger.debug(
 					`${logPrefix} Successfully retrieved space details`,
