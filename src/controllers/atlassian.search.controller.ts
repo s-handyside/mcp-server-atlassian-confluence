@@ -6,7 +6,7 @@ import {
 	PaginationType,
 } from '../utils/pagination.util.js';
 import { ControllerResponse } from '../types/common.types.js';
-import { SearchOptions } from './atlassian.search.type.js';
+import { SearchOptions } from './atlassian.search.types.js';
 import {
 	formatSearchResults,
 	processCqlQuery,

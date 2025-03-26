@@ -7,7 +7,7 @@ import {
 	ListPagesToolArgsType,
 	GetPageToolArgs,
 	GetPageToolArgsType,
-} from './atlassian.pages.type.js';
+} from './atlassian.pages.types.js';
 
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
 

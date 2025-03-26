@@ -9,7 +9,7 @@ import {
 	GetPageOptions,
 	ListPagesOptions,
 	PageIdentifier,
-} from './atlassian.pages.type.js';
+} from './atlassian.pages.types.js';
 import {
 	formatPageDetails,
 	formatPagesList,

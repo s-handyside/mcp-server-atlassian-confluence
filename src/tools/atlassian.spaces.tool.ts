@@ -7,7 +7,7 @@ import {
 	ListSpacesToolArgsType,
 	GetSpaceToolArgs,
 	GetSpaceToolArgsType,
-} from './atlassian.spaces.type.js';
+} from './atlassian.spaces.types.js';
 
 import atlassianSpacesController from '../controllers/atlassian.spaces.controller.js';
 

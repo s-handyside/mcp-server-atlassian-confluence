@@ -5,7 +5,7 @@ import atlassianPagesController from '../controllers/atlassian.pages.controller.
 import {
 	ListPagesOptions,
 	GetPageOptions,
-} from '../controllers/atlassian.pages.type.js';
+} from '../controllers/atlassian.pages.types.js';
 import { ContentStatus } from '../services/vendor.atlassian.pages.types.js';
 import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 

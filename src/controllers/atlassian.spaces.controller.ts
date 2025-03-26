@@ -12,7 +12,10 @@ import {
 	SpaceType,
 } from '../services/vendor.atlassian.spaces.types.js';
 import { ControllerResponse } from '../types/common.types.js';
-import { ListSpacesOptions, SpaceIdentifier } from './atlassian.spaces.type.js';
+import {
+	ListSpacesOptions,
+	SpaceIdentifier,
+} from './atlassian.spaces.types.js';
 import {
 	formatSpacesList,
 	formatSpaceDetails,

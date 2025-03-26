@@ -2,7 +2,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { logger } from '../utils/logger.util.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
-import { SearchToolArgs, SearchToolArgsType } from './atlassian.search.type.js';
+import {
+	SearchToolArgs,
+	SearchToolArgsType,
+} from './atlassian.search.types.js';
 
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
 
