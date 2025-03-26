@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.7.0...v1.8.0) (2025-03-26)
+
+
+### Features
+
+* **page:** remove bodyFormat option to ensure minimal interface ([bf79382](https://github.com/aashari/mcp-server-atlassian-confluence/commit/bf79382f0c84242cca96076cd1b209c22a0cd4b3))
+
 # [1.7.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.6.0...v1.7.0) (2025-03-26)
 
 
