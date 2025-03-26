@@ -75,7 +75,10 @@ async function list(
 		);
 
 		// Format the pages data for display
-		const formattedPages = formatPagesList(pagesData.results || []);
+		const formattedPages = formatPagesList(
+			pagesData.results || [],
+			pagination,
+		);
 
 		return {
 			content: formattedPages,

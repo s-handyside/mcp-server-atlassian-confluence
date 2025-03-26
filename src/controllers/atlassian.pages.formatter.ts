@@ -17,12 +17,12 @@ import {
 /**
  * Format a list of pages for display
  * @param pagesData - Raw pages data from the API
- * @param nextCursor - Pagination cursor for retrieving the next set of results
+ * @param pagination - Pagination information including count and next cursor
  * @returns Formatted string with pages information in markdown format
  */
 export function formatPagesList(
 	pagesData: Page[],
-	nextCursor?: string,
+	pagination?: { nextCursor?: string; hasMore: boolean; count?: number },
 ): string {
 	if (pagesData.length === 0) {
 		return 'No Confluence pages found.';
@@ -67,12 +67,18 @@ export function formatPagesList(
 
 	lines.push(formattedList);
 
-	// Add pagination information
-	if (nextCursor) {
+	// Add pagination information if available
+	if (pagination) {
 		lines.push('');
 		lines.push(formatSeparator());
 		lines.push('');
-		lines.push(formatPagination(pagesData.length, true, nextCursor));
+		lines.push(
+			formatPagination(
+				pagination.count || pagesData.length,
+				pagination.hasMore,
+				pagination.nextCursor,
+			),
+		);
 	}
 
 	return lines.join('\n');

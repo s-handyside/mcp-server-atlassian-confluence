@@ -6,6 +6,8 @@ import {
 	ListPagesOptions,
 	GetPageOptions,
 } from '../controllers/atlassian.pages.type.js';
+import { ContentStatus } from '../services/vendor.atlassian.pages.types.js';
+import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 
 /**
  * CLI module for managing Confluence pages.
@@ -36,23 +38,31 @@ function registerListPagesCommand(program: Command): void {
 	program
 		.command('list-pages')
 		.description(
-			'List Confluence pages with optional filtering\n\n  Retrieves pages from your Confluence instance with filtering by space, status, and sorting options.',
-		)
-		.option(
-			'-s, --space-id <id>',
-			'Filter by space ID. Use this option to limit results to a specific space.',
-		)
-		.option(
-			'-u, --status <status>',
-			'Filter by page status (current, archived).',
+			'List Confluence pages with optional filtering\n\n' +
+				'Retrieves pages from your Confluence instance with filtering and pagination options.\n\n' +
+				'Examples:\n' +
+				'  $ list-pages --space-id TEAM --status current\n' +
+				'  $ list-pages --limit 50 --filter "title:Project"\n' +
+				'  $ list-pages --space-id TEAM --filter "label:documentation"',
 		)
 		.option(
 			'-l, --limit <number>',
-			'Maximum number of pages to return (1-100). Use this to control the response size. If omitted, defaults to 25.',
+			'Maximum number of items to return (1-100)',
+			'25',
 		)
 		.option(
-			'-c, --cursor <cursor>',
-			'Pagination cursor for retrieving the next set of results. Obtain this value from the previous response when more results are available.',
+			'-c, --cursor <string>',
+			'Pagination cursor for retrieving the next set of results',
+		)
+		.option(
+			'-f, --filter <string>',
+			'Filter pages by title, content, or labels',
+		)
+		.option('-s, --space-id <id>', 'Filter by space ID')
+		.option(
+			'--status <status>',
+			'Filter by page status: current, archived',
+			'current',
 		)
 		.action(async (options) => {
 			const logPrefix = '[src/cli/atlassian.pages.cli.ts@list-pages]';
@@ -62,15 +72,28 @@ function registerListPagesCommand(program: Command): void {
 					options,
 				);
 
+				// Validate status if provided
+				if (
+					options.status &&
+					!['current', 'archived'].includes(options.status)
+				) {
+					throw new Error(
+						'Status must be either "current" or "archived"',
+					);
+				}
+
 				const filterOptions: ListPagesOptions = {
 					...(options.spaceId && {
 						spaceId: [options.spaceId],
 					}),
-					...(options.status && { status: options.status }),
+					...(options.status && {
+						status: [options.status as ContentStatus],
+					}),
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
 					}),
 					...(options.cursor && { cursor: options.cursor }),
+					...(options.filter && { filter: options.filter }),
 				};
 
 				logger.debug(
@@ -85,16 +108,19 @@ function registerListPagesCommand(program: Command): void {
 					} pages`,
 				);
 
+				// Print the main content
+				console.log(formatHeading('Pages', 2));
 				console.log(result.content);
 
-				// Display pagination information if available
-				if (result.pagination?.hasMore) {
-					console.log('\n## Pagination');
+				// Print pagination information if available
+				if (result.pagination) {
 					console.log(
-						`*Showing ${result.pagination.count || ''} items. More results are available.*`,
-					);
-					console.log(
-						`\nTo see more results, use --cursor "${result.pagination.nextCursor}"`,
+						'\n' +
+							formatPagination(
+								result.pagination.count || 0,
+								result.pagination.hasMore,
+								result.pagination.nextCursor,
+							),
 					);
 				}
 			} catch (error) {
