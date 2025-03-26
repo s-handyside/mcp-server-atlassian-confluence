@@ -75,17 +75,7 @@ async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
 	logger.debug(`${logPrefix} Retrieving page details for ID: ${args.pageId}`);
 
 	try {
-		const message = await atlassianPagesController.get(
-			{ id: args.pageId },
-			{
-				bodyFormat: args.bodyFormat,
-				includeLabels: args.includeLabels,
-				includeProperties: args.includeProperties,
-				includeWebresources: args.includeWebresources,
-				includeCollaborators: args.includeCollaborators,
-				includeVersion: args.includeVersion,
-			},
-		);
+		const message = await atlassianPagesController.get({ id: args.pageId });
 
 		logger.debug(
 			`${logPrefix} Successfully retrieved page details from controller`,
@@ -171,12 +161,11 @@ WHEN NOT TO USE:
 - When you need to browse multiple pages (use list-pages instead)
 - When you need space information rather than page details (use get-space instead)
 
-RETURNS: Detailed page information including title, body content, space, author, version, labels, and creation/update dates.
+RETURNS: Detailed page information including title, body content, space, author, version, labels, and creation/update dates. All metadata (labels, properties, collaborators) is included by default for comprehensive information.
 
 EXAMPLES:
 - Get page content: {pageId: "123456"}
 - With specific format: {pageId: "123456", bodyFormat: "view"}
-- With all metadata: {pageId: "123456", includeLabels: true, includeProperties: true}
 
 ERRORS:
 - Page not found: Verify the page ID is correct

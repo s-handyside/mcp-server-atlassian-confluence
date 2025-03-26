@@ -78,41 +78,6 @@ const GetPageToolArgs = z.object({
 		.describe(
 			'Format for the body content. Options include: "storage" (the Confluence storage format), "view" (the rendered HTML), or "editor" (the Confluence editor format). Defaults to "view" if not specified.',
 		),
-
-	includeLabels: z
-		.boolean()
-		.optional()
-		.describe(
-			'Whether to include labels associated with the page in the response. Defaults to false.',
-		),
-
-	includeProperties: z
-		.boolean()
-		.optional()
-		.describe(
-			'Whether to include properties associated with the page in the response. Defaults to false.',
-		),
-
-	includeWebresources: z
-		.boolean()
-		.optional()
-		.describe(
-			'Whether to include web resources associated with the page in the response. Defaults to false.',
-		),
-
-	includeCollaborators: z
-		.boolean()
-		.optional()
-		.describe(
-			'Whether to include collaborator information for the page in the response. Defaults to false.',
-		),
-
-	includeVersion: z
-		.boolean()
-		.optional()
-		.describe(
-			'Whether to include version information for the page in the response. Defaults to false.',
-		),
 });
 
 type GetPageToolArgsType = z.infer<typeof GetPageToolArgs>;

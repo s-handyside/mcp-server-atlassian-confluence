@@ -2,10 +2,7 @@ import { Command } from 'commander';
 import { logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
-import {
-	ListPagesOptions,
-	GetPageOptions,
-} from '../controllers/atlassian.pages.types.js';
+import { ListPagesOptions } from '../controllers/atlassian.pages.types.js';
 import { ContentStatus } from '../services/vendor.atlassian.pages.types.js';
 import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 
@@ -158,31 +155,6 @@ function registerGetPageCommand(program: Command): void {
 			'-f, --body-format <format>',
 			'Format for the body content (storage, view, editor). Defaults to view.',
 		)
-		.option(
-			'-l, --include-labels',
-			'Include labels associated with the page.',
-			false,
-		)
-		.option(
-			'-p, --include-properties',
-			'Include properties associated with the page.',
-			false,
-		)
-		.option(
-			'-w, --include-webresources',
-			'Include web resources associated with the page.',
-			false,
-		)
-		.option(
-			'-c, --include-collaborators',
-			'Include collaborator information for the page.',
-			false,
-		)
-		.option(
-			'-v, --include-version',
-			'Include version information for the page.',
-			false,
-		)
 		.action(async (options) => {
 			const logPrefix = '[src/cli/atlassian.pages.cli.ts@get-page]';
 			try {
@@ -198,31 +170,9 @@ function registerGetPageCommand(program: Command): void {
 					);
 				}
 
-				const pageOptions: GetPageOptions = {
-					...(options.bodyFormat && {
-						bodyFormat: options.bodyFormat,
-					}),
-					...(options.includeLabels && {
-						includeLabels: options.includeLabels,
-					}),
-					...(options.includeProperties && {
-						includeProperties: options.includeProperties,
-					}),
-					...(options.includeWebresources && {
-						includeWebresources: options.includeWebresources,
-					}),
-					...(options.includeCollaborators && {
-						includeCollaborators: options.includeCollaborators,
-					}),
-					...(options.includeVersion && {
-						includeVersion: options.includeVersion,
-					}),
-				};
-
-				const result = await atlassianPagesController.get(
-					{ id: pageId },
-					pageOptions,
-				);
+				const result = await atlassianPagesController.get({
+					id: pageId,
+				});
 
 				logger.debug(
 					`${logPrefix} Successfully retrieved page details`,

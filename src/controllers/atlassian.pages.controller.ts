@@ -5,21 +5,13 @@ import {
 	PaginationType,
 } from '../utils/pagination.util.js';
 import { ControllerResponse } from '../types/common.types.js';
-import {
-	GetPageOptions,
-	ListPagesOptions,
-	PageIdentifier,
-} from './atlassian.pages.types.js';
+import { ListPagesOptions, PageIdentifier } from './atlassian.pages.types.js';
 import {
 	formatPageDetails,
 	formatPagesList,
 } from './atlassian.pages.formatter.js';
 import atlassianPagesService from '../services/vendor.atlassian.pages.service.js';
-import {
-	DEFAULT_PAGE_SIZE,
-	PAGE_DEFAULTS,
-	applyDefaults,
-} from '../utils/defaults.util.js';
+import { DEFAULT_PAGE_SIZE, PAGE_DEFAULTS } from '../utils/defaults.util.js';
 import {
 	ListPagesParams,
 	BodyFormat,
@@ -100,13 +92,9 @@ async function list(
 /**
  * Gets details of a specific Confluence page
  * @param identifier The page identifier
- * @param options Options for retrieving page details
  * @returns Formatted page details
  */
-async function get(
-	identifier: PageIdentifier,
-	options: GetPageOptions = {},
-): Promise<ControllerResponse> {
+async function get(identifier: PageIdentifier): Promise<ControllerResponse> {
 	const { id } = identifier;
 	const methodLogger = Logger.forContext(
 		'controllers/atlassian.pages.controller.ts',
@@ -116,41 +104,15 @@ async function get(
 	methodLogger.debug(`Getting Confluence page with ID: ${id}...`);
 
 	try {
-		// Apply default values to options
-		const optionsWithDefaults = applyDefaults(options, {
-			bodyFormat: PAGE_DEFAULTS.BODY_FORMAT,
+		// Always use default settings with maximum detail
+		const serviceParams: GetPageByIdParams = {
+			bodyFormat: PAGE_DEFAULTS.BODY_FORMAT as BodyFormat,
 			includeLabels: PAGE_DEFAULTS.INCLUDE_LABELS,
 			includeProperties: PAGE_DEFAULTS.INCLUDE_PROPERTIES,
 			includeWebresources: PAGE_DEFAULTS.INCLUDE_WEBRESOURCES,
 			includeCollaborators: PAGE_DEFAULTS.INCLUDE_COLLABORATORS,
 			includeVersion: PAGE_DEFAULTS.INCLUDE_VERSION,
-		});
-
-		// Map controller options to service parameters
-		const serviceParams: GetPageByIdParams = {
-			bodyFormat: optionsWithDefaults.bodyFormat as BodyFormat,
 		};
-
-		// Map boolean options to the appropriate service parameters
-		if (optionsWithDefaults.includeLabels) {
-			serviceParams.includeLabels = true;
-		}
-
-		if (optionsWithDefaults.includeProperties) {
-			serviceParams.includeProperties = true;
-		}
-
-		if (optionsWithDefaults.includeWebresources) {
-			serviceParams.includeWebresources = true;
-		}
-
-		if (optionsWithDefaults.includeCollaborators) {
-			serviceParams.includeCollaborators = true;
-		}
-
-		if (optionsWithDefaults.includeVersion) {
-			serviceParams.includeVersion = true;
-		}
 
 		const pageData = await atlassianPagesService.get(id, serviceParams);
 		methodLogger.debug(
@@ -169,7 +131,6 @@ async function get(
 			entityId: identifier,
 			operation: 'retrieving',
 			source: 'controllers/atlassian.pages.controller.ts@get',
-			additionalInfo: { options },
 		});
 	}
 }
