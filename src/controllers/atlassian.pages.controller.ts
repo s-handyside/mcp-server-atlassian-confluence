@@ -74,8 +74,14 @@ async function list(
 			'controllers/atlassian.pages.controller.ts@list',
 		);
 
+		// Extract the base URL from response links
+		const baseUrl = pagesData._links?.base || '';
+
 		// Format the pages data for display
-		const formattedPages = formatPagesList(pagesData.results || []);
+		const formattedPages = formatPagesList(
+			pagesData.results || [],
+			baseUrl,
+		);
 
 		return {
 			content: formattedPages,

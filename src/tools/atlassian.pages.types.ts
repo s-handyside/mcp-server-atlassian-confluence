@@ -66,7 +66,7 @@ type ListPagesToolArgsType = z.infer<typeof ListPagesToolArgs>;
  * Matches the controller's get function signature
  */
 const GetPageToolArgs = z.object({
-	entityId: z
+	pageId: z
 		.string()
 		.describe(
 			'The numeric ID of the Confluence page to retrieve (e.g., "456789"). This is required and must be a valid page ID from your Confluence instance. The page content will be returned in Markdown format for easy reading.',

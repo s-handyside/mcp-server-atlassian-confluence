@@ -16,9 +16,13 @@ import {
 /**
  * Format a list of pages for display
  * @param pagesData - Raw pages data from the API
+ * @param baseUrl - Base URL for constructing page links
  * @returns Formatted string with pages information in markdown format
  */
-export function formatPagesList(pagesData: Page[]): string {
+export function formatPagesList(
+	pagesData: Page[],
+	baseUrl: string = '',
+): string {
 	if (!pagesData || pagesData.length === 0) {
 		return 'No Confluence pages found matching your criteria.';
 	}
@@ -33,7 +37,7 @@ export function formatPagesList(pagesData: Page[]): string {
 		itemLines.push(formatHeading(page.title, 2));
 
 		// Create an object with all the properties to display
-		const pageUrl = `${page._links.base}/pages/viewpage.action?pageId=${page.id}`;
+		const pageUrl = `${baseUrl}/pages/viewpage.action?pageId=${page.id}`;
 
 		const properties: Record<string, unknown> = {
 			ID: page.id,
