@@ -56,7 +56,10 @@ function registerListPagesCommand(program: Command): void {
 			'-q, --query <text>',
 			'Filter pages by title, content, or labels (simple text search, not query language)',
 		)
-		.option('--space-id <id>', 'Filter by space ID (must be numeric)')
+		.option(
+			'--space-id <id1,id2,...>',
+			'Filter by space IDs (comma-separated list of numeric IDs)',
+		)
 		.option(
 			'-s, --status <status>',
 			'Filter by page status: current, archived',
@@ -71,10 +74,17 @@ function registerListPagesCommand(program: Command): void {
 				);
 
 				// Validate space ID if provided
-				if (options.spaceId && !/^\d+$/.test(options.spaceId)) {
-					throw new Error(
-						'Invalid --space-id: Must be a numeric space ID. Use list-spaces to find the ID if you only have the key.',
-					);
+				if (options.spaceId) {
+					const spaceIds = options.spaceId
+						.split(',')
+						.map((id: string) => id.trim());
+					for (const id of spaceIds) {
+						if (!/^\d+$/.test(id)) {
+							throw new Error(
+								'Invalid --space-id: Must contain only numeric space IDs. Use list-spaces to find the IDs if you only have the keys.',
+							);
+						}
+					}
 				}
 
 				// Validate status if provided
@@ -89,7 +99,9 @@ function registerListPagesCommand(program: Command): void {
 
 				const filterOptions: ListPagesOptions = {
 					...(options.spaceId && {
-						spaceId: [options.spaceId],
+						spaceId: options.spaceId
+							.split(',')
+							.map((id: string) => id.trim()),
 					}),
 					...(options.status && {
 						status: [options.status as ContentStatus],
