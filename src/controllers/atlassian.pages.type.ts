@@ -6,7 +6,7 @@ import {
 	ControllerResponse,
 	PaginationOptions,
 	EntityIdentifier,
-} from './atlassian.type.js';
+} from '../types/common.types.js';
 
 /**
  * Page identifier for retrieving specific pages.
