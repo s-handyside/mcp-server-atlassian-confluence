@@ -1,3 +1,10 @@
+## [1.9.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.9.1...v1.9.2) (2025-03-26)
+
+
+### Bug Fixes
+
+* improve CLI and tool descriptions with consistent formatting and detailed guidance ([008f2b9](https://github.com/aashari/mcp-server-atlassian-confluence/commit/008f2b9f829de910253a9825669a5c20b609512e))
+
 ## [1.9.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.9.0...v1.9.1) (2025-03-26)
 
 
