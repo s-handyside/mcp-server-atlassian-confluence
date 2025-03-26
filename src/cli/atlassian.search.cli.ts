@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { logger } from '../utils/logger.util.js';
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
 import { handleCliError } from '../utils/error.util.js';
+import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 
 /**
  * CLI module for searching Confluence content.
@@ -69,10 +70,24 @@ function registerSearchCommand(program: Command): void {
 					await atlassianSearchController.search(searchOptions);
 				logger.debug(`${logPrefix} Search completed successfully`);
 
+				// Print the main content
+				console.log(formatHeading('Search Results', 2));
 				console.log(result.content);
+
+				// Print pagination information if available
+				if (result.pagination) {
+					console.log(
+						'\n' +
+							formatPagination(
+								result.pagination.count || 0,
+								result.pagination.hasMore,
+								result.pagination.nextCursor,
+							),
+					);
+				}
 			} catch (error) {
 				logger.error(
-					`[src/cli/atlassian.search.cli.ts@handler] Error executing search command`,
+					`${logPrefix} Error executing search command`,
 					error,
 				);
 				handleCliError(error);

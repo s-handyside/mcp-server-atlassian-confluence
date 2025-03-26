@@ -182,6 +182,14 @@ function registerGetPageCommand(program: Command): void {
 					`${logPrefix} Fetching details for page ID: ${entityId}`,
 				);
 
+				// Validate that the page ID is a proper Confluence ID (numeric)
+				const pageId = entityId;
+				if (!pageId.match(/^\d+$/)) {
+					throw new Error(
+						'Page ID must be a numeric string. If you are using a page title or key, please use the search command to find the page ID first.',
+					);
+				}
+
 				const pageOptions: GetPageOptions = {
 					...(options.bodyFormat && {
 						bodyFormat: options.bodyFormat,
@@ -204,7 +212,7 @@ function registerGetPageCommand(program: Command): void {
 				};
 
 				const result = await atlassianPagesController.get(
-					{ id: entityId },
+					{ id: pageId },
 					pageOptions,
 				);
 

@@ -1,49 +1,66 @@
 import { z } from 'zod';
 
 /**
- * Arguments for listing Confluence spaces
- * Includes optional filters with defaults applied in the controller
+ * Base pagination arguments for all tools
  */
-const ListSpacesToolArgs = z.object({
-	type: z
-		.enum(['global', 'personal', 'collaboration', 'knowledge_base'])
-		.optional()
-		.describe(
-			'Filter spaces by type. Options: "global" (company-wide spaces), "personal" (user-specific spaces), "collaboration" (team spaces), or "knowledge_base" (documentation spaces). Defaults to "global" if not specified.',
-		),
-	status: z
-		.enum(['current', 'archived'])
-		.optional()
-		.describe(
-			'Filter spaces by status. Options: "current" (active spaces) or "archived" (inactive spaces). Defaults to "current" if not specified.',
-		),
+const PaginationArgs = {
 	limit: z
 		.number()
 		.min(1)
-		.max(250)
+		.max(100)
 		.optional()
 		.describe(
-			'Maximum number of spaces to return (1-250). Use this to control the response size. Useful for pagination or when you only need a few results.',
+			'Maximum number of items to return (1-100). Use this to control the response size. Useful for pagination or when you only need a few results. The Confluence API caps results at 100 items per request.',
 		),
+
 	cursor: z
 		.string()
 		.optional()
 		.describe(
 			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
 		),
+};
+
+/**
+ * Arguments for listing Confluence spaces
+ * Matches the controller's ListSpacesOptions interface
+ */
+const ListSpacesToolArgs = z.object({
+	type: z
+		.enum(['global', 'personal', 'archived'])
+		.optional()
+		.describe(
+			'Filter spaces by type. Options include: "global" (team spaces), "personal" (user spaces), or "archived" (archived spaces). If omitted, returns all types.',
+		),
+
+	status: z
+		.enum(['current', 'archived'])
+		.optional()
+		.describe(
+			'Filter spaces by status. Options include: "current" (active spaces) or "archived" (archived spaces). If omitted, returns spaces with all statuses.',
+		),
+
+	filter: z
+		.string()
+		.optional()
+		.describe(
+			'Search filter to find spaces matching specific text in their name, key, or description.',
+		),
+
+	...PaginationArgs,
 });
 
 type ListSpacesToolArgsType = z.infer<typeof ListSpacesToolArgs>;
 
 /**
  * Arguments for getting a specific Confluence space
- * This matches the controller implementation which takes only an ID parameter
+ * Matches the controller's get function signature
  */
 const GetSpaceToolArgs = z.object({
-	id: z
+	entityId: z
 		.string()
 		.describe(
-			'The numeric ID of the Confluence space to retrieve (e.g., "123456"). This is required and must be a valid space ID from your Confluence instance.',
+			'The key of the Confluence space to retrieve (e.g., "DEV" or "MARKETING"). The space key is a unique identifier for a space, typically a short uppercase code.',
 		),
 });
 

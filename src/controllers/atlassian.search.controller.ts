@@ -76,10 +76,7 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 		);
 
 		// Format the search results for display using the formatter
-		const formattedResults = formatSearchResults(
-			searchData.results,
-			pagination.nextCursor,
-		);
+		const formattedResults = formatSearchResults(searchData.results);
 
 		return {
 			content: formattedResults,

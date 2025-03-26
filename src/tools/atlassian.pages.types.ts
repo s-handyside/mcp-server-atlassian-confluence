@@ -33,13 +33,6 @@ const ListPagesToolArgs = z.object({
 			'Filter pages by space IDs. Provide an array of space IDs (e.g., ["123456", "789012"]) to only show pages from specific spaces. Useful when you want to focus on content from particular projects or teams.',
 		),
 
-	spaceId: z
-		.array(z.string())
-		.optional()
-		.describe(
-			'Filter pages by space IDs. Provide an array of space IDs (e.g., ["123456", "789012"]) to only show pages from specific spaces. Useful when you want to focus on content from particular projects or teams.',
-		),
-
 	filter: z
 		.string()
 		.optional()
@@ -75,15 +68,50 @@ type ListPagesToolArgsType = z.infer<typeof ListPagesToolArgs>;
 const GetPageToolArgs = z.object({
 	entityId: z
 		.string()
-		.optional()
 		.describe(
 			'The numeric ID of the Confluence page to retrieve (e.g., "456789"). This is required and must be a valid page ID from your Confluence instance. The page content will be returned in Markdown format for easy reading.',
 		),
 
-	id: z
-		.string()
+	bodyFormat: z
+		.enum(['storage', 'view', 'editor'])
+		.optional()
 		.describe(
-			'The numeric ID of the Confluence page to retrieve (e.g., "456789"). This is required and must be a valid page ID from your Confluence instance. The page content will be returned in Markdown format for easy reading.',
+			'Format for the body content. Options include: "storage" (the Confluence storage format), "view" (the rendered HTML), or "editor" (the Confluence editor format). Defaults to "view" if not specified.',
+		),
+
+	includeLabels: z
+		.boolean()
+		.optional()
+		.describe(
+			'Whether to include labels associated with the page in the response. Defaults to false.',
+		),
+
+	includeProperties: z
+		.boolean()
+		.optional()
+		.describe(
+			'Whether to include properties associated with the page in the response. Defaults to false.',
+		),
+
+	includeWebresources: z
+		.boolean()
+		.optional()
+		.describe(
+			'Whether to include web resources associated with the page in the response. Defaults to false.',
+		),
+
+	includeCollaborators: z
+		.boolean()
+		.optional()
+		.describe(
+			'Whether to include collaborator information for the page in the response. Defaults to false.',
+		),
+
+	includeVersion: z
+		.boolean()
+		.optional()
+		.describe(
+			'Whether to include version information for the page in the response. Defaults to false.',
 		),
 });
 

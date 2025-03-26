@@ -50,7 +50,7 @@ describe('Atlassian Search Controller', () => {
 			// Verify pagination if present
 			if (result.pagination?.hasMore) {
 				expect(result.pagination).toHaveProperty('nextCursor');
-				expect(result.content).toContain('## Pagination');
+				// Pagination information is now handled by the CLI, not in the content
 			}
 		}, 15000);
 

@@ -3,10 +3,10 @@ import { logger } from '../utils/logger.util.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import {
-	ListPagesToolArgs,
 	ListPagesToolArgsType,
-	GetPageToolArgs,
 	GetPageToolArgsType,
+	ListPagesToolArgs,
+	GetPageToolArgs,
 } from './atlassian.pages.types.js';
 
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
@@ -30,15 +30,13 @@ async function listPages(
 	logger.debug(`${logPrefix} Listing Confluence pages with filters:`, args);
 
 	try {
-		// Handle both new standardized parameters and legacy parameters
-		const spaces = args.parentId || args.spaceId;
-
 		// Pass the filter options to the controller
 		const message = await atlassianPagesController.list({
-			spaceId: spaces,
+			spaceId: args.parentId,
 			status: args.status,
 			limit: args.limit,
 			cursor: args.cursor,
+			filter: args.filter,
 		});
 
 		logger.debug(
@@ -74,13 +72,22 @@ async function listPages(
 async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
 	const logPrefix = '[src/tools/atlassian.pages.tool.ts@getPage]';
 
-	// Handle both new standardized parameters and legacy parameters
-	const pageId = args.entityId || args.id;
-
-	logger.debug(`${logPrefix} Retrieving page details for ID: ${pageId}`);
+	logger.debug(
+		`${logPrefix} Retrieving page details for ID: ${args.entityId}`,
+	);
 
 	try {
-		const message = await atlassianPagesController.get({ id: pageId });
+		const message = await atlassianPagesController.get(
+			{ id: args.entityId },
+			{
+				bodyFormat: args.bodyFormat,
+				includeLabels: args.includeLabels,
+				includeProperties: args.includeProperties,
+				includeWebresources: args.includeWebresources,
+				includeCollaborators: args.includeCollaborators,
+				includeVersion: args.includeVersion,
+			},
+		);
 		logger.debug(
 			`${logPrefix} Successfully retrieved page details from controller`,
 			message,
@@ -135,8 +142,8 @@ WHEN NOT TO USE:
 RETURNS: Formatted list of pages with IDs, titles, space information, and URLs, plus pagination info.
 
 EXAMPLES:
-- Pages in a space: {parentId: "DEV"} or {spaceId: "DEV"}
-- With status filter: {parentId: "DEV", status: "current"} or {spaceId: "DEV", status: "current"}
+- Pages in a space: {parentId: "DEV"}
+- With status filter: {parentId: "DEV", status: "current"}
 - With pagination: {parentId: "DEV", limit: 10, cursor: "next-page-token"}
 
 ERRORS:
@@ -169,7 +176,7 @@ WHEN NOT TO USE:
 RETURNS: Complete page content in Markdown format with metadata including title, author, version, space, and creation/modification dates.
 
 EXAMPLES:
-- By ID: {entityId: "123456"} or {id: "123456"}
+- By ID: {entityId: "123456"}
 
 ERRORS:
 - Page not found: Verify the page ID is correct
