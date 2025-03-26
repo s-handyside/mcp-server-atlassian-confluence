@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.9.0...v1.9.1) (2025-03-26)
+
+
+### Bug Fixes
+
+* support comma-separated list for space-id parameter in list-pages ([3f0aecf](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3f0aecfeb4bedcc86be779104487da99c563203e))
+
 # [1.9.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.8.0...v1.9.0) (2025-03-26)
 
 
