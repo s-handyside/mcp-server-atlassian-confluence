@@ -1,25 +1,17 @@
-import atlassianSpacesService from '../services/vendor.atlassian.spaces.service.js';
-import atlassianPagesController from './atlassian.pages.controller.js';
 import { logger } from '../utils/logger.util.js';
+import {
+	SpaceIdentifier,
+	ListSpacesOptions,
+} from './atlassian.spaces.types.js';
 import { createApiError } from '../utils/error.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
-import {
-	extractPaginationInfo,
-	PaginationType,
-} from '../utils/pagination.util.js';
-import {
-	SpaceStatus,
-	SpaceType,
-} from '../services/vendor.atlassian.spaces.types.js';
-import { ControllerResponse } from '../types/common.types.js';
-import {
-	ListSpacesOptions,
-	SpaceIdentifier,
-} from './atlassian.spaces.types.js';
+import atlassianSpacesService from '../services/vendor.atlassian.spaces.service.js';
 import {
 	formatSpacesList,
 	formatSpaceDetails,
-} from './atlassian.spaces.formatter.js';
+} from '../controllers/atlassian.spaces.formatter.js';
+import { ControllerResponse } from '../types/common.types.js';
+import atlassianPagesController from './atlassian.pages.controller.js';
 
 /**
  * Controller for managing Confluence spaces.
@@ -28,86 +20,85 @@ import {
 
 /**
  * List Confluence spaces with optional filtering
- * @param options - Optional filter options for the spaces list
+ * @param options - Options for filtering spaces
  * @param options.type - Filter by space type (global, personal, etc.)
  * @param options.status - Filter by space status (current, archived)
  * @param options.limit - Maximum number of spaces to return
- * @param options.cursor - Pagination cursor for retrieving the next set of results
- * @returns Promise with formatted space list content and pagination information
+ * @param options.cursor - Pagination cursor for subsequent requests
+ * @returns Promise with formatted spaces list content and pagination info
+ * @throws Error if space listing fails
  */
 async function list(
 	options: ListSpacesOptions = {},
 ): Promise<ControllerResponse> {
-	const source = `[src/controllers/atlassian.spaces.controller.ts@list]`;
-	logger.debug(`${source} Listing Confluence spaces...`, options);
+	logger.debug(
+		`[src/controllers/atlassian.spaces.controller.ts@list] Listing Confluence spaces with options:`,
+		options,
+	);
 
 	try {
-		// Set default filters and hardcoded values
-		const filters = {
-			// Optional filters with defaults
-			type: options.type || ('global' as SpaceType),
-			status: options.status || ('current' as SpaceStatus),
+		// Map controller options to service parameters
+		const params = {
+			type: options.type,
+			status: options.status,
 			limit: options.limit,
 			cursor: options.cursor,
-			// Hardcoded values for content format
+			// Additional parameters
+			sort: '-name' as const, // Sort by name descending by default
 			descriptionFormat: 'view' as const,
-			includeIcon: false,
+			includeIcon: true, // Include space icons in response
 		};
 
-		logger.debug(`${source} Using filters:`, filters);
-
-		const spacesData = await atlassianSpacesService.list(filters);
-		// Log only the count of spaces returned instead of the entire response
 		logger.debug(
-			`${source} Retrieved ${spacesData.results?.length || 0} spaces`,
+			`[src/controllers/atlassian.spaces.controller.ts@list] Using params:`,
+			params,
 		);
 
-		// Extract pagination information using the utility
-		const pagination = extractPaginationInfo(
-			spacesData,
-			PaginationType.CURSOR,
-			source,
+		const spacesData = await atlassianSpacesService.list(params);
+
+		// Log only summary information instead of the entire response
+		logger.debug(
+			`[src/controllers/atlassian.spaces.controller.ts@list] Retrieved ${spacesData.results.length} spaces. Has more: ${spacesData._links?.next ? 'yes' : 'no'}`,
 		);
 
-		// Format the spaces data for display using the formatter
-		const formattedSpaces = formatSpacesList(
-			spacesData,
-			pagination.nextCursor,
-		);
+		// The formatSpacesList function expects a spacesData parameter
+		// Extract the nextCursor from the links
+		const nextCursor = spacesData._links?.next?.split('cursor=')[1] || '';
+		const formattedSpaces = formatSpacesList(spacesData);
 
 		return {
 			content: formattedSpaces,
-			pagination,
+			pagination: {
+				count: spacesData.results.length,
+				hasMore: !!spacesData._links?.next,
+				nextCursor: nextCursor,
+			},
 		};
 	} catch (error) {
 		// Use the standardized error handler
-		handleControllerError(error, {
+		return handleControllerError(error, {
 			entityType: 'Spaces',
 			operation: 'listing',
 			source: 'src/controllers/atlassian.spaces.controller.ts@list',
-			additionalInfo: { options },
 		});
 	}
 }
 
 /**
  * Get details of a specific Confluence space
- * @param identifier - Object containing the ID or key of the space to retrieve
- * @param identifier.idOrKey - The ID or key of the space
+ * @param identifier - Object containing the key of the space to retrieve
+ * @param identifier.key - The key of the space
  * @returns Promise with formatted space details content
  * @throws Error if space retrieval fails
  */
 async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
-	const { idOrKey } = identifier;
+	const { key } = identifier;
 
 	logger.debug(
-		`[src/controllers/atlassian.spaces.controller.ts@get] Getting Confluence space with ID or Key: ${idOrKey}...`,
+		`[src/controllers/atlassian.spaces.controller.ts@get] Getting Confluence space with key: ${key}...`,
 	);
 
 	try {
-		// Determine if the input is a numeric ID or a space key
-		const isNumericId = /^\d+$/.test(idOrKey);
-
 		// Hardcoded parameters for the service call
 		const params = {
 			// Content format
@@ -125,43 +116,30 @@ async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 			params,
 		);
 
-		let spaceData;
+		// Get space ID by key
+		logger.debug(
+			`[src/controllers/atlassian.spaces.controller.ts@get] Searching for space by key`,
+		);
 
-		if (isNumericId) {
-			// If it's a numeric ID, use the get method directly
-			logger.debug(
-				`[src/controllers/atlassian.spaces.controller.ts@get] Treating input as numeric space ID`,
+		const spacesResponse = await atlassianSpacesService.list({
+			keys: [key],
+			limit: 1,
+			...params,
+		});
+
+		// Check if space was found
+		if (!spacesResponse.results || spacesResponse.results.length === 0) {
+			throw createApiError(
+				`Space not found with key: ${key}. Verify the space key is correct and that you have access to this space.`,
+				404,
 			);
-			spaceData = await atlassianSpacesService.get(idOrKey, params);
-		} else {
-			// If it's a space key, use the list method with keys filter
-			logger.debug(
-				`[src/controllers/atlassian.spaces.controller.ts@get] Treating input as space key, using list method with keys filter`,
-			);
-
-			const spacesResponse = await atlassianSpacesService.list({
-				keys: [idOrKey],
-				limit: 1,
-				...params,
-			});
-
-			// Check if space was found
-			if (
-				!spacesResponse.results ||
-				spacesResponse.results.length === 0
-			) {
-				throw createApiError(
-					`Space not found with key: ${idOrKey}. Verify the space key is correct and that you have access to this space.`,
-					404,
-				);
-			}
-
-			// Get the first space from the results
-			const spaceId = spacesResponse.results[0].id;
-
-			// Get full space details using the ID
-			spaceData = await atlassianSpacesService.get(spaceId, params);
 		}
+
+		// Get the space from the results
+		const spaceId = spacesResponse.results[0].id;
+
+		// Get full space details using the ID
+		const spaceData = await atlassianSpacesService.get(spaceId, params);
 
 		// Log only key information instead of the entire response
 		logger.debug(
@@ -222,7 +200,7 @@ async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 		};
 	} catch (error) {
 		// Use the standardized error handler
-		handleControllerError(error, {
+		return handleControllerError(error, {
 			entityType: 'Space',
 			entityId: identifier,
 			operation: 'retrieving',

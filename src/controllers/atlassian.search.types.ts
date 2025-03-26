@@ -19,5 +19,5 @@ export interface SearchOptions extends PaginationOptions {
 	/**
 	 * Confluence Query Language (CQL) query
 	 */
-	cql: string;
+	cql?: string;
 }

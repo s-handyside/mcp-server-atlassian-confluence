@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { logger } from '../utils/logger.util.js';
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
 import { handleCliError } from '../utils/error.util.js';
+import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 
 /**
  * CLI module for searching Confluence content.
@@ -31,10 +32,13 @@ function registerSearchCommand(program: Command): void {
 	program
 		.command('search')
 		.description(
-			'Search for content in Confluence using Confluence Query Language (CQL)\n\n  Provides powerful search capabilities to find content across spaces, pages, and attachments using CQL syntax.',
+			'Search for content in Confluence using Confluence Query Language (CQL)\n\n  Provides powerful search capabilities to find content across spaces, pages, and attachments using CQL syntax.\n\n' +
+				'Examples:\n' +
+				'  $ search --query "space = TEAM AND title ~ Project"\n' +
+				'  $ search --query "type = page AND label = documentation" --limit 50',
 		)
-		.argument(
-			'<cql>',
+		.requiredOption(
+			'-q, --query <cql>',
 			'Confluence Query Language (CQL) query to search for',
 		)
 		.option(
@@ -45,16 +49,15 @@ function registerSearchCommand(program: Command): void {
 			'-c, --cursor <cursor>',
 			'Pagination cursor for retrieving the next set of results. Obtain this value from the previous response when more results are available.',
 		)
-		.action(async (cql: string, options) => {
+		.action(async (options) => {
 			const logPrefix = '[src/cli/atlassian.search.cli.ts@search]';
 			try {
 				logger.debug(`${logPrefix} Processing command options:`, {
-					cql,
 					...options,
 				});
 
 				const searchOptions = {
-					cql,
+					cql: options.query,
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
 					}),
@@ -69,10 +72,24 @@ function registerSearchCommand(program: Command): void {
 					await atlassianSearchController.search(searchOptions);
 				logger.debug(`${logPrefix} Search completed successfully`);
 
+				// Print the main content
+				console.log(formatHeading('Search Results', 2));
 				console.log(result.content);
+
+				// Print pagination information if available
+				if (result.pagination) {
+					console.log(
+						'\n' +
+							formatPagination(
+								result.pagination.count ?? 0,
+								result.pagination.hasMore,
+								result.pagination.nextCursor,
+							),
+					);
+				}
 			} catch (error) {
 				logger.error(
-					`[src/cli/atlassian.search.cli.ts@handler] Error executing search command`,
+					`${logPrefix} Error executing search command`,
 					error,
 				);
 				handleCliError(error);

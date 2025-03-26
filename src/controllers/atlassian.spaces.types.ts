@@ -9,9 +9,9 @@ import { PaginationOptions, EntityIdentifier } from '../types/common.types.js';
  */
 export interface SpaceIdentifier extends EntityIdentifier {
 	/**
-	 * The ID or key of the space to retrieve
+	 * The key of the space to retrieve
 	 */
-	idOrKey: string;
+	key: string;
 }
 
 /**
@@ -27,4 +27,9 @@ export interface ListSpacesOptions extends PaginationOptions {
 	 * Filter spaces by status (defaults to current)
 	 */
 	status?: SpaceStatus;
+
+	/**
+	 * Filter spaces by name or description
+	 */
+	query?: string;
 }

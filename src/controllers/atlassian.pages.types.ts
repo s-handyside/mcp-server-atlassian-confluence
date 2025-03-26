@@ -32,6 +32,12 @@ export interface ListPagesOptions extends PaginationOptions {
 	 * Examples: 'current', 'draft', 'archived'
 	 */
 	status?: ContentStatus[];
+
+	/**
+	 * Text-based filter for pages.
+	 * Search by title, content, or labels.
+	 */
+	query?: string;
 }
 
 /**

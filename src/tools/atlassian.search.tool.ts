@@ -3,29 +3,26 @@ import { logger } from '../utils/logger.util.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import {
-	SearchToolArgs,
 	SearchToolArgsType,
+	SearchToolArgs,
 } from './atlassian.search.types.js';
 
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
 
 /**
- * MCP Tool: Search Confluence Content
+ * MCP Tool: Search Confluence
  *
- * Searches Confluence content using Confluence Query Language (CQL).
- * Returns a formatted markdown response with search results and pagination info.
+ * Searches Confluence content using CQL (Confluence Query Language).
+ * Returns a formatted markdown response with search results.
  *
  * @param {SearchToolArgsType} args - Tool arguments for the search query
  * @param {RequestHandlerExtra} _extra - Extra request handler information (unused)
  * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted search results
  * @throws Will return error message if search fails
  */
-async function searchContent(
-	args: SearchToolArgsType,
-	_extra: RequestHandlerExtra,
-) {
-	const logPrefix = '[src/tools/atlassian.search.tool.ts@searchContent]';
-	logger.debug(`${logPrefix} Searching Confluence with CQL:`, args);
+async function search(args: SearchToolArgsType, _extra: RequestHandlerExtra) {
+	const logPrefix = '[src/tools/atlassian.search.tool.ts@search]';
+	logger.debug(`${logPrefix} Searching Confluence with filters:`, args);
 
 	try {
 		// Pass the search options to the controller
@@ -47,7 +44,6 @@ async function searchContent(
 					text: message.content,
 				},
 			],
-			pagination: message.pagination,
 		};
 	} catch (error) {
 		logger.error(`${logPrefix} Failed to search Confluence`, error);
@@ -56,7 +52,7 @@ async function searchContent(
 }
 
 /**
- * Register Atlassian Search MCP Tool
+ * Register Atlassian Search MCP Tools
  *
  * Registers the search tool with the MCP server.
  * The tool is registered with its schema, description, and handler function.
@@ -65,47 +61,45 @@ async function searchContent(
  */
 function register(server: McpServer) {
 	const logPrefix = '[src/tools/atlassian.search.tool.ts@register]';
-	logger.debug(`${logPrefix} Registering Atlassian Search tool...`);
+	logger.debug(`${logPrefix} Registering Atlassian Search tools...`);
 
 	// Register the search tool
 	server.tool(
 		'search',
-		`Search for content across Confluence using Confluence Query Language (CQL).
+		`Search for content in Confluence using Confluence Query Language (CQL).
 
-PURPOSE: Finds content matching specific criteria with excerpts showing matches, helping you discover relevant information across spaces.
+PURPOSE: Find pages, blog posts, attachments, and other content across spaces using powerful search queries.
 
 WHEN TO USE:
-- When you need to find specific content across multiple spaces
-- When you want to search by various criteria (text, title, labels, content type)
-- When you need to gather information scattered across different pages
-- When you're unfamiliar with the structure of Confluence and need discovery
-- When looking for content with specific labels or within specific date ranges
+- When you need to find content matching specific keywords
+- When you need to search across multiple spaces
+- When you want to find content based on labels, authors, or dates
+- When you need to find attachments or specific file types
+- When you need advanced filtering beyond what list-pages provides
 
 WHEN NOT TO USE:
-- When you already know the exact space and page (use get-page instead)
-- When you want to list all spaces or pages systematically (use list-spaces/list-pages)
-- When performing many rapid, consecutive searches (consider rate limits)
-- When you need to retrieve complete page content (use get-page after search)
+- When you only need to browse spaces (use list-spaces instead)
+- When you know the space and just want to list pages (use list-pages instead)
+- When you already know the specific page ID (use get-page instead)
 
-RETURNS: Search results with titles, excerpts showing matches, content types, spaces, and URLs, plus pagination info.
+RETURNS: Formatted list of search results with titles, spaces, content snippets, and URLs.
 
 EXAMPLES:
-- Simple text search: {cql: "text~documentation"}
-- Space-specific search: {cql: "space=DEV AND text~API"}
-- Title search: {cql: "title~Project Plan"}
-- Content type filter: {cql: "type=page AND label=important"}
-- With pagination: {cql: "text~API", limit: 10, cursor: "next-page-token"}
+- Basic text search: {cql: "project plan"}
+- Search in specific space: {cql: "space = DEV AND text ~ documentation"}
+- Search by label: {cql: "label = 'getting-started'"}
+- Search by content type: {cql: "type = page AND text ~ API"}
+- With pagination: {cql: "project plan", limit: 20, cursor: "next-page-token"}
 
 ERRORS:
-- Invalid CQL syntax: Check CQL syntax (example: "type=page AND space=DEV")
-- No results: Try broader search terms or check different spaces
-- Authentication failures: Check your Confluence credentials
-- Rate limiting: Use more specific queries and pagination`,
+- Invalid CQL: Check your CQL syntax
+- Authentication failures: Verify credentials
+- No results: Try broadening your search terms`,
 		SearchToolArgs.shape,
-		searchContent,
+		search,
 	);
 
-	logger.debug(`${logPrefix} Successfully registered Atlassian Search tool`);
+	logger.debug(`${logPrefix} Successfully registered Atlassian Search tools`);
 }
 
 export default { register };

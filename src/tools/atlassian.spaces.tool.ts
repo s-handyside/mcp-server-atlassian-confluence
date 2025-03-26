@@ -3,10 +3,10 @@ import { logger } from '../utils/logger.util.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import {
-	ListSpacesToolArgs,
 	ListSpacesToolArgsType,
-	GetSpaceToolArgs,
 	GetSpaceToolArgsType,
+	ListSpacesToolArgs,
+	GetSpaceToolArgs,
 } from './atlassian.spaces.types.js';
 
 import atlassianSpacesController from '../controllers/atlassian.spaces.controller.js';
@@ -14,7 +14,7 @@ import atlassianSpacesController from '../controllers/atlassian.spaces.controlle
 /**
  * MCP Tool: List Confluence Spaces
  *
- * Lists Confluence spaces with optional filtering by type, status, and limit.
+ * Lists Confluence spaces with optional filtering by type and name.
  * Returns a formatted markdown response with space details and pagination info.
  *
  * @param {ListSpacesToolArgsType} args - Tool arguments for filtering spaces
@@ -32,7 +32,8 @@ async function listSpaces(
 	try {
 		// Pass the filter options to the controller
 		const message = await atlassianSpacesController.list({
-			type: args.type,
+			type: args.type === 'archived' ? 'global' : args.type,
+			query: args.query,
 			status: args.status,
 			limit: args.limit,
 			cursor: args.cursor,
@@ -61,9 +62,9 @@ async function listSpaces(
  * MCP Tool: Get Confluence Space Details
  *
  * Retrieves detailed information about a specific Confluence space.
- * Returns a formatted markdown response with space metadata and properties.
+ * Returns a formatted markdown response with space metadata.
  *
- * @param {GetSpaceToolArgsType} args - Tool arguments containing the space ID
+ * @param {GetSpaceToolArgsType} args - Tool arguments containing the space key or ID
  * @param {RequestHandlerExtra} _extra - Extra request handler information (unused)
  * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted space details
  * @throws Will return error message if space retrieval fails
@@ -73,11 +74,14 @@ async function getSpace(
 	_extra: RequestHandlerExtra,
 ) {
 	const logPrefix = '[src/tools/atlassian.spaces.tool.ts@getSpace]';
-	logger.debug(`${logPrefix} Retrieving space details for ID: ${args.id}`);
+
+	logger.debug(
+		`${logPrefix} Retrieving space details for key: ${args.entityId}`,
+	);
 
 	try {
 		const message = await atlassianSpacesController.get({
-			idOrKey: args.id,
+			key: args.entityId,
 		});
 		logger.debug(
 			`${logPrefix} Successfully retrieved space details from controller`,
@@ -113,32 +117,34 @@ function register(server: McpServer) {
 	// Register the list spaces tool
 	server.tool(
 		'list-spaces',
-		`List Confluence spaces with optional filtering capabilities.
+		`List Confluence spaces with optional filtering by type, status, and name.
 
-PURPOSE: Discovers available spaces in your Confluence instance with their keys, names, types, and URLs.
+PURPOSE: Helps you discover available spaces in your Confluence instance with their keys, names, and descriptions.
 
 WHEN TO USE:
-- When you need to discover what spaces exist in your Confluence instance
-- When you want to find spaces by type (global, personal, archived)
-- When you need to browse available spaces before accessing specific pages
+- When you need to find available spaces for content exploration
 - When you need space keys for use with other Confluence tools
+- When you want to browse spaces before accessing specific content
+- When you need to filter spaces by type (personal, team, etc.)
+- When you need to find spaces matching specific keywords
 
 WHEN NOT TO USE:
-- When you already know the specific space key/ID (use get-space instead)
-- When you need detailed information about a specific space (use get-space instead)
-- When you need to find content across multiple spaces (use search instead)
-- When you need to list pages within a specific space (use list-pages instead)
+- When you already know the specific space key (use get-space instead)
+- When you need detailed information about a single space (use get-space instead)
+- When looking for pages rather than spaces (use list-pages instead)
+- When you need to search content across spaces (use search instead)
 
-RETURNS: Formatted list of spaces with IDs, keys, names, types, and URLs, plus pagination info.
+RETURNS: Formatted list of spaces with keys, names, types, descriptions, and homepage links.
 
 EXAMPLES:
 - List all spaces: {}
 - Filter by type: {type: "global"}
+- Filter by keyword: {filter: "documentation"}
 - With pagination: {limit: 10, cursor: "next-page-token"}
 
 ERRORS:
 - Authentication failures: Check your Confluence credentials
-- No spaces found: Verify your permissions in Confluence
+- No spaces found: You may not have permission to view any spaces
 - Rate limiting: Use pagination and reduce query frequency`,
 		ListSpacesToolArgs.shape,
 		listSpaces,
@@ -147,31 +153,31 @@ ERRORS:
 	// Register the get space details tool
 	server.tool(
 		'get-space',
-		`Get detailed information about a specific Confluence space by ID or key.
+		`Get detailed information about a specific Confluence space by key.
 
-PURPOSE: Retrieves comprehensive space metadata including description, homepage, permissions, and more.
+PURPOSE: Retrieves comprehensive information about a space including description, categories, permissions, and homepage details.
 
 WHEN TO USE:
 - When you need detailed information about a specific space
-- When you need to find the homepage or key pages within a space
-- When you need to verify space permissions or settings
-- After using list-spaces to identify the relevant space
+- When you need to verify space existence or accessibility
+- When you need to find the homepage of a space
+- After using list-spaces to identify the space key you're interested in
+- When you need information about space categories or permissions
 
 WHEN NOT TO USE:
 - When you don't know which space to look for (use list-spaces first)
-- When you need to browse multiple spaces (use list-spaces instead)
-- When you need to find specific content (use search or list-pages instead)
+- When you need to list pages within a space (use list-pages instead)
+- When you need to search content within a space (use search instead)
 
-RETURNS: Detailed space information including key, name, description, type, homepage, and metadata.
+RETURNS: Detailed space information including key, name, description, type, status, homepage link, and created/updated dates.
 
 EXAMPLES:
-- By key: {idOrKey: "DEV"}
-- By ID: {idOrKey: "123456"}
+- By key: {entityId: "DEV"}
 
 ERRORS:
-- Space not found: Verify the space key or ID is correct
+- Space not found: Verify the space key is correct
 - Permission errors: Ensure you have access to the requested space
-- Rate limiting: Cache space information when possible`,
+- Rate limiting: Cache space information when possible for frequently referenced spaces`,
 		GetSpaceToolArgs.shape,
 		getSpace,
 	);

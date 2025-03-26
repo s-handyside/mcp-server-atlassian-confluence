@@ -3,126 +3,96 @@
  * These functions should be used by all formatters to ensure consistent formatting.
  */
 
+import { format } from 'date-fns';
+import {
+	formatSpacesList,
+	formatSpaceDetails,
+} from '../controllers/atlassian.spaces.formatter.js';
+
 /**
- * Format a date in a standardized way: YYYY-MM-DD HH:MM:SS UTC
- * @param dateString - ISO date string or Date object
+ * Format a date with standard formatting
+ * @param date - The date to format
+ * @param formatStr - Optional custom format string
  * @returns Formatted date string
  */
-export function formatDate(dateString?: string | Date): string {
-	if (!dateString) {
-		return 'Not available';
-	}
-
-	try {
-		const date =
-			typeof dateString === 'string' ? new Date(dateString) : dateString;
-
-		// Format: YYYY-MM-DD HH:MM:SS UTC
-		return date
-			.toISOString()
-			.replace('T', ' ')
-			.replace(/\.\d+Z$/, ' UTC');
-	} catch {
-		return 'Invalid date';
-	}
+export function formatDate(
+	date: Date | string,
+	formatStr: string = 'yyyy-MM-dd HH:mm:ss',
+): string {
+	const dateObj = typeof date === 'string' ? new Date(date) : date;
+	return format(dateObj, formatStr);
 }
 
 /**
- * Format a relative time (e.g., "2 days ago")
- * @param dateString - ISO date string or Date object
- * @returns Relative time string
+ * Format a heading with the specified level (markdown)
+ * @param text - The heading text
+ * @param level - The heading level (1-6, defaults to 1)
+ * @returns Formatted heading
  */
-export function formatRelativeTime(dateString?: string | Date): string {
-	if (!dateString) {
-		return 'Not available';
-	}
+export function formatHeading(text: string, level: number = 1): string {
+	const hashes = '#'.repeat(Math.max(1, Math.min(6, level)));
+	return `${hashes} ${text}`;
+}
 
-	try {
-		const date =
-			typeof dateString === 'string' ? new Date(dateString) : dateString;
+/**
+ * Format pagination information
+ * @param count - The number of items in the current page
+ * @param hasMore - Whether there are more items to fetch
+ * @param nextCursor - The cursor for the next page (if available)
+ * @returns Formatted pagination details
+ */
+export function formatPagination(
+	count: number,
+	hasMore: boolean,
+	nextCursor?: string,
+): string {
+	const lines: string[] = [];
 
-		const now = new Date();
-		const diffMs = now.getTime() - date.getTime();
-		const diffSec = Math.floor(diffMs / 1000);
-		const diffMin = Math.floor(diffSec / 60);
-		const diffHour = Math.floor(diffMin / 60);
-		const diffDay = Math.floor(diffHour / 24);
-		const diffMonth = Math.floor(diffDay / 30);
-		const diffYear = Math.floor(diffMonth / 12);
+	// Append the count information
+	lines.push(`**Results:** ${count} items`);
 
-		if (diffYear > 0) {
-			return `${diffYear} year${diffYear === 1 ? '' : 's'} ago`;
-		} else if (diffMonth > 0) {
-			return `${diffMonth} month${diffMonth === 1 ? '' : 's'} ago`;
-		} else if (diffDay > 0) {
-			return `${diffDay} day${diffDay === 1 ? '' : 's'} ago`;
-		} else if (diffHour > 0) {
-			return `${diffHour} hour${diffHour === 1 ? '' : 's'} ago`;
-		} else if (diffMin > 0) {
-			return `${diffMin} minute${diffMin === 1 ? '' : 's'} ago`;
-		} else {
-			return `${diffSec} second${diffSec === 1 ? '' : 's'} ago`;
+	// Append pagination information if available
+	if (hasMore) {
+		lines.push(
+			'**More results available:** Use the pagination cursor to fetch the next page.',
+		);
+		if (nextCursor) {
+			lines.push(`**Next cursor:** \`${nextCursor}\``);
 		}
-	} catch {
-		return 'Invalid date';
+	} else {
+		lines.push('**No more results available.**');
 	}
+
+	return lines.join('\n');
 }
 
 /**
  * Format a URL as a markdown link
- * @param url - URL to format
- * @param title - Link title
- * @returns Formatted markdown link
+ * @param url - The URL to format
+ * @param title - Optional title for the link
+ * @returns Formatted URL as a markdown link
  */
-export function formatUrl(url?: string, title?: string): string {
-	if (!url) {
-		return 'Not available';
-	}
-
-	const linkTitle = title || url;
-	return `[${linkTitle}](${url})`;
+export function formatUrl(url: string, title?: string): string {
+	return `[${title || url}](${url})`;
 }
 
 /**
- * Format pagination information in a standardized way
- * @param totalItems - Number of items in the current result set
- * @param hasMore - Whether there are more results available
- * @param nextCursor - Cursor for the next page of results
- * @returns Formatted pagination information
+ * Format a separator line
+ * @returns Formatted separator line
  */
-export function formatPagination(
-	totalItems: number,
-	hasMore: boolean,
-	nextCursor?: string,
-): string {
-	if (!hasMore) {
-		return `*Showing ${totalItems} item${totalItems === 1 ? '' : 's'}.*`;
-	}
-
-	return `*Showing ${totalItems} item${totalItems === 1 ? '' : 's'}. More results are available.*\n\nTo see more results, use --cursor "${nextCursor}"`;
+export function formatSeparator(): string {
+	return '---';
 }
 
 /**
- * Format a heading with consistent style
- * @param text - Heading text
- * @param level - Heading level (1-6)
- * @returns Formatted heading
- */
-export function formatHeading(text: string, level: number = 1): string {
-	const validLevel = Math.min(Math.max(level, 1), 6);
-	const prefix = '#'.repeat(validLevel);
-	return `${prefix} ${text}`;
-}
-
-/**
- * Format a list of key-value pairs as a bullet list
- * @param items - Object with key-value pairs
- * @param keyFormatter - Optional function to format keys
+ * Format a bullet list from an object
+ * @param items - The object to format as a bullet list
+ * @param formatter - Optional function to format keys
  * @returns Formatted bullet list
  */
 export function formatBulletList(
 	items: Record<string, unknown>,
-	keyFormatter?: (key: string) => string,
+	formatter: (key: string) => string = (key) => key,
 ): string {
 	const lines: string[] = [];
 
@@ -131,68 +101,39 @@ export function formatBulletList(
 			continue;
 		}
 
-		const formattedKey = keyFormatter ? keyFormatter(key) : key;
-		const formattedValue = formatValue(value);
-		lines.push(`- **${formattedKey}**: ${formattedValue}`);
+		const formattedKey = formatter(key);
+
+		if (typeof value === 'object' && value !== null && 'url' in value) {
+			const urlObj = value as { url: string; title?: string };
+			// Handle URL objects with title
+			const urlTitle = urlObj.title || urlObj.url;
+			lines.push(
+				`- **${formattedKey}**: ${formatUrl(String(urlObj.url), String(urlTitle))}`,
+			);
+		} else if (
+			typeof value === 'string' &&
+			(value.startsWith('http://') || value.startsWith('https://'))
+		) {
+			// Handle URL strings
+			lines.push(`- **${formattedKey}**: ${formatUrl(value)}`);
+		} else if (value instanceof Date) {
+			// Handle dates
+			lines.push(`- **${formattedKey}**: ${formatDate(value)}`);
+		} else if (Array.isArray(value)) {
+			// Handle arrays
+			lines.push(`- **${formattedKey}**: ${value.join(', ')}`);
+		} else {
+			// Handle all other types
+			lines.push(`- **${formattedKey}**: ${String(value)}`);
+		}
 	}
 
 	return lines.join('\n');
 }
 
 /**
- * Format a value based on its type
- * @param value - Value to format
- * @returns Formatted value
- */
-function formatValue(value: unknown): string {
-	if (value === undefined || value === null) {
-		return 'Not available';
-	}
-
-	if (value instanceof Date) {
-		return formatDate(value);
-	}
-
-	// Handle URL objects with url and title properties
-	if (typeof value === 'object' && value !== null && 'url' in value) {
-		const urlObj = value as { url: string; title?: string };
-		if (typeof urlObj.url === 'string') {
-			return formatUrl(urlObj.url, urlObj.title);
-		}
-	}
-
-	if (typeof value === 'string') {
-		// Check if it's a URL
-		if (value.startsWith('http://') || value.startsWith('https://')) {
-			return formatUrl(value);
-		}
-
-		// Check if it might be a date
-		if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
-			return formatDate(value);
-		}
-
-		return value;
-	}
-
-	if (typeof value === 'boolean') {
-		return value ? 'Yes' : 'No';
-	}
-
-	return String(value);
-}
-
-/**
- * Format a separator line
- * @returns Separator line
- */
-export function formatSeparator(): string {
-	return '---';
-}
-
-/**
- * Format a numbered list of items
- * @param items - Array of items to format
+ * Format a numbered list from an array
+ * @param items - The array of items to format
  * @param formatter - Function to format each item
  * @returns Formatted numbered list
  */
@@ -200,11 +141,23 @@ export function formatNumberedList<T>(
 	items: T[],
 	formatter: (item: T, index: number) => string,
 ): string {
-	if (items.length === 0) {
-		return 'No items.';
-	}
-
 	return items
-		.map((item, index) => formatter(item, index))
-		.join('\n\n' + formatSeparator() + '\n\n');
+		.map((item, index) => {
+			const formattedItem = formatter(item, index);
+			return `${index + 1}. ${formattedItem}`;
+		})
+		.join('\n\n');
 }
+
+// Export space formatters from controller files
+export { formatSpacesList, formatSpaceDetails };
+
+export default {
+	formatDate,
+	formatHeading,
+	formatPagination,
+	formatUrl,
+	formatSeparator,
+	formatBulletList,
+	formatNumberedList,
+};

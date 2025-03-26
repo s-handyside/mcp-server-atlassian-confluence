@@ -5,7 +5,6 @@ import {
 import {
 	formatUrl,
 	formatDate,
-	formatPagination,
 	formatHeading,
 	formatBulletList,
 	formatSeparator,
@@ -15,73 +14,61 @@ import {
 /**
  * Format a list of spaces for display
  * @param spacesData - Raw spaces data from the API
- * @param nextCursor - Pagination cursor for retrieving the next set of results
  * @returns Formatted string with spaces information in markdown format
  */
-export function formatSpacesList(
-	spacesData: SpacesResponse,
-	nextCursor?: string,
-): string {
+export function formatSpacesList(spacesData: SpacesResponse): string {
 	if (!spacesData.results || spacesData.results.length === 0) {
-		return 'No Confluence spaces found.';
+		return 'No Confluence spaces found matching your criteria.';
 	}
 
 	const lines: string[] = [formatHeading('Confluence Spaces', 1), ''];
 
 	// Use the numbered list formatter for consistent formatting
-	const formattedList = formatNumberedList(spacesData.results, (space) => {
-		const itemLines: string[] = [];
+	const formattedList = formatNumberedList(
+		spacesData.results,
+		(space, index) => {
+			const itemLines: string[] = [];
+			itemLines.push(formatHeading(space.name, 2));
 
-		// Basic information
-		itemLines.push(formatHeading(space.name, 2));
+			// Basic properties
+			const properties: Record<string, unknown> = {
+				ID: space.id,
+				Key: space.key,
+				Type: space.type,
+				Status: space.status,
+				Created: space.createdAt
+					? formatDate(new Date(space.createdAt))
+					: 'Not available',
+				'Homepage ID': space.homepageId || 'Not set',
+				Description: space.description?.view?.value || 'Not available',
+				URL: formatUrl(
+					`${spacesData._links.base}/spaces/${space.key}`,
+					space.key,
+				),
+			};
 
-		// Create an object with all the properties to display
-		const baseUrl = spacesData._links.base || '';
-		const spaceUrl = space._links.webui;
-		const fullUrl = spaceUrl.startsWith('http')
-			? spaceUrl
-			: `${baseUrl}${spaceUrl}`;
+			if (space.currentActiveAlias) {
+				properties['Alias'] = space.currentActiveAlias;
+			}
 
-		// Create description from available content
-		let description = 'Not available';
-		if (space.description?.view?.value) {
-			description = space.description.view.value.trim();
-		} else if (space.description?.plain?.value) {
-			description = space.description.plain.value.trim();
-		}
+			// Format as a bullet list with proper formatting for each value type
+			itemLines.push(formatBulletList(properties, (key) => key));
 
-		const properties: Record<string, unknown> = {
-			ID: space.id,
-			Key: space.key,
-			Type: space.type,
-			Status: space.status,
-			Created: space.createdAt,
-			'Homepage ID': space.homepageId,
-			Description: description || undefined,
-			URL: {
-				url: fullUrl,
-				title: space.key,
-			},
-			Alias: space.currentActiveAlias,
-		};
+			// Add separator between spaces except for the last one
+			if (index < spacesData.results.length - 1) {
+				itemLines.push('');
+				itemLines.push(formatSeparator());
+			}
 
-		// Format as a bullet list with proper formatting for each value type
-		itemLines.push(formatBulletList(properties, (key) => key));
-
-		return itemLines.join('\n');
-	});
+			return itemLines.join('\n');
+		},
+	);
 
 	lines.push(formattedList);
 
-	// Add pagination information
-	if (nextCursor) {
-		lines.push('');
-		lines.push(formatSeparator());
-		lines.push('');
-		lines.push(
-			formatPagination(spacesData.results.length, true, nextCursor),
-		);
-	}
+	// Add timestamp for when this information was retrieved
+	lines.push('');
+	lines.push(`*Space information retrieved at ${formatDate(new Date())}*`);
 
 	return lines.join('\n');
 }

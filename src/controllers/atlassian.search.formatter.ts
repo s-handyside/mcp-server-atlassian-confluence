@@ -2,20 +2,15 @@ import { SearchResult } from '../services/vendor.atlassian.search.types.js';
 import {
 	formatHeading,
 	formatBulletList,
-	formatSeparator,
 	formatNumberedList,
 } from '../utils/formatter.util.js';
 
 /**
  * Format search results for display
  * @param searchData - Raw search results from the API
- * @param nextCursor - Pagination cursor for retrieving the next set of results
  * @returns Formatted string with search results in markdown format
  */
-export function formatSearchResults(
-	searchData: SearchResult[],
-	nextCursor?: string,
-): string {
+export function formatSearchResults(searchData: SearchResult[]): string {
 	if (searchData.length === 0) {
 		return 'No Confluence content found matching your query.';
 	}
@@ -54,19 +49,6 @@ export function formatSearchResults(
 	});
 
 	lines.push(formattedList);
-
-	// Add pagination information
-	if (nextCursor) {
-		lines.push('');
-		lines.push(formatSeparator());
-		lines.push('');
-		lines.push(formatHeading('Pagination', 2));
-		lines.push(
-			`*Showing ${searchData.length} items. More results are available.*`,
-		);
-		lines.push('');
-		lines.push(`To see more results, use --cursor "${nextCursor}"`);
-	}
 
 	return lines.join('\n');
 }
