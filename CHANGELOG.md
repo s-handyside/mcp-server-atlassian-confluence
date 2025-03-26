@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.5.1...v1.6.0) (2025-03-26)
+
+
+### Features
+
+* enhance pages and spaces CLI with named parameters and improved date handling ([25103de](https://github.com/aashari/mcp-server-atlassian-confluence/commit/25103de54fa91dba532b984c2ea9e85b7a7b6f6f))
+
 ## [1.5.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.5.0...v1.5.1) (2025-03-25)
 
 
