@@ -15,24 +15,48 @@ Model Context Protocol (MCP) is an open standard enabling AI models to connect s
 
 ## Available Tools
 
-This MCP server exposes the following capabilities as standardized "Tools" for AI assistants:
+This MCP server provides the following tools for your AI assistant:
 
-| Tool Name     | Key Parameter(s)    | Description                                              | Example Conversational Use            | AI Tool Call Example (Simplified)       |
-| :------------ | :------------------ | :------------------------------------------------------- | :------------------------------------ | :-------------------------------------- |
-| `search`      | `cql` (string)      | Search Confluence using CQL (Confluence Query Language). | "Find pages about API documentation"  | `{ cql: "text ~ 'API documentation'" }` |
-| `list-spaces` | _None required_     | List available Confluence spaces.                        | "Show me all Confluence spaces"       | `{}`                                    |
-| `get-space`   | `spaceKey` (string) | Get detailed information about a specific space.         | "Tell me about the 'DEV' space"       | `{ spaceKey: "DEV" }`                   |
-| `list-pages`  | _None required_     | List pages (optionally filter by space, status).         | "Show pages in the Engineering space" | `{ spaceId: ["123456"] }`               |
-| `get-page`    | `pageId` (string)   | Get the full content and metadata of a specific page.    | "Show me the 'Getting Started' page"  | `{ pageId: "789012" }`                  |
+- **List Spaces (`list-spaces`)**
 
-## Interface Philosophy: Minimal Interface, Maximal Detail
+    - **Purpose:** Discover available Confluence spaces and find their 'keys' (unique identifiers).
+    - **Use When:** You need to know which spaces exist, find a space's key, or filter spaces by type/status.
+    - **Conversational Example:** "Show me all the Confluence spaces."
+    - **Parameter Example:** `{}` (no parameters needed for basic list) or `{ type: "global", status: "current" }` (to filter).
 
-This server is designed to be simple for both humans (via CLI) and AI (via MCP Tools) to use, while providing rich information:
+- **Get Space (`get-space`)**
 
-1.  **Simple Commands/Tools:** Interfaces require only the essential identifiers or filters (like `pageId`, `spaceKey`, `cql`).
-2.  **Comprehensive Results by Default:** Operations that retrieve a specific item (`get-page`, `get-space`) automatically fetch and return all relevant details (content, labels, properties, links, etc.) without needing extra "include" flags.
+    - **Purpose:** Retrieve detailed information about a _specific_ space using its key. Includes homepage content snippet.
+    - **Use When:** You know the space key (e.g., "DEV") and need its full details, labels, or homepage overview.
+    - **Conversational Example:** "Tell me about the 'DEV' space in Confluence."
+    - **Parameter Example:** `{ spaceKey: "DEV" }`
 
-This philosophy ensures you get the full picture without complex commands, letting the AI focus on using the information.
+- **List Pages (`list-pages`)**
+
+    - **Purpose:** List pages within specific spaces (using numeric space IDs) or across the instance, with filtering options.
+    - **Use When:** You need to find pages in a known space (requires numeric ID), filter by status, or do simple text searches on titles/labels.
+    - **Conversational Example:** "Show me current pages in space ID 123456." (Use `list-spaces` first if you only know the key).
+    - **Parameter Example:** `{ spaceId: ["123456"] }` or `{ status: ["archived"], query: "Meeting Notes" }`.
+
+- **Get Page (`get-page`)**
+
+    - **Purpose:** Retrieve the full content (in Markdown) and metadata of a _specific_ page using its numeric ID.
+    - **Use When:** You know the numeric page ID (found via `list-pages` or `search`) and need to read, analyze, or summarize its content.
+    - **Conversational Example:** "Get the content of Confluence page ID 12345678."
+    - **Parameter Example:** `{ pageId: "12345678" }`
+
+- **Search (`search`)**
+    - **Purpose:** Perform powerful searches across Confluence content (pages, blogs, attachments) using CQL (Confluence Query Language).
+    - **Use When:** You need complex searches involving multiple criteria, full-text search, or filtering by labels, dates, contributors, etc.
+    - **Conversational Example:** "Search Confluence for pages labeled 'meeting-notes' created in the last week."
+    - **Parameter Example:** `{ cql: "label = meeting-notes AND created > -7d" }`
+
+## Interface Philosophy: Simple Input, Rich Output
+
+This server follows a "Minimal Interface, Maximal Detail" approach:
+
+1.  **Simple Tools:** Ask for only essential identifiers or filters (like `pageId`, `spaceKey`, `cql`).
+2.  **Rich Details:** When you ask for a specific item (like `get-page`), the server provides all relevant information by default (content, labels, links, etc.) without needing extra flags.
 
 ## Prerequisites
 
@@ -52,21 +76,19 @@ Follow these steps to connect your AI assistant to Confluence:
 2.  Click **Create API token**.
 3.  Give it a descriptive **Label** (e.g., `mcp-confluence-access`).
 4.  Click **Create**.
-5.  **Immediately copy the generated API token.** You won't be able to see it again. Store it securely (e.g., in a password manager).
+5.  **Immediately copy the generated API token.** You won't be able to see it again. Store it securely.
 
 ### Step 2: Configure the Server Credentials
 
 Choose **one** of the following methods:
 
-#### Method A: Global MCP Config File (Recommended for Persistent Use)
+#### Method A: Global MCP Config File (Recommended)
 
-This is the preferred method as it keeps credentials separate from your AI client configuration.
+This keeps credentials separate and organized.
 
-1.  **Create the directory** (if it doesn't exist):
-    - macOS/Linux: `mkdir -p ~/.mcp`
-    - Windows: Create a folder named `.mcp` in your user profile directory (e.g., `C:\Users\<YourUsername>\.mcp`)
-2.  **Create the config file:** Inside the `.mcp` directory, create a file named `configs.json`.
-3.  **Add the configuration:** Paste the following JSON structure into `configs.json`, replacing the placeholder values:
+1.  **Create the directory** (if needed): `~/.mcp/`
+2.  **Create/Edit the file:** `~/.mcp/configs.json`
+3.  **Add the configuration:** Paste the following JSON structure, replacing the placeholders:
 
     ```json
     {
@@ -77,23 +99,22 @@ This is the preferred method as it keeps credentials separate from your AI clien
     			"ATLASSIAN_API_TOKEN": "<YOUR_COPIED_API_TOKEN>"
     		}
     	}
-    	// You can add configurations for other @aashari MCP servers here too
+    	// Add other servers here if needed
     }
     ```
 
-    - `<YOUR_SITE_NAME>`: Your Confluence site name (e.g., if your URL is `mycompany.atlassian.net`, enter `mycompany`).
-    - `<YOUR_ATLASSIAN_EMAIL>`: The email address associated with your Atlassian account.
-    - `<YOUR_COPIED_API_TOKEN>`: The API token you generated in Step 1.
+    - `<YOUR_SITE_NAME>`: Your Confluence site name (e.g., `mycompany` for `mycompany.atlassian.net`).
+    - `<YOUR_ATLASSIAN_EMAIL>`: Your Atlassian account email.
+    - `<YOUR_COPIED_API_TOKEN>`: The API token from Step 1.
 
-#### Method B: Environment Variables (Alternative / Temporary)
+#### Method B: Environment Variables (Alternative)
 
-You can set environment variables directly when running the server. This is less convenient for regular use but useful for testing.
+Set environment variables when running the server.
 
 ```bash
-# Example for running the server directly (adjust for client config)
-ATLASSIAN_SITE_NAME=<YOUR_SITE_NAME> \
-ATLASSIAN_USER_EMAIL=<YOUR_ATLASSIAN_EMAIL> \
-ATLASSIAN_API_TOKEN=<YOUR_COPIED_API_TOKEN> \
+ATLASSIAN_SITE_NAME="<YOUR_SITE_NAME>" \
+ATLASSIAN_USER_EMAIL="<YOUR_EMAIL>" \
+ATLASSIAN_API_TOKEN="<YOUR_API_TOKEN>" \
 npx -y @aashari/mcp-server-atlassian-confluence
 ```
 
@@ -101,11 +122,10 @@ npx -y @aashari/mcp-server-atlassian-confluence
 
 Configure your MCP client (Claude Desktop, Cursor, etc.) to run this server.
 
-#### Option 1: Claude Desktop
+#### Claude Desktop
 
-1.  Open Claude Desktop settings (gear icon).
-2.  Click **Edit Config**.
-3.  Add or merge the following into the `mcpServers` section:
+1.  Open Settings (gear icon) > Edit Config.
+2.  Add or merge into `mcpServers`:
 
     ```json
     {
@@ -114,30 +134,28 @@ Configure your MCP client (Claude Desktop, Cursor, etc.) to run this server.
     			"command": "npx",
     			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
     		}
-    		// Add other servers here if needed
+    		// ... other servers
     	}
     }
     ```
 
-4.  Save the configuration file.
-5.  **Restart Claude Desktop.**
-6.  Verify the connection: Click the "Tools" (hammer) icon. You should see the Confluence tools listed (e.g., `search`, `list-spaces`).
+3.  Save and **Restart Claude Desktop**.
+4.  **Verify:** Click the "Tools" (hammer) icon; Confluence tools should be listed.
 
-#### Option 2: Cursor AI
+#### Cursor AI
 
-1.  Open the Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`).
-2.  Search for and select **Cursor Settings > MCP**.
-3.  Click **+ Add new MCP server**.
-4.  Fill in the details:
-    - **Name**: `aashari/mcp-server-atlassian-confluence` (or another name you prefer)
-    - **Type**: `command`
-    - **Command**: `npx -y @aashari/mcp-server-atlassian-confluence`
-5.  Click **Add**.
-6.  Wait for the indicator next to the server name to turn green, confirming it's running and connected.
+1.  Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`) > **Cursor Settings > MCP**.
+2.  Click **+ Add new MCP server**.
+3.  Enter:
+    - Name: `aashari/mcp-server-atlassian-confluence`
+    - Type: `command`
+    - Command: `npx -y @aashari/mcp-server-atlassian-confluence`
+4.  Click **Add**.
+5.  **Verify:** Wait for the indicator next to the server name to turn green.
 
-### Step 4: Start Using It!
+### Step 4: Using the Tools
 
-Now you can ask your AI assistant questions related to your Confluence instance:
+You can now ask your AI assistant questions related to your Confluence instance:
 
 - "List the Confluence spaces."
 - "Search Confluence using CQL: `label = meeting-notes AND created > -7d`"
@@ -146,126 +164,59 @@ Now you can ask your AI assistant questions related to your Confluence instance:
 
 ## Using as a Command-Line Tool (CLI)
 
-You can also use this package directly from your terminal for quick checks or scripting.
+You can also use this package directly from your terminal. Ensure credentials are set first (Method A or B above).
 
-#### Method 1: `npx` (No Installation Needed)
-
-Run commands directly using `npx`:
+#### Quick Use with `npx`
 
 ```bash
-# Ensure credentials are set via ~/.mcp/configs.json or environment variables first!
 npx -y @aashari/mcp-server-atlassian-confluence list-spaces
 npx -y @aashari/mcp-server-atlassian-confluence get-page --page 123456
 npx -y @aashari/mcp-server-atlassian-confluence search --cql "type=page AND text~API" --limit 10
 ```
 
-#### Method 2: Global Installation (for Frequent Use)
+#### Global Installation (Optional)
 
-1.  Install globally: `npm install -g @aashari/mcp-server-atlassian-confluence`
-2.  Run commands using the `mcp-confluence` alias:
+1.  `npm install -g @aashari/mcp-server-atlassian-confluence`
+2.  Use the `mcp-confluence` command:
 
 ```bash
-# Ensure credentials are set via ~/.mcp/configs.json or environment variables first!
 mcp-confluence list-spaces --limit 5
 mcp-confluence get-space --space DEV
 mcp-confluence list-pages --space-id 12345 --status archived
 mcp-confluence --help # See all commands
-mcp-confluence get-page --help # Help for a specific command
 ```
 
 ## Troubleshooting
 
-- **Authentication Errors:**
-    - Double-check your `ATLASSIAN_SITE_NAME`, `ATLASSIAN_USER_EMAIL`, and `ATLASSIAN_API_TOKEN` in your `~/.mcp/configs.json` or environment variables.
-    - Ensure the API token is still valid and hasn't been revoked.
-    - Verify your user account has permission to access the Confluence instance and the specific spaces/pages you're querying.
+- **Authentication Errors (401/403):**
+    - Double-check your `ATLASSIAN_SITE_NAME`, `ATLASSIAN_USER_EMAIL`, and `ATLASSIAN_API_TOKEN` in `~/.mcp/configs.json` or environment variables.
+    - Ensure the API token is correct, valid, and not revoked.
+    - Verify your user account has permission to access the Confluence instance and relevant spaces/pages.
 - **Server Not Connecting (in AI Client):**
-    - Ensure the command in your AI client configuration (`npx -y @aashari/mcp-server-atlassian-confluence`) is correct.
-    * Check if Node.js/npm are correctly installed and in your system's PATH.
-    * Try running the `npx` command directly in your terminal to see if it outputs any errors.
-- **Resource Not Found (404 Errors):**
-    - Verify the `pageId` or `spaceKey` you are using is correct.
-    - Ensure you have permissions to view the specific page or space.
-- **Enable Debug Logs:** Set the `DEBUG` environment variable to `true` for more detailed logs. Add `"DEBUG": "true"` inside the `environments` block in `configs.json` or run like `DEBUG=true npx ...`.
+    - Ensure the command (`npx ...`) is correct in your client's config.
+    - Check Node.js/npm installation and PATH.
+    - Run the `npx` command directly in your terminal for error messages.
+- **Resource Not Found (404):**
+    - Verify the `pageId` (must be numeric) or `spaceKey` is correct.
+    - Check your permissions for the specific page or space.
+- **CQL Query Errors (400):**
+    - Check your CQL syntax carefully. Refer to [Confluence CQL documentation](https://developer.atlassian.com/cloud/confluence/advanced-searching-using-cql/).
+    - Ensure field names and values are valid.
+- **Enable Debug Logs:** Set `DEBUG=true` environment variable (e.g., add `"DEBUG": "true"` in `configs.json` or run `DEBUG=true npx ...`).
 
 ## For Developers: Contributing
 
-Contributions are welcome! Please follow the established architecture and guidelines.
+Contributions are welcome! If you'd like to contribute:
 
-### Project Architecture
-
-This MCP server adheres to a layered architecture promoting separation of concerns:
-
-1.  **`src/cli`**: Defines the command-line interface using `commander`. Minimal logic, mainly argument parsing and calling controllers.
-2.  **`src/tools`**: Defines the MCP tool interface for AI clients using `@modelcontextprotocol/sdk` and `zod` for schemas. Minimal logic, maps arguments and calls controllers.
-3.  **`src/controllers`**: Contains the core application logic. Orchestrates calls to services, uses formatters, handles pagination, and ensures consistent responses. Implements the "maximal detail" principle for 'get' operations.
-4.  **`src/services`**: Acts as an adapter to the specific vendor (Atlassian Confluence) API. Uses `transport.util` for actual HTTP calls.
-5.  **`src/formatters`**: Responsible for converting data into user-friendly Markdown output, heavily utilizing `formatter.util`.
-6.  **`src/utils`**: Holds shared, reusable utilities (config, logging, errors, formatting, transport, pagination, defaults, ADF conversion).
-7.  **`src/types`**: Defines shared internal TypeScript types (`ControllerResponse`, etc.).
-
-### Setting Up Development
-
-1.  Clone the repository: `git clone <repository-url>`
-2.  Navigate to the project directory: `cd mcp-server-atlassian-confluence`
-3.  Install dependencies: `npm install`
-4.  Run the server in development mode (uses `ts-node` and watches for changes): `npm run dev:server`
-5.  Run CLI commands during development: `npm run dev:cli -- <command> [options]` (e.g., `npm run dev:cli -- list-spaces`)
-
-### Key Development Scripts
-
-- `npm run dev:server`: Start the MCP server via stdio transport with hot-reloading.
-- `npm run dev:cli -- [args]`: Execute CLI commands using `ts-node`.
-- `npm run build`: Compile TypeScript to JavaScript in `dist/`.
-- `npm test`: Run unit and integration tests using Jest.
-- `npm run lint`: Run ESLint to check for code style issues.
-- `npm run format`: Format code using Prettier.
-
-### Adding a New Feature (Tool/Command)
-
-1.  **API Research:** Identify the target Confluence API endpoint(s).
-2.  **Service Layer:** Add function(s) in `src/services/vendor.atlassian.*.service.ts` using `fetchAtlassian`. Define API types in `src/services/vendor.*.types.ts`.
-3.  **Controller Layer:** Add function in `src/controllers/*.controller.ts`. Define internal types (`*Options`, `*Identifier`) in `src/controllers/*.types.ts`. Call the service, ensure maximum detail for 'get' operations, call the formatter, handle pagination (`extractPaginationInfo`), return `ControllerResponse`, and wrap logic in `handleControllerError`.
-4.  **Formatter:** Add/update function in `src/controllers/*.formatter.ts` using `formatter.util`.
-5.  **Tool Layer:** Define Zod schema in `src/tools/*.types.ts` (minimal args). Define tool in `src/tools/*.tool.ts` using `server.tool()`, including the standard documentation template (see below). Implement handler calling the controller.
-6.  **CLI Layer:** Define command in `src/cli/*.cli.ts` using `commander` (options matching tool args). Implement action calling the controller, formatting output, and using `handleCliError`.
-7.  **Testing:** Add relevant tests (unit, integration, CLI execution).
-8.  **Documentation:** Update this README and ensure tool/CLI descriptions are accurate.
-
-### Standard Tool Documentation Template
-
-Use this template within the description string for `server.tool()`:
-
-```
-PURPOSE: [Briefly explain what the tool does and its primary goal.]
-
-WHEN TO USE:
-- [Describe the main scenario(s) where this tool is useful.]
-- [Mention specific situations or questions it answers.]
-
-WHEN NOT TO USE:
-- [Point to alternative tools if they are better suited for certain tasks.]
-- [Mention any limitations or anti-patterns.]
-
-RETURNS: [Describe the structure and key information included in the Markdown output. Mention that details are comprehensive by default for 'get' operations.]
-
-EXAMPLES:
-- [Provide a simple AI tool call example: { param: "value" }]
-- [Provide a more complex example if applicable, e.g., with filters.]
-
-ERRORS:
-- [List common error scenarios (e.g., "Not Found", "Permission Denied").]
-- [Briefly suggest potential causes or checks (e.g., "Verify the ID/Key", "Check credentials/permissions").]
-```
-
-### File Naming Convention
-
-- Utility files in `src/utils/` use `kebab-case`: `config.util.ts`, `error-handler.util.ts`.
-- Feature-specific files (CLI, Controller, Formatter, Service, Tool, Types) use the pattern `atlassian.{feature}.{layer}.ts` or `vendor.atlassian.{feature}.{layer}.ts` (for services/service-types), e.g., `atlassian.pages.cli.ts`, `atlassian.pages.controller.ts`, `atlassian.pages.formatter.ts`, `vendor.atlassian.pages.service.ts`, `atlassian.pages.tool.ts`, `atlassian.pages.types.ts`.
+- **Architecture:** The server uses a layered approach (CLI/Tool -> Controller -> Service). See `.cursorrules` or code comments for details.
+- **Setup:** Clone repo, `npm install`. Use `npm run dev:server` or `npm run dev:cli -- <command>`.
+- **Code Style:** Use `npm run lint` and `npm run format`.
+- **Tests:** Add tests via `npm test`.
+- **Consistency:** Follow existing patterns and the "Minimal Interface, Maximal Detail" philosophy.
 
 ## Versioning Note
 
-This project (`@aashari/mcp-server-atlassian-confluence`) follows Semantic Versioning. It is versioned independently from other `@aashari/mcp-server-*` packages (like Jira or Bitbucket). Version differences between these related projects are expected and reflect their individual development cycles.
+This project (`@aashari/mcp-server-atlassian-confluence`) follows Semantic Versioning and is versioned independently from other `@aashari/mcp-server-*` packages.
 
 ## License
 
