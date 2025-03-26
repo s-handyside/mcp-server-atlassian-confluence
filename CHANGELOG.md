@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.8.0...v1.9.0) (2025-03-26)
+
+
+### Features
+
+* trigger release with semantic versioning ([d285293](https://github.com/aashari/mcp-server-atlassian-confluence/commit/d2852939d72c200a4171446578c593e6f588ef96))
+
 # [1.8.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.7.0...v1.8.0) (2025-03-26)
 
 
