@@ -34,12 +34,18 @@ function registerListSpacesCommand(program: Command): void {
 	program
 		.command('list-spaces')
 		.description(
-			'List Confluence spaces with optional filtering\n\n' +
-				'Retrieves spaces from your Confluence instance with filtering and pagination options.\n\n' +
-				'Examples:\n' +
-				'  $ list-spaces --type global\n' +
-				'  $ list-spaces --limit 50 --status current\n' +
-				'  $ list-spaces --query "Documentation"',
+			`List Confluence spaces accessible to the authenticated user.
+
+        PURPOSE: Discover available spaces, find their keys for use in other commands (like searching or listing pages), and get a high-level overview of space metadata.
+
+        Use Case: Useful when you don't know the exact key of a space, or when exploring available spaces. Allows filtering by type (global/personal) and status (current/archived).
+
+        Output: Formatted list including space name, key, ID, type, status, description snippet, and URL. Supports filtering and pagination.
+
+        Examples:
+  $ mcp-confluence list-spaces --type global --status current
+  $ mcp-confluence list-spaces --limit 50
+  $ mcp-confluence list-spaces --query "Documentation"`,
 		)
 		.option(
 			'-l, --limit <number>',
@@ -142,10 +148,16 @@ function registerGetSpaceCommand(program: Command): void {
 	program
 		.command('get-space')
 		.description(
-			'Get detailed information about a specific Confluence space\n\n' +
-				'Retrieves comprehensive details for a space including metadata, permissions, and content overview.\n\n' +
-				'Examples:\n' +
-				'  $ get-space --space DEV',
+			`Get detailed information about a specific Confluence space using its key.
+
+        PURPOSE: Retrieve comprehensive details for a *known* space, including its ID, name, description, labels, and homepage content snippet. Requires the space key.
+
+        Use Case: Useful when you have a specific space key (often obtained via 'list-spaces') and need its full metadata or homepage overview.
+
+        Output: Formatted details of the specified space, including a snippet of its homepage content. Fetches all available details by default.
+
+        Examples:
+  $ mcp-confluence get-space --space DEV`,
 		)
 		.requiredOption(
 			'--space <key>',

@@ -66,35 +66,53 @@ function register(server: McpServer) {
 	// Register the search tool
 	server.tool(
 		'search',
-		`Search for content in Confluence using Confluence Query Language (CQL).
+		`Search Confluence content using CQL (Confluence Query Language) for precise results.
 
-PURPOSE: Find pages, blog posts, attachments, and other content across spaces using powerful search queries.
+        PURPOSE: Performs advanced content searches across Confluence using CQL queries, allowing for complex search patterns, content filtering, and targeted results. This is the most powerful search tool for Confluence, supporting complex filtering and sorting.
 
-WHEN TO USE:
-- When you need to find content matching specific keywords
-- When you need to search across multiple spaces
-- When you want to find content based on labels, authors, or dates
-- When you need to find attachments or specific file types
-- When you need advanced filtering beyond what list-pages provides
+        WHEN TO USE:
+        - When you need to search for specific text or patterns within page content (not just titles).
+        - When you need to combine multiple search criteria (e.g., text + space + date + type).
+        - When you need to search using complex logical operators (AND, OR, NOT).
+        - When simple title/label searches via 'list-pages' are insufficient.
+        - When you need to search across all content types (pages, blog posts, attachments, etc.).
+        - When you need fine-grained sorting control over search results.
 
-WHEN NOT TO USE:
-- When you only need to browse spaces (use list-spaces instead)
-- When you know the space and just want to list pages (use list-pages instead)
-- When you already know the specific page ID (use get-page instead)
+        WHEN NOT TO USE:
+        - When you already know the page ID (use 'get-page' instead).
+        - When you only need to list pages in a space by title (use 'list-pages' with optional query).
+        - When you need to explore or browse spaces (use space-related tools).
+        - When you're not searching for actual content (e.g., for space metadata).
 
-RETURNS: Formatted list of search results with titles, spaces, content snippets, and URLs.
+        RETURNS: Formatted search results including:
+        - Result type (page, blog, attachment, etc.)
+        - Title and content excerpt with highlighted match terms
+        - Space information, creation metadata, and URL
+        - Content ID for use with other tools like 'get-page'
+        
+        Results can be paginated using the 'limit' and 'cursor' parameters.
 
-EXAMPLES:
-- Basic text search: {cql: "project plan"}
-- Search in specific space: {cql: "space = DEV AND text ~ documentation"}
-- Search by label: {cql: "label = 'getting-started'"}
-- Search by content type: {cql: "type = page AND text ~ API"}
-- With pagination: {cql: "project plan", limit: 20, cursor: "next-page-token"}
+        CQL EXAMPLES:
+        - Basic text search: { cql: "text ~ 'project plan'" }
+        - Combined criteria: { cql: "text ~ 'quarterly report' AND space = DEV AND type = 'page'" }
+        - Date filtering: { cql: "created >= '2023-01-01' AND created <= '2023-12-31'" }
+        - Content by specific user: { cql: "creator = 'jsmith'" }
+        - Exact phrase with label: { cql: "text = 'API Documentation' AND label = 'public'" }
+        
+        Common CQL fields:
+        - text: Full-text content search
+        - title: Title search
+        - space: Space key
+        - type: Content type (page, blogpost, attachment)
+        - created/modified: Date criteria
+        - label: Content labels
+        - creator/contributor: User references
 
-ERRORS:
-- Invalid CQL: Check your CQL syntax
-- Authentication failures: Verify credentials
-- No results: Try broadening your search terms`,
+        ERRORS:
+        - Invalid CQL syntax: Check query format against CQL documentation.
+        - No results: Try broadening search criteria.
+        - Authentication/permission failures: Ensure proper credentials.
+        - Rate limiting: For large result sets, use pagination and caching.`,
 		SearchToolArgs.shape,
 		search,
 	);

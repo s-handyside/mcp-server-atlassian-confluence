@@ -35,13 +35,21 @@ function registerListPagesCommand(program: Command): void {
 	program
 		.command('list-pages')
 		.description(
-			'List Confluence pages with optional filtering\n\n' +
-				'Retrieves pages from your Confluence instance with filtering and pagination options.\n\n' +
-				'Examples:\n' +
-				'  $ list-pages --space-id 59114294 --status current\n' +
-				'  $ list-pages --limit 50 --query "title:Project"\n' +
-				'  $ list-pages --space-id 59114294 --query "label:documentation"\n\n' +
-				'Note: Space ID must be numeric. Use list-spaces to find the ID if you only have the key.',
+			`List Confluence pages, optionally filtering by space ID(s), status, or title/content/label query.
+
+        PURPOSE: Discover pages within specific spaces or across your instance based on status or simple text matching. Useful for finding page IDs for 'get-page'.
+
+        Use Case: Use this for browsing pages in a known space, finding archived pages, or doing simple text searches within titles/labels. For complex content searches, use the 'search' command with CQL.
+
+        Output: Formatted list of pages including ID, title, space ID, status, author, creation date, and URL. Supports filtering and pagination.
+
+        Note: --space-id requires numeric IDs. Use 'list-spaces' or 'get-space' first if you only have the space key.
+
+        Examples:
+  $ mcp-confluence list-pages --space-id 123456 --status current
+  $ mcp-confluence list-pages --limit 50 --query "Project"
+  $ mcp-confluence list-pages --space-id 123456,789012 --query "documentation"
+  $ mcp-confluence list-pages --cursor "next-cursor-value"`,
 		)
 		.option(
 			'-l, --limit <number>',
@@ -157,10 +165,16 @@ function registerGetPageCommand(program: Command): void {
 	program
 		.command('get-page')
 		.description(
-			'Get detailed information about a specific Confluence page\n\n' +
-				'Retrieves comprehensive details for a page including content, version history, and relationships.\n\n' +
-				'Examples:\n' +
-				'  $ get-page --page 123456',
+			`Get detailed information about a specific Confluence page using its numeric ID.
+
+        PURPOSE: Retrieve the full content (converted to Markdown) and comprehensive metadata for a *known* page, including labels, properties, and links. Requires the numeric page ID.
+
+        Use Case: Essential for reading, analyzing, or summarizing the content of a specific page identified via 'list-pages' or 'search'.
+
+        Output: Formatted details of the specified page, including its full body content in Markdown. Fetches all available details by default.
+
+        Examples:
+  $ mcp-confluence get-page --page 123456`,
 		)
 		.requiredOption('--page <id>', 'ID of the page to retrieve (numeric)')
 		.action(async (options) => {

@@ -32,10 +32,18 @@ function registerSearchCommand(program: Command): void {
 	program
 		.command('search')
 		.description(
-			'Search for content in Confluence using Confluence Query Language (CQL)\n\n  Provides powerful search capabilities to find content across spaces, pages, and attachments using CQL syntax.\n\n' +
-				'Examples:\n' +
-				'  $ search --cql "space = TEAM AND title ~ Project"\n' +
-				'  $ search --cql "type = page AND label = documentation" --limit 50',
+			`Search for Confluence content (pages, blog posts, attachments, etc.) using CQL (Confluence Query Language).
+
+        PURPOSE: Perform powerful, targeted searches across your entire Confluence instance using the flexible CQL syntax. Find content based on text, labels, space, type, dates, and more.
+
+        Use Case: Ideal for complex searches, finding specific attachments, or querying content across multiple spaces when 'list-pages' is too limited.
+
+        Output: Formatted list of search results including title, type, space, content snippet (excerpt), and URL. Supports pagination.
+
+        Examples:
+  $ mcp-confluence search --cql "space = TEAM AND title ~ Project"
+  $ mcp-confluence search --cql "type = page AND label = documentation ORDER BY lastModified DESC" --limit 50
+  $ mcp-confluence search --cql "text ~ 'security review' AND type = attachment" --cursor "next-cursor-value"`,
 		)
 		.requiredOption(
 			'-q, --cql <cql>',
