@@ -30,9 +30,12 @@ async function listPages(
 	logger.debug(`${logPrefix} Listing Confluence pages with filters:`, args);
 
 	try {
+		// Handle both new standardized parameters and legacy parameters
+		const spaces = args.parentId || args.spaceId;
+
 		// Pass the filter options to the controller
 		const message = await atlassianPagesController.list({
-			spaceId: args.spaceId,
+			spaceId: spaces,
 			status: args.status,
 			limit: args.limit,
 			cursor: args.cursor,
@@ -70,10 +73,14 @@ async function listPages(
  */
 async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
 	const logPrefix = '[src/tools/atlassian.pages.tool.ts@getPage]';
-	logger.debug(`${logPrefix} Retrieving page details for ID: ${args.id}`);
+
+	// Handle both new standardized parameters and legacy parameters
+	const pageId = args.entityId || args.id;
+
+	logger.debug(`${logPrefix} Retrieving page details for ID: ${pageId}`);
 
 	try {
-		const message = await atlassianPagesController.get({ id: args.id });
+		const message = await atlassianPagesController.get({ id: pageId });
 		logger.debug(
 			`${logPrefix} Successfully retrieved page details from controller`,
 			message,
@@ -128,9 +135,9 @@ WHEN NOT TO USE:
 RETURNS: Formatted list of pages with IDs, titles, space information, and URLs, plus pagination info.
 
 EXAMPLES:
-- Pages in a space: {spaceId: "DEV"}
-- With status filter: {spaceId: "DEV", status: "current"}
-- With pagination: {spaceId: "DEV", limit: 10, cursor: "next-page-token"}
+- Pages in a space: {parentId: "DEV"} or {spaceId: "DEV"}
+- With status filter: {parentId: "DEV", status: "current"} or {spaceId: "DEV", status: "current"}
+- With pagination: {parentId: "DEV", limit: 10, cursor: "next-page-token"}
 
 ERRORS:
 - Space not found: Verify the space ID is correct
@@ -162,7 +169,7 @@ WHEN NOT TO USE:
 RETURNS: Complete page content in Markdown format with metadata including title, author, version, space, and creation/modification dates.
 
 EXAMPLES:
-- By ID: {id: "123456"}
+- By ID: {entityId: "123456"} or {id: "123456"}
 
 ERRORS:
 - Page not found: Verify the page ID is correct

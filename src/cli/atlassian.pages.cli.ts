@@ -41,9 +41,9 @@ function registerListPagesCommand(program: Command): void {
 			'List Confluence pages with optional filtering\n\n' +
 				'Retrieves pages from your Confluence instance with filtering and pagination options.\n\n' +
 				'Examples:\n' +
-				'  $ list-pages --space-id TEAM --status current\n' +
+				'  $ list-pages --parent-id TEAM --status current\n' +
 				'  $ list-pages --limit 50 --filter "title:Project"\n' +
-				'  $ list-pages --space-id TEAM --filter "label:documentation"',
+				'  $ list-pages --parent-id TEAM --filter "label:documentation"',
 		)
 		.option(
 			'-l, --limit <number>',
@@ -58,7 +58,7 @@ function registerListPagesCommand(program: Command): void {
 			'-f, --filter <string>',
 			'Filter pages by title, content, or labels',
 		)
-		.option('-s, --space-id <id>', 'Filter by space ID')
+		.option('-p, --parent-id <id>', 'Filter by space ID')
 		.option(
 			'--status <status>',
 			'Filter by page status: current, archived',
@@ -83,8 +83,8 @@ function registerListPagesCommand(program: Command): void {
 				}
 
 				const filterOptions: ListPagesOptions = {
-					...(options.spaceId && {
-						spaceId: [options.spaceId],
+					...(options.parentId && {
+						spaceId: [options.parentId],
 					}),
 					...(options.status && {
 						status: [options.status as ContentStatus],
@@ -100,8 +100,10 @@ function registerListPagesCommand(program: Command): void {
 					`${logPrefix} Fetching pages with filters:`,
 					filterOptions,
 				);
+
 				const result =
 					await atlassianPagesController.list(filterOptions);
+
 				logger.debug(
 					`${logPrefix} Successfully retrieved ${
 						result.pagination?.count || 'all'
@@ -138,9 +140,12 @@ function registerGetPageCommand(program: Command): void {
 	program
 		.command('get-page')
 		.description(
-			'Get detailed information about a specific Confluence page\n\n  Retrieves comprehensive details for a page including content, version history, and relationships.',
+			'Get detailed information about a specific Confluence page\n\n' +
+				'Retrieves comprehensive details for a page including content, version history, and relationships.\n\n' +
+				'Examples:\n' +
+				'  $ get-page 123456',
 		)
-		.argument('<id>', 'ID of the page to retrieve')
+		.argument('<entity-id>', 'ID of the page to retrieve')
 		.option(
 			'-f, --body-format <format>',
 			'Format for the body content (storage, view, editor). Defaults to view.',
@@ -170,11 +175,11 @@ function registerGetPageCommand(program: Command): void {
 			'Include version information for the page.',
 			false,
 		)
-		.action(async (id: string, options) => {
+		.action(async (entityId: string, options) => {
 			const logPrefix = '[src/cli/atlassian.pages.cli.ts@get-page]';
 			try {
 				logger.debug(
-					`${logPrefix} Fetching details for page ID: ${id}`,
+					`${logPrefix} Fetching details for page ID: ${entityId}`,
 				);
 
 				const pageOptions: GetPageOptions = {
@@ -199,9 +204,10 @@ function registerGetPageCommand(program: Command): void {
 				};
 
 				const result = await atlassianPagesController.get(
-					{ id },
+					{ id: entityId },
 					pageOptions,
 				);
+
 				logger.debug(
 					`${logPrefix} Successfully retrieved page details`,
 				);
