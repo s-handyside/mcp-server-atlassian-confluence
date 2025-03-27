@@ -8,9 +8,6 @@
 import TurndownService from 'turndown';
 import { Logger } from './logger.util.js';
 
-// Create a contextualized logger for this file
-const markdownLogger = Logger.forContext('utils/markdown.util.ts');
-
 // DOM type definitions
 interface HTMLElement {
 	nodeName: string;

@@ -4,9 +4,6 @@ import { Logger } from './logger.util.js';
 import dotenv from 'dotenv';
 import os from 'os';
 
-// Create a contextualized logger for this file
-const configLogger = Logger.forContext('utils/config.util.ts');
-
 /**
  * Configuration loader that handles multiple sources with priority:
  * 1. Direct ENV pass (process.env)

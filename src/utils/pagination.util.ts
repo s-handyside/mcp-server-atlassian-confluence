@@ -64,13 +64,11 @@ export type PaginationData =
  * Extract pagination information from API response
  * @param data The API response containing pagination information
  * @param paginationType The type of pagination mechanism used
- * @param source Source identifier for logging
  * @returns Object with nextCursor, hasMore, and count properties
  */
 export function extractPaginationInfo(
 	data: PaginationData,
 	paginationType: PaginationType,
-	source: string,
 ): { nextCursor?: string; hasMore: boolean; count?: number } {
 	const paginationLogger = Logger.forContext(
 		'utils/pagination.util.ts',

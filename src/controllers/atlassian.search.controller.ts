@@ -72,7 +72,6 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 		const pagination = extractPaginationInfo(
 			searchData,
 			PaginationType.CURSOR,
-			'controllers/atlassian.search.controller.ts@search',
 		);
 
 		// Format the search results for display using the formatter

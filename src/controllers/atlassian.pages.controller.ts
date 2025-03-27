@@ -65,7 +65,6 @@ async function list(
 		const pagination = extractPaginationInfo(
 			pagesData,
 			PaginationType.CURSOR,
-			'controllers/atlassian.pages.controller.ts@list',
 		);
 
 		// Extract the base URL from response links
