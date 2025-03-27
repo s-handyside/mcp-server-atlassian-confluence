@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.11.0...v1.11.1) (2025-03-27)
+
+
+### Bug Fixes
+
+* trigger release ([2cd8a9d](https://github.com/aashari/mcp-server-atlassian-confluence/commit/2cd8a9dace5610715867ab8a8adffe0da6161001))
+
 # [1.11.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.10.0...v1.11.0) (2025-03-27)
 
 
