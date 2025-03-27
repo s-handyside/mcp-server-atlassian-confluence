@@ -12,6 +12,7 @@ import {
 	processCqlQuery,
 } from './atlassian.search.formatter.js';
 import { ExcerptStrategy } from '../services/vendor.atlassian.types.js';
+import { DEFAULT_PAGE_SIZE } from '../utils/defaults.util.js';
 
 /**
  * Controller for searching Confluence content.
@@ -43,21 +44,12 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 			);
 		}
 
-		// Process the CQL query to handle reserved keywords
-		const processedCql = processCqlQuery(options.cql);
-
-		// If the query was modified, log the change
-		if (processedCql !== options.cql) {
-			controllerLogger.debug(
-				`Modified CQL query to handle reserved keywords: ${processedCql}`,
-			);
-		}
-
+		// Instead of using applyDefaults, set defaults directly
 		// Set up search parameters
 		const searchParams = {
-			cql: processedCql,
+			cql: processCqlQuery(options.cql || ''),
 			cursor: options.cursor,
-			limit: options.limit || 25,
+			limit: options.limit || DEFAULT_PAGE_SIZE,
 			excerpt: 'highlight' as ExcerptStrategy, // Always include highlighted excerpts in search results
 		};
 

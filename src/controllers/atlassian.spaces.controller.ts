@@ -12,6 +12,7 @@ import {
 } from '../controllers/atlassian.spaces.formatter.js';
 import { ControllerResponse } from '../types/common.types.js';
 import atlassianPagesController from './atlassian.pages.controller.js';
+import { DEFAULT_PAGE_SIZE } from '../utils/defaults.util.js';
 
 /**
  * Controller for managing Confluence spaces.
@@ -42,7 +43,7 @@ async function list(
 		const params = {
 			type: options.type,
 			status: options.status,
-			limit: options.limit,
+			limit: options.limit || DEFAULT_PAGE_SIZE,
 			cursor: options.cursor,
 			// Additional parameters
 			sort: '-name' as const, // Sort by name descending by default
