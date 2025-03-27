@@ -33,7 +33,10 @@ describe('Atlassian Pages Controller', () => {
 			expect(typeof result.content).toBe('string');
 
 			// Verify the content format
-			if (result.content !== 'No Confluence pages found.') {
+			if (
+				result.content !==
+				'No Confluence pages found matching your criteria.'
+			) {
 				expect(result.content).toContain('# Confluence Pages');
 				expect(result.content).toContain('**ID**');
 				expect(result.content).toContain('**Title**');
@@ -53,7 +56,10 @@ describe('Atlassian Pages Controller', () => {
 			const initialResult = await atlassianPagesController.list();
 
 			// Skip if no pages are available
-			if (initialResult.content === 'No Confluence pages found.') {
+			if (
+				initialResult.content ===
+				'No Confluence pages found matching your criteria.'
+			) {
 				console.warn('Skipping test: No pages available');
 				return;
 			}
@@ -96,7 +102,9 @@ describe('Atlassian Pages Controller', () => {
 
 			// Verify the response
 			expect(result).toHaveProperty('content');
-			expect(result.content).toBe('No Confluence pages found.');
+			expect(result.content).toBe(
+				'No Confluence pages found matching your criteria.',
+			);
 		}, 15000);
 
 		it('should handle pagination correctly', async () => {
@@ -116,8 +124,10 @@ describe('Atlassian Pages Controller', () => {
 
 			// Skip if no pages are available
 			if (
-				firstResult.content === 'No Confluence pages found.' ||
-				secondResult.content === 'No Confluence pages found.'
+				firstResult.content ===
+					'No Confluence pages found matching your criteria.' ||
+				secondResult.content ===
+					'No Confluence pages found matching your criteria.'
 			) {
 				console.warn('Skipping test: No pages available');
 				return;
@@ -176,7 +186,10 @@ describe('Atlassian Pages Controller', () => {
 			const listResult = await atlassianPagesController.list();
 
 			// Skip if no pages are available
-			if (listResult.content === 'No Confluence pages found.') {
+			if (
+				listResult.content ===
+				'No Confluence pages found matching your criteria.'
+			) {
 				console.warn('Skipping test: No pages available');
 				return;
 			}
@@ -277,7 +290,10 @@ describe('Atlassian Pages Controller', () => {
 			const listResult = await atlassianPagesController.list();
 
 			// Skip if no pages are available
-			if (listResult.content === 'No Confluence pages found.') {
+			if (
+				listResult.content ===
+				'No Confluence pages found matching your criteria.'
+			) {
 				console.warn('Skipping test: No pages available');
 				return;
 			}
