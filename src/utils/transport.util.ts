@@ -1,4 +1,4 @@
-import { logger } from './logger.util.js';
+import { Logger } from './logger.util.js';
 import { config } from './config.util.js';
 import {
 	createAuthInvalidError,
@@ -25,6 +25,9 @@ export interface RequestOptions {
 	body?: unknown;
 }
 
+// Create a logger for the utility
+const utilLogger = Logger.forContext('utils/transport.util.ts');
+
 /**
  * Get Atlassian credentials from environment variables
  * @returns AtlassianCredentials object or null if credentials are missing
@@ -35,7 +38,7 @@ export function getAtlassianCredentials(): AtlassianCredentials | null {
 	const apiToken = config.get('ATLASSIAN_API_TOKEN');
 
 	if (!siteName || !userEmail || !apiToken) {
-		logger.warn(
+		utilLogger.warn(
 			'Missing Atlassian credentials. Please set ATLASSIAN_SITE_NAME, ATLASSIAN_USER_EMAIL, and ATLASSIAN_API_TOKEN environment variables.',
 		);
 		return null;
@@ -60,6 +63,10 @@ export async function fetchAtlassian<T>(
 	path: string,
 	options: RequestOptions = {},
 ): Promise<T> {
+	const fetchLogger = Logger.forContext(
+		'utils/transport.util.ts',
+		'fetchAtlassian',
+	);
 	const { siteName, userEmail, apiToken } = credentials;
 
 	// Ensure path starts with a slash
@@ -84,16 +91,34 @@ export async function fetchAtlassian<T>(
 		body: options.body ? JSON.stringify(options.body) : undefined,
 	};
 
-	logger.debug(
-		`[src/utils/transport.util.ts@fetchAtlassian] Calling Atlassian API: ${url}`,
-	);
+	fetchLogger.debug(`Calling Atlassian API: ${url}`);
+
+	// Track API call performance
+	const startTime = performance.now();
+	let endTime: number;
 
 	try {
 		const response = await fetch(url, requestOptions);
+		endTime = performance.now();
+		const requestDuration = (endTime - startTime).toFixed(2);
+
+		// Log successful API call duration at info level for significant operations
+		if (parseFloat(requestDuration) > 1000) {
+			// If request took more than 1 second, log at warn level
+			fetchLogger.warn(`API call to ${path} took ${requestDuration}ms`);
+		} else if (options.method && options.method !== 'GET') {
+			// For non-GET operations, log at info level
+			fetchLogger.info(
+				`${options.method} operation to ${path} completed in ${requestDuration}ms`,
+			);
+		} else {
+			// For regular GET operations, log at debug level
+			fetchLogger.debug(`API call completed in ${requestDuration}ms`);
+		}
 
 		// Log the raw response status and headers
-		logger.debug(
-			`[src/utils/transport.util.ts@fetchAtlassian] Raw response received: ${response.status} ${response.statusText}`,
+		fetchLogger.debug(
+			`Raw response received: ${response.status} ${response.statusText}`,
 			{
 				url,
 				status: response.status,
@@ -104,8 +129,8 @@ export async function fetchAtlassian<T>(
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			logger.error(
-				`[src/utils/transport.util.ts@fetchAtlassian] API error: ${response.status} ${response.statusText}`,
+			fetchLogger.error(
+				`API error: ${response.status} ${response.statusText}`,
 				errorText,
 			);
 
@@ -137,10 +162,7 @@ export async function fetchAtlassian<T>(
 					}
 				}
 			} catch (parseError) {
-				logger.debug(
-					`[src/utils/transport.util.ts@fetchAtlassian] Error parsing error response:`,
-					parseError,
-				);
+				fetchLogger.debug(`Error parsing error response:`, parseError);
 				// Fall back to the default error message
 			}
 
@@ -158,15 +180,15 @@ export async function fetchAtlassian<T>(
 		// Clone the response to log its content without consuming it
 		const clonedResponse = response.clone();
 		const responseJson = await clonedResponse.json();
-		logger.debug(
-			`[src/utils/transport.util.ts@fetchAtlassian] Response body:`,
-			responseJson,
-		);
+		fetchLogger.debug(`Response body:`, responseJson);
 
 		return response.json() as Promise<T>;
 	} catch (error) {
-		logger.error(
-			`[src/utils/transport.util.ts@fetchAtlassian] Request failed`,
+		endTime = performance.now();
+		const failedRequestDuration = (endTime - startTime).toFixed(2);
+
+		fetchLogger.error(
+			`Request failed after ${failedRequestDuration}ms`,
 			error,
 		);
 
