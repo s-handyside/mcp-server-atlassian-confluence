@@ -1,15 +1,17 @@
 import { getAtlassianCredentials, fetchAtlassian } from './transport.util.js';
 import { config } from './config.util.js';
-import { logger } from './logger.util.js';
+import { Logger } from './logger.util.js';
 import { SpacesResponse } from '../services/vendor.atlassian.spaces.types.js';
 
-// Mock the logger module only to prevent console output during tests
+// Mock the Logger class to prevent console output during tests
 jest.mock('./logger.util.js', () => ({
-	logger: {
-		debug: jest.fn(),
-		info: jest.fn(),
-		warn: jest.fn(),
-		error: jest.fn(),
+	Logger: {
+		forContext: jest.fn().mockReturnValue({
+			debug: jest.fn(),
+			info: jest.fn(),
+			warn: jest.fn(),
+			error: jest.fn(),
+		}),
 	},
 }));
 
@@ -45,9 +47,25 @@ describe('Transport Utility', () => {
 		});
 
 		it('should return null and log a warning when environment variables are missing', () => {
-			// Temporarily override the config.get function
-			const originalGet = config.get;
-			config.get = jest.fn().mockReturnValue(undefined);
+			// Create a spy on the Logger instance to track warn calls
+			const warnSpy = jest.spyOn(
+				Logger.forContext('utils/transport.util.ts'),
+				'warn',
+			);
+
+			// Store original environment values
+			const originalSiteName = process.env.ATLASSIAN_SITE_NAME;
+			const originalUserEmail = process.env.ATLASSIAN_USER_EMAIL;
+			const originalApiToken = process.env.ATLASSIAN_API_TOKEN;
+
+			// Temporarily remove credentials from environment
+			delete process.env.ATLASSIAN_SITE_NAME;
+			delete process.env.ATLASSIAN_USER_EMAIL;
+			delete process.env.ATLASSIAN_API_TOKEN;
+
+			// Clear the config cache
+			jest.clearAllMocks();
+			config.load();
 
 			// Call the function
 			const credentials = getAtlassianCredentials();
@@ -56,12 +74,20 @@ describe('Transport Utility', () => {
 			expect(credentials).toBeNull();
 
 			// Verify that a warning was logged
-			expect(logger.warn).toHaveBeenCalledWith(
+			expect(warnSpy).toHaveBeenCalledWith(
 				'Missing Atlassian credentials. Please set ATLASSIAN_SITE_NAME, ATLASSIAN_USER_EMAIL, and ATLASSIAN_API_TOKEN environment variables.',
 			);
 
-			// Restore the original function
-			config.get = originalGet;
+			// Restore original environment values
+			process.env.ATLASSIAN_SITE_NAME = originalSiteName;
+			process.env.ATLASSIAN_USER_EMAIL = originalUserEmail;
+			process.env.ATLASSIAN_API_TOKEN = originalApiToken;
+
+			// Restore config
+			config.load();
+
+			// Clean up spy
+			warnSpy.mockRestore();
 		});
 	});
 
