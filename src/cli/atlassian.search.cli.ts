@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
 import { handleCliError } from '../utils/error.util.js';
 import { formatHeading, formatPagination } from '../utils/formatter.util.js';
@@ -16,12 +16,15 @@ import { formatHeading, formatPagination } from '../utils/formatter.util.js';
  * @throws Error if command registration fails
  */
 function register(program: Command): void {
-	const logPrefix = '[src/cli/atlassian.search.cli.ts@register]';
-	logger.debug(`${logPrefix} Registering Confluence Search CLI commands...`);
+	const cliLogger = Logger.forContext(
+		'cli/atlassian.search.cli.ts',
+		'register',
+	);
+	cliLogger.debug('Registering Confluence Search CLI commands...');
 
 	registerSearchCommand(program);
 
-	logger.debug(`${logPrefix} CLI commands registered successfully`);
+	cliLogger.debug('CLI commands registered successfully');
 }
 
 /**
@@ -58,9 +61,12 @@ function registerSearchCommand(program: Command): void {
 			'Pagination cursor for retrieving the next set of results. Obtain this value from the previous response when more results are available.',
 		)
 		.action(async (options) => {
-			const logPrefix = '[src/cli/atlassian.search.cli.ts@search]';
+			const actionLogger = Logger.forContext(
+				'cli/atlassian.search.cli.ts',
+				'search',
+			);
 			try {
-				logger.debug(`${logPrefix} Processing command options:`, {
+				actionLogger.debug('Processing command options:', {
 					...options,
 				});
 
@@ -72,13 +78,10 @@ function registerSearchCommand(program: Command): void {
 					...(options.cursor && { cursor: options.cursor }),
 				};
 
-				logger.debug(
-					`${logPrefix} Searching with options:`,
-					searchOptions,
-				);
+				actionLogger.debug('Searching with options:', searchOptions);
 				const result =
 					await atlassianSearchController.search(searchOptions);
-				logger.debug(`${logPrefix} Search completed successfully`);
+				actionLogger.debug('Search completed successfully');
 
 				// Print the main content
 				console.log(formatHeading('Search Results', 2));
@@ -96,10 +99,7 @@ function registerSearchCommand(program: Command): void {
 					);
 				}
 			} catch (error) {
-				logger.error(
-					`${logPrefix} Error executing search command`,
-					error,
-				);
+				actionLogger.error('Error executing search command', error);
 				handleCliError(error);
 				process.exit(1);
 			}

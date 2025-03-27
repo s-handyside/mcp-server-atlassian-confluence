@@ -6,7 +6,10 @@
  */
 
 import TurndownService from 'turndown';
-import { logger } from './logger.util.js';
+import { Logger } from './logger.util.js';
+
+// Create a contextualized logger for this file
+const markdownLogger = Logger.forContext('utils/markdown.util.ts');
 
 // DOM type definitions
 interface HTMLElement {
@@ -90,10 +93,11 @@ export function htmlToMarkdown(html: string): string {
 		const markdown = turndownService.turndown(html);
 		return markdown;
 	} catch (error) {
-		logger.error(
-			'[src/utils/markdown.util.ts@htmlToMarkdown] Error converting HTML to Markdown:',
-			error,
+		const conversionLogger = Logger.forContext(
+			'utils/markdown.util.ts',
+			'htmlToMarkdown',
 		);
+		conversionLogger.error('Error converting HTML to Markdown:', error);
 		// Return the original HTML if conversion fails
 		return html;
 	}

@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
 import { ListPagesOptions } from '../controllers/atlassian.pages.types.js';
@@ -18,13 +18,16 @@ import { formatHeading, formatPagination } from '../utils/formatter.util.js';
  * @throws Error if command registration fails
  */
 function register(program: Command): void {
-	const logPrefix = '[src/cli/atlassian.pages.cli.ts@register]';
-	logger.debug(`${logPrefix} Registering Confluence Pages CLI commands...`);
+	const cliLogger = Logger.forContext(
+		'cli/atlassian.pages.cli.ts',
+		'register',
+	);
+	cliLogger.debug('Registering Confluence Pages CLI commands...');
 
 	registerListPagesCommand(program);
 	registerGetPageCommand(program);
 
-	logger.debug(`${logPrefix} CLI commands registered successfully`);
+	cliLogger.debug('CLI commands registered successfully');
 }
 
 /**
@@ -80,12 +83,12 @@ function registerListPagesCommand(program: Command): void {
 			'Sort order for pages (e.g., "title", "-modified-date"). Default is "-modified-date" (most recently modified first).',
 		)
 		.action(async (options) => {
-			const logPrefix = '[src/cli/atlassian.pages.cli.ts@list-pages]';
+			const actionLogger = Logger.forContext(
+				'cli/atlassian.pages.cli.ts',
+				'list-pages',
+			);
 			try {
-				logger.debug(
-					`${logPrefix} Processing command options:`,
-					options,
-				);
+				actionLogger.debug('Processing command options:', options);
 
 				// Validate space ID if provided
 				if (options.spaceId) {
@@ -128,16 +131,16 @@ function registerListPagesCommand(program: Command): void {
 					...(options.sort && { sort: options.sort }),
 				};
 
-				logger.debug(
-					`${logPrefix} Fetching pages with filters:`,
+				actionLogger.debug(
+					'Fetching pages with filters:',
 					filterOptions,
 				);
 
 				const result =
 					await atlassianPagesController.list(filterOptions);
 
-				logger.debug(
-					`${logPrefix} Successfully retrieved ${
+				actionLogger.debug(
+					`Successfully retrieved ${
 						result.pagination?.count || 'all'
 					} pages`,
 				);
@@ -158,7 +161,7 @@ function registerListPagesCommand(program: Command): void {
 					);
 				}
 			} catch (error) {
-				logger.error(`${logPrefix} Operation failed:`, error);
+				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
 			}
 		});
@@ -185,10 +188,13 @@ function registerGetPageCommand(program: Command): void {
 		)
 		.requiredOption('--page <id>', 'ID of the page to retrieve (numeric)')
 		.action(async (options) => {
-			const logPrefix = '[src/cli/atlassian.pages.cli.ts@get-page]';
+			const actionLogger = Logger.forContext(
+				'cli/atlassian.pages.cli.ts',
+				'get-page',
+			);
 			try {
-				logger.debug(
-					`${logPrefix} Fetching details for page ID: ${options.page}`,
+				actionLogger.debug(
+					`Fetching details for page ID: ${options.page}`,
 				);
 
 				// Validate that the page ID is a proper Confluence ID (numeric)
@@ -203,13 +209,11 @@ function registerGetPageCommand(program: Command): void {
 					id: pageId,
 				});
 
-				logger.debug(
-					`${logPrefix} Successfully retrieved page details`,
-				);
+				actionLogger.debug('Successfully retrieved page details');
 
 				console.log(result.content);
 			} catch (error) {
-				logger.error(`${logPrefix} Operation failed:`, error);
+				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
 			}
 		});

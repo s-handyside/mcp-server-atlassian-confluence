@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import {
@@ -21,8 +21,11 @@ import atlassianSearchController from '../controllers/atlassian.search.controlle
  * @throws Will return error message if search fails
  */
 async function search(args: SearchToolArgsType, _extra: RequestHandlerExtra) {
-	const logPrefix = '[src/tools/atlassian.search.tool.ts@search]';
-	logger.debug(`${logPrefix} Searching Confluence with filters:`, args);
+	const toolLogger = Logger.forContext(
+		'tools/atlassian.search.tool.ts',
+		'search',
+	);
+	toolLogger.debug('Searching Confluence with filters:', args);
 
 	try {
 		// Pass the search options to the controller
@@ -32,8 +35,8 @@ async function search(args: SearchToolArgsType, _extra: RequestHandlerExtra) {
 			cursor: args.cursor,
 		});
 
-		logger.debug(
-			`${logPrefix} Successfully retrieved search results from controller`,
+		toolLogger.debug(
+			'Successfully retrieved search results from controller',
 			message,
 		);
 
@@ -46,7 +49,7 @@ async function search(args: SearchToolArgsType, _extra: RequestHandlerExtra) {
 			],
 		};
 	} catch (error) {
-		logger.error(`${logPrefix} Failed to search Confluence`, error);
+		toolLogger.error('Failed to search Confluence', error);
 		return formatErrorForMcpTool(error);
 	}
 }
@@ -60,8 +63,11 @@ async function search(args: SearchToolArgsType, _extra: RequestHandlerExtra) {
  * @param {McpServer} server - The MCP server instance to register tools with
  */
 function register(server: McpServer) {
-	const logPrefix = '[src/tools/atlassian.search.tool.ts@register]';
-	logger.debug(`${logPrefix} Registering Atlassian Search tools...`);
+	const toolLogger = Logger.forContext(
+		'tools/atlassian.search.tool.ts',
+		'register',
+	);
+	toolLogger.debug('Registering Atlassian Search tools...');
 
 	// Register the search tool
 	server.tool(
@@ -117,7 +123,7 @@ function register(server: McpServer) {
 		search,
 	);
 
-	logger.debug(`${logPrefix} Successfully registered Atlassian Search tools`);
+	toolLogger.debug('Successfully registered Atlassian Search tools');
 }
 
 export default { register };

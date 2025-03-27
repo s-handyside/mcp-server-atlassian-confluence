@@ -1,5 +1,5 @@
 import atlassianSearchService from '../services/vendor.atlassian.search.service.js';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
 import {
 	extractPaginationInfo,
@@ -24,11 +24,11 @@ import { ExcerptStrategy } from '../services/vendor.atlassian.types.js';
  * @returns Promise with formatted search results and pagination information
  */
 async function search(options: SearchOptions): Promise<ControllerResponse> {
-	const source = `[src/controllers/atlassian.search.controller.ts@search]`;
-	logger.debug(
-		`${source} Searching Confluence with CQL: ${options.cql}`,
-		options,
+	const controllerLogger = Logger.forContext(
+		'controllers/atlassian.search.controller.ts',
+		'search',
 	);
+	controllerLogger.debug('Searching Confluence with CQL:', options);
 
 	try {
 		if (!options.cql) {
@@ -38,7 +38,7 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 				{
 					entityType: 'Search',
 					operation: 'validating',
-					source: 'src/controllers/atlassian.search.controller.ts@search',
+					source: 'controllers/atlassian.search.controller.ts@search',
 				},
 			);
 		}
@@ -48,8 +48,8 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 
 		// If the query was modified, log the change
 		if (processedCql !== options.cql) {
-			logger.debug(
-				`${source} Modified CQL query to handle reserved keywords: ${processedCql}`,
+			controllerLogger.debug(
+				`Modified CQL query to handle reserved keywords: ${processedCql}`,
 			);
 		}
 
@@ -61,18 +61,18 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 			excerpt: 'highlight' as ExcerptStrategy, // Always include highlighted excerpts in search results
 		};
 
-		logger.debug(`${source} Using search params:`, searchParams);
+		controllerLogger.debug('Using search params:', searchParams);
 
 		const searchData = await atlassianSearchService.search(searchParams);
-		logger.debug(
-			`${source} Retrieved ${searchData.results?.length || 0} results`,
+		controllerLogger.debug(
+			`Retrieved ${searchData.results?.length || 0} results`,
 		);
 
 		// Extract pagination information using the utility
 		const pagination = extractPaginationInfo(
 			searchData,
 			PaginationType.CURSOR,
-			source,
+			'controllers/atlassian.search.controller.ts@search',
 		);
 
 		// Format the search results for display using the formatter
@@ -87,7 +87,7 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 		handleControllerError(error, {
 			entityType: 'Search',
 			operation: 'searching',
-			source: 'src/controllers/atlassian.search.controller.ts@search',
+			source: 'controllers/atlassian.search.controller.ts@search',
 			additionalInfo: { options, cql: options.cql },
 		});
 	}

@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import {
@@ -26,8 +26,11 @@ async function listPages(
 	args: ListPagesToolArgsType,
 	_extra: RequestHandlerExtra,
 ) {
-	const logPrefix = '[src/tools/atlassian.pages.tool.ts@listPages]';
-	logger.debug(`${logPrefix} Listing Confluence pages with filters:`, args);
+	const toolLogger = Logger.forContext(
+		'tools/atlassian.pages.tool.ts',
+		'listPages',
+	);
+	toolLogger.debug('Listing Confluence pages with filters:', args);
 
 	try {
 		// Pass the options to the controller
@@ -40,8 +43,8 @@ async function listPages(
 			sort: args.sort,
 		});
 
-		logger.debug(
-			`${logPrefix} Successfully retrieved pages from controller`,
+		toolLogger.debug(
+			'Successfully retrieved pages from controller',
 			message,
 		);
 
@@ -54,7 +57,7 @@ async function listPages(
 			],
 		};
 	} catch (error) {
-		logger.error(`${logPrefix} Failed to list pages`, error);
+		toolLogger.error('Failed to list pages', error);
 		return formatErrorForMcpTool(error);
 	}
 }
@@ -71,15 +74,17 @@ async function listPages(
  * @throws Will return error message if page retrieval fails
  */
 async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
-	const logPrefix = '[src/tools/atlassian.pages.tool.ts@getPage]';
-
-	logger.debug(`${logPrefix} Retrieving page details for ID: ${args.pageId}`);
+	const toolLogger = Logger.forContext(
+		'tools/atlassian.pages.tool.ts',
+		'getPage',
+	);
+	toolLogger.debug(`Retrieving page details for ID: ${args.pageId}`);
 
 	try {
 		const message = await atlassianPagesController.get({ id: args.pageId });
 
-		logger.debug(
-			`${logPrefix} Successfully retrieved page details from controller`,
+		toolLogger.debug(
+			'Successfully retrieved page details from controller',
 			message,
 		);
 
@@ -92,7 +97,7 @@ async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
 			],
 		};
 	} catch (error) {
-		logger.error(`${logPrefix} Failed to get page details`, error);
+		toolLogger.error('Failed to get page details', error);
 		return formatErrorForMcpTool(error);
 	}
 }
@@ -106,8 +111,11 @@ async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
  * @param {McpServer} server - The MCP server instance to register tools with
  */
 function register(server: McpServer) {
-	const logPrefix = '[src/tools/atlassian.pages.tool.ts@register]';
-	logger.debug(`${logPrefix} Registering Atlassian Pages tools...`);
+	const toolLogger = Logger.forContext(
+		'tools/atlassian.pages.tool.ts',
+		'register',
+	);
+	toolLogger.debug('Registering Atlassian Pages tools...');
 
 	// Register the list pages tool
 	server.tool(
@@ -188,7 +196,7 @@ function register(server: McpServer) {
 		getPage,
 	);
 
-	logger.debug(`${logPrefix} Successfully registered Atlassian Pages tools`);
+	toolLogger.debug('Successfully registered Atlassian Pages tools');
 }
 
 export default { register };

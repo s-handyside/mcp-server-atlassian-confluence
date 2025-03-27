@@ -1,5 +1,5 @@
 import { createAuthMissingError } from '../utils/error.util.js';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import {
 	fetchAtlassian,
 	getAtlassianCredentials,
@@ -54,8 +54,11 @@ const API_PATH = '/wiki/api/v2';
  * });
  */
 async function list(params: ListPagesParams = {}): Promise<PagesResponse> {
-	const logPrefix = '[src/services/vendor.atlassian.pages.service.ts@list]';
-	logger.debug(`${logPrefix} Listing Confluence pages with params:`, params);
+	const serviceLogger = Logger.forContext(
+		'services/vendor.atlassian.pages.service.ts',
+		'list',
+	);
+	serviceLogger.debug('Listing Confluence pages with params:', params);
 
 	const credentials = getAtlassianCredentials();
 	if (!credentials) {
@@ -107,7 +110,7 @@ async function list(params: ListPagesParams = {}): Promise<PagesResponse> {
 		: '';
 	const path = `${API_PATH}/pages${queryString}`;
 
-	logger.debug(`${logPrefix} Sending request to: ${path}`);
+	serviceLogger.debug('Sending request to:', path);
 	return fetchAtlassian<PagesResponse>(credentials, path);
 }
 
@@ -148,8 +151,11 @@ async function get(
 	id: string,
 	params: GetPageByIdParams = {},
 ): Promise<PageDetailed> {
-	const logPrefix = '[src/services/vendor.atlassian.pages.service.ts@get]';
-	logger.debug(`${logPrefix} Getting Confluence page with ID: ${id}`);
+	const serviceLogger = Logger.forContext(
+		'services/vendor.atlassian.pages.service.ts',
+		'get',
+	);
+	serviceLogger.debug('Getting Confluence page with ID:', id);
 
 	const credentials = getAtlassianCredentials();
 	if (!credentials) {
@@ -224,7 +230,7 @@ async function get(
 		: '';
 	const path = `${API_PATH}/pages/${id}${queryString}`;
 
-	logger.debug(`${logPrefix} Sending request to: ${path}`);
+	serviceLogger.debug('Sending request to:', path);
 	return fetchAtlassian<PageDetailed>(credentials, path);
 }
 

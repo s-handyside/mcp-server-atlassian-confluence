@@ -1,4 +1,4 @@
-import { logger } from './logger.util.js';
+import { Logger } from './logger.util.js';
 
 /**
  * Types of pagination mechanisms used by different Atlassian APIs
@@ -72,6 +72,10 @@ export function extractPaginationInfo(
 	paginationType: PaginationType,
 	source: string,
 ): { nextCursor?: string; hasMore: boolean; count?: number } {
+	const paginationLogger = Logger.forContext(
+		'utils/pagination.util.ts',
+		'extractPaginationInfo',
+	);
 	let nextCursor: string | undefined;
 	let count: number | undefined;
 
@@ -127,8 +131,8 @@ export function extractPaginationInfo(
 							nextCursor = nextPage;
 						}
 					} catch (error) {
-						logger.warn(
-							`${source} Failed to parse next URL: ${pageData.next}`,
+						paginationLogger.warn(
+							`Failed to parse next URL: ${pageData.next}`,
 							{ error },
 						);
 					}
@@ -137,17 +141,17 @@ export function extractPaginationInfo(
 			}
 
 			default:
-				logger.warn(
-					`${source} Unknown pagination type: ${paginationType}`,
+				paginationLogger.warn(
+					`Unknown pagination type: ${paginationType}`,
 				);
 		}
 
 		if (nextCursor) {
-			logger.debug(`${source} Next cursor: ${nextCursor}`);
+			paginationLogger.debug(`Next cursor: ${nextCursor}`);
 		}
 
 		if (count !== undefined) {
-			logger.debug(`${source} Count: ${count}`);
+			paginationLogger.debug(`Count: ${count}`);
 		}
 
 		return {
@@ -156,8 +160,8 @@ export function extractPaginationInfo(
 			count,
 		};
 	} catch (error) {
-		logger.warn(
-			`${source} Error extracting pagination information: ${error instanceof Error ? error.message : String(error)}`,
+		paginationLogger.warn(
+			`Error extracting pagination information: ${error instanceof Error ? error.message : String(error)}`,
 		);
 		return { hasMore: false };
 	}

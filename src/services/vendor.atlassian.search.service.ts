@@ -1,5 +1,5 @@
 import { createAuthMissingError } from '../utils/error.util.js';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import {
 	fetchAtlassian,
 	getAtlassianCredentials,
@@ -17,9 +17,11 @@ const API_PATH = '/wiki/rest/api/search';
  * @returns Search results
  */
 async function search(params: SearchParams): Promise<SearchResponse> {
-	const logPrefix =
-		'[src/services/vendor.atlassian.search.service.ts@search]';
-	logger.debug(`${logPrefix} Searching Confluence with params:`, params);
+	const serviceLogger = Logger.forContext(
+		'services/vendor.atlassian.search.service.ts',
+		'search',
+	);
+	serviceLogger.debug('Searching Confluence with params:', params);
 
 	const credentials = getAtlassianCredentials();
 	if (!credentials) {
@@ -50,7 +52,7 @@ async function search(params: SearchParams): Promise<SearchResponse> {
 
 	const path = `${API_PATH}?${queryParams.toString()}`;
 
-	logger.debug(`${logPrefix} Sending request to: ${path}`);
+	serviceLogger.debug('Sending request to:', path);
 	return fetchAtlassian<SearchResponse>(credentials, path);
 }
 
