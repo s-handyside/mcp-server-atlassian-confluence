@@ -1,3 +1,20 @@
+# [1.12.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.11.1...v1.12.0) (2025-03-27)
+
+
+### Bug Fixes
+
+* **error:** standardize error handling across all MCP servers ([a7ad7e3](https://github.com/aashari/mcp-server-atlassian-confluence/commit/a7ad7e39c42d418f760706b3726317376d899d5f))
+* improve API test skipping when credentials are missing ([f150985](https://github.com/aashari/mcp-server-atlassian-confluence/commit/f150985c05ce9e8cd2c37d575b071415caad7543))
+* **test:** update transport.util.test.ts to handle Logger refactoring ([c9953f4](https://github.com/aashari/mcp-server-atlassian-confluence/commit/c9953f4626b9bbe39357ec9bba3dc4fc0b21642f))
+
+
+### Features
+
+* **logging:** complete logging standardization across all modules ([dae3f60](https://github.com/aashari/mcp-server-atlassian-confluence/commit/dae3f60e6ec291bdee2cb5ad8f791299327ee420))
+* **logging:** enhance logging system with performance metrics, granular debug controls, and operational milestones ([93fde13](https://github.com/aashari/mcp-server-atlassian-confluence/commit/93fde13b1100eba5ec49adf460d25613d419a027))
+* **logging:** standardize logger context usage across service modules ([a27cae4](https://github.com/aashari/mcp-server-atlassian-confluence/commit/a27cae42bb66f33052f5bef0b449de2d5741874f))
+* **logging:** standardize logging across Confluence modules ([50326ba](https://github.com/aashari/mcp-server-atlassian-confluence/commit/50326ba572ebb827e32d0082baf522b2f9e2c2df))
+
 ## [1.11.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.11.0...v1.11.1) (2025-03-27)
 
 
