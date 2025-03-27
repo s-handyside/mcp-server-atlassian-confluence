@@ -1,4 +1,4 @@
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import {
 	SpaceIdentifier,
 	ListSpacesOptions,
@@ -31,10 +31,11 @@ import atlassianPagesController from './atlassian.pages.controller.js';
 async function list(
 	options: ListSpacesOptions = {},
 ): Promise<ControllerResponse> {
-	logger.debug(
-		`[src/controllers/atlassian.spaces.controller.ts@list] Listing Confluence spaces with options:`,
-		options,
+	const controllerLogger = Logger.forContext(
+		'controllers/atlassian.spaces.controller.ts',
+		'list',
 	);
+	controllerLogger.debug('Listing Confluence spaces with options:', options);
 
 	try {
 		// Map controller options to service parameters
@@ -49,16 +50,13 @@ async function list(
 			includeIcon: true, // Include space icons in response
 		};
 
-		logger.debug(
-			`[src/controllers/atlassian.spaces.controller.ts@list] Using params:`,
-			params,
-		);
+		controllerLogger.debug('Using params:', params);
 
 		const spacesData = await atlassianSpacesService.list(params);
 
 		// Log only summary information instead of the entire response
-		logger.debug(
-			`[src/controllers/atlassian.spaces.controller.ts@list] Retrieved ${spacesData.results.length} spaces. Has more: ${spacesData._links?.next ? 'yes' : 'no'}`,
+		controllerLogger.debug(
+			`Retrieved ${spacesData.results.length} spaces. Has more: ${spacesData._links?.next ? 'yes' : 'no'}`,
 		);
 
 		// The formatSpacesList function expects a spacesData parameter
@@ -79,7 +77,7 @@ async function list(
 		return handleControllerError(error, {
 			entityType: 'Spaces',
 			operation: 'listing',
-			source: 'src/controllers/atlassian.spaces.controller.ts@list',
+			source: 'controllers/atlassian.spaces.controller.ts@list',
 		});
 	}
 }
@@ -93,10 +91,11 @@ async function list(
  */
 async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 	const { key } = identifier;
-
-	logger.debug(
-		`[src/controllers/atlassian.spaces.controller.ts@get] Getting Confluence space with key: ${key}...`,
+	const controllerLogger = Logger.forContext(
+		'controllers/atlassian.spaces.controller.ts',
+		'get',
 	);
+	controllerLogger.debug(`Getting Confluence space with key: ${key}...`);
 
 	try {
 		// Hardcoded parameters for the service call
@@ -111,15 +110,10 @@ async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 			includeRoleAssignments: false,
 		};
 
-		logger.debug(
-			`[src/controllers/atlassian.spaces.controller.ts@get] Using params:`,
-			params,
-		);
+		controllerLogger.debug('Using params:', params);
 
 		// Get space ID by key
-		logger.debug(
-			`[src/controllers/atlassian.spaces.controller.ts@get] Searching for space by key`,
-		);
+		controllerLogger.debug('Searching for space by key');
 
 		const spacesResponse = await atlassianSpacesService.list({
 			keys: [key],
@@ -142,16 +136,16 @@ async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 		const spaceData = await atlassianSpacesService.get(spaceId, params);
 
 		// Log only key information instead of the entire response
-		logger.debug(
-			`[src/controllers/atlassian.spaces.controller.ts@get] Retrieved space: ${spaceData.name} (${spaceData.id})`,
+		controllerLogger.debug(
+			`Retrieved space: ${spaceData.name} (${spaceData.id})`,
 		);
 
 		// Get homepage content if available
 		let homepageContent = '';
 		if (spaceData.homepageId) {
 			try {
-				logger.debug(
-					`[src/controllers/atlassian.spaces.controller.ts@get] Fetching homepage content for ID: ${spaceData.homepageId}`,
+				controllerLogger.debug(
+					`Fetching homepage content for ID: ${spaceData.homepageId}`,
 				);
 				const homepageResult = await atlassianPagesController.get({
 					id: spaceData.homepageId,
@@ -166,26 +160,26 @@ async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 
 				if (contentMatch && contentMatch[1]) {
 					homepageContent = contentMatch[1].trim();
-					logger.debug(
-						`[src/controllers/atlassian.spaces.controller.ts@get] Successfully extracted homepage content section`,
+					controllerLogger.debug(
+						'Successfully extracted homepage content section',
 					);
 				} else {
 					// If no specific content section found, use everything after the title
 					const titleMatch = content.match(/# .*?\n([\s\S]*)/);
 					if (titleMatch && titleMatch[1]) {
 						homepageContent = titleMatch[1].trim();
-						logger.debug(
-							`[src/controllers/atlassian.spaces.controller.ts@get] Extracted homepage content from title section`,
+						controllerLogger.debug(
+							'Extracted homepage content from title section',
 						);
 					} else {
-						logger.debug(
-							`[src/controllers/atlassian.spaces.controller.ts@get] No content sections found in homepage`,
+						controllerLogger.debug(
+							'No content sections found in homepage',
 						);
 					}
 				}
 			} catch (error) {
-				logger.warn(
-					`[src/controllers/atlassian.spaces.controller.ts@get] Failed to fetch homepage content: ${error instanceof Error ? error.message : String(error)}`,
+				controllerLogger.warn(
+					`Failed to fetch homepage content: ${error instanceof Error ? error.message : String(error)}`,
 				);
 				homepageContent =
 					'*Failed to retrieve homepage content. The page may be inaccessible or deleted.*';
@@ -204,7 +198,7 @@ async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 			entityType: 'Space',
 			entityId: identifier,
 			operation: 'retrieving',
-			source: 'src/controllers/atlassian.spaces.controller.ts@get',
+			source: 'controllers/atlassian.spaces.controller.ts@get',
 		});
 	}
 }

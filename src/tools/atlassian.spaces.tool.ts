@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import {
@@ -26,8 +26,11 @@ async function listSpaces(
 	args: ListSpacesToolArgsType,
 	_extra: RequestHandlerExtra,
 ) {
-	const logPrefix = '[src/tools/atlassian.spaces.tool.ts@listSpaces]';
-	logger.debug(`${logPrefix} Listing Confluence spaces with filters:`, args);
+	const toolLogger = Logger.forContext(
+		'tools/atlassian.spaces.tool.ts',
+		'listSpaces',
+	);
+	toolLogger.debug('Listing Confluence spaces with filters:', args);
 
 	try {
 		// Pass the filter options to the controller
@@ -39,8 +42,8 @@ async function listSpaces(
 			cursor: args.cursor,
 		});
 
-		logger.debug(
-			`${logPrefix} Successfully retrieved spaces from controller`,
+		toolLogger.debug(
+			'Successfully retrieved spaces from controller',
 			message,
 		);
 
@@ -53,7 +56,7 @@ async function listSpaces(
 			],
 		};
 	} catch (error) {
-		logger.error(`${logPrefix} Failed to list spaces`, error);
+		toolLogger.error('Failed to list spaces', error);
 		return formatErrorForMcpTool(error);
 	}
 }
@@ -73,18 +76,18 @@ async function getSpace(
 	args: GetSpaceToolArgsType,
 	_extra: RequestHandlerExtra,
 ) {
-	const logPrefix = '[src/tools/atlassian.spaces.tool.ts@getSpace]';
-
-	logger.debug(
-		`${logPrefix} Retrieving space details for key: ${args.spaceKey}`,
+	const toolLogger = Logger.forContext(
+		'tools/atlassian.spaces.tool.ts',
+		'getSpace',
 	);
+	toolLogger.debug('Retrieving space details for key:', args.spaceKey);
 
 	try {
 		const message = await atlassianSpacesController.get({
 			key: args.spaceKey,
 		});
-		logger.debug(
-			`${logPrefix} Successfully retrieved space details from controller`,
+		toolLogger.debug(
+			'Successfully retrieved space details from controller',
 			message,
 		);
 
@@ -97,7 +100,7 @@ async function getSpace(
 			],
 		};
 	} catch (error) {
-		logger.error(`${logPrefix} Failed to get space details`, error);
+		toolLogger.error('Failed to get space details', error);
 		return formatErrorForMcpTool(error);
 	}
 }
@@ -111,8 +114,11 @@ async function getSpace(
  * @param {McpServer} server - The MCP server instance to register tools with
  */
 function register(server: McpServer) {
-	const logPrefix = '[src/tools/atlassian.spaces.tool.ts@register]';
-	logger.debug(`${logPrefix} Registering Atlassian Spaces tools...`);
+	const toolLogger = Logger.forContext(
+		'tools/atlassian.spaces.tool.ts',
+		'register',
+	);
+	toolLogger.debug('Registering Atlassian Spaces tools...');
 
 	// Register the list spaces tool
 	server.tool(
@@ -205,7 +211,7 @@ function register(server: McpServer) {
 		getSpace,
 	);
 
-	logger.debug(`${logPrefix} Successfully registered Atlassian Spaces tools`);
+	toolLogger.debug('Successfully registered Atlassian Spaces tools');
 }
 
 export default { register };

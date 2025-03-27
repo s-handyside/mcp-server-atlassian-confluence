@@ -1,5 +1,5 @@
 import { createAuthMissingError } from '../utils/error.util.js';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import {
 	fetchAtlassian,
 	getAtlassianCredentials,
@@ -58,8 +58,11 @@ const API_PATH = '/wiki/api/v2';
  * });
  */
 async function list(params: ListSpacesParams = {}): Promise<SpacesResponse> {
-	const logPrefix = '[src/services/vendor.atlassian.spaces.service.ts@list]';
-	logger.debug(`${logPrefix} Listing Confluence spaces with params:`, params);
+	const serviceLogger = Logger.forContext(
+		'services/vendor.atlassian.spaces.service.ts',
+		'list',
+	);
+	serviceLogger.debug('Listing Confluence spaces with params:', params);
 
 	const credentials = getAtlassianCredentials();
 	if (!credentials) {
@@ -122,7 +125,7 @@ async function list(params: ListSpacesParams = {}): Promise<SpacesResponse> {
 		: '';
 	const path = `${API_PATH}/spaces${queryString}`;
 
-	logger.debug(`${logPrefix} Sending request to: ${path}`);
+	serviceLogger.debug(`Sending request to: ${path}`);
 	return fetchAtlassian<SpacesResponse>(credentials, path);
 }
 
@@ -157,9 +160,12 @@ async function get(
 	id: string,
 	params: GetSpaceByIdParams = {},
 ): Promise<SpaceDetailed> {
-	const logPrefix = '[src/services/vendor.atlassian.spaces.service.ts@get]';
-	logger.debug(
-		`${logPrefix} Getting Confluence space with ID: ${id}, params:`,
+	const serviceLogger = Logger.forContext(
+		'services/vendor.atlassian.spaces.service.ts',
+		'get',
+	);
+	serviceLogger.debug(
+		`Getting Confluence space with ID: ${id}, params:`,
 		params,
 	);
 
@@ -215,7 +221,7 @@ async function get(
 		: '';
 	const path = `${API_PATH}/spaces/${id}${queryString}`;
 
-	logger.debug(`${logPrefix} Sending request to: ${path}`);
+	serviceLogger.debug(`Sending request to: ${path}`);
 	return fetchAtlassian<SpaceDetailed>(credentials, path);
 }
 

@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { logger } from '../utils/logger.util.js';
+import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianSpacesController from '../controllers/atlassian.spaces.controller.js';
 import { ListSpacesOptions } from '../controllers/atlassian.spaces.types.js';
@@ -17,13 +17,16 @@ import { formatHeading, formatPagination } from '../utils/formatter.util.js';
  * @throws Error if command registration fails
  */
 function register(program: Command): void {
-	const logPrefix = '[src/cli/atlassian.spaces.cli.ts@register]';
-	logger.debug(`${logPrefix} Registering Confluence Spaces CLI commands...`);
+	const cliLogger = Logger.forContext(
+		'cli/atlassian.spaces.cli.ts',
+		'register',
+	);
+	cliLogger.debug('Registering Confluence Spaces CLI commands...');
 
 	registerListSpacesCommand(program);
 	registerGetSpaceCommand(program);
 
-	logger.debug(`${logPrefix} CLI commands registered successfully`);
+	cliLogger.debug('CLI commands registered successfully');
 }
 
 /**
@@ -73,12 +76,12 @@ function registerListSpacesCommand(program: Command): void {
 			'current',
 		)
 		.action(async (options) => {
-			const logPrefix = '[src/cli/atlassian.spaces.cli.ts@list-spaces]';
+			const actionLogger = Logger.forContext(
+				'cli/atlassian.spaces.cli.ts',
+				'list-spaces',
+			);
 			try {
-				logger.debug(
-					`${logPrefix} Processing command options:`,
-					options,
-				);
+				actionLogger.debug('Processing command options:', options);
 
 				// Validate type if provided
 				if (
@@ -110,15 +113,15 @@ function registerListSpacesCommand(program: Command): void {
 					...(options.query && { query: options.query }),
 				};
 
-				logger.debug(
-					`${logPrefix} Fetching spaces with filters:`,
+				actionLogger.debug(
+					'Fetching spaces with filters:',
 					filterOptions,
 				);
 
 				const result =
 					await atlassianSpacesController.list(filterOptions);
 
-				logger.debug(`${logPrefix} Successfully retrieved spaces`);
+				actionLogger.debug('Successfully retrieved spaces');
 
 				// Print the main content
 				console.log(formatHeading('Spaces', 2));
@@ -136,7 +139,7 @@ function registerListSpacesCommand(program: Command): void {
 					);
 				}
 			} catch (error) {
-				logger.error(`${logPrefix} Operation failed:`, error);
+				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
 			}
 		});
@@ -166,10 +169,13 @@ function registerGetSpaceCommand(program: Command): void {
 			'Key of the space to retrieve (e.g., DEV, MARKETING)',
 		)
 		.action(async (options) => {
-			const logPrefix = '[src/cli/atlassian.spaces.cli.ts@get-space]';
+			const actionLogger = Logger.forContext(
+				'cli/atlassian.spaces.cli.ts',
+				'get-space',
+			);
 			try {
-				logger.debug(
-					`${logPrefix} Fetching details for space key: ${options.space}`,
+				actionLogger.debug(
+					`Fetching details for space key: ${options.space}`,
 				);
 
 				// Validate that the space key is a proper Confluence space key
@@ -183,13 +189,11 @@ function registerGetSpaceCommand(program: Command): void {
 				const result = await atlassianSpacesController.get({
 					key: options.space,
 				});
-				logger.debug(
-					`${logPrefix} Successfully retrieved space details`,
-				);
+				actionLogger.debug('Successfully retrieved space details');
 
 				console.log(result.content);
 			} catch (error) {
-				logger.error(`${logPrefix} Operation failed:`, error);
+				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
 			}
 		});
