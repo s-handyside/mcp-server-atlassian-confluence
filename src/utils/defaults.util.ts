@@ -71,9 +71,9 @@ export const SPACE_DEFAULTS = {
  * const options = applyDefaults({ limit: 10 }, { limit: DEFAULT_PAGE_SIZE, includeLabels: true });
  * // Result: { limit: 10, includeLabels: true }
  */
-export function applyDefaults<T extends Record<string, unknown>>(
+export function applyDefaults<T extends object>(
 	options: Partial<T>,
-	defaults: T,
+	defaults: Partial<T>,
 ): T {
 	return {
 		...defaults,

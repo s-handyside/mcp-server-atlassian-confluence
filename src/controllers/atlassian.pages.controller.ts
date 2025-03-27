@@ -11,7 +11,11 @@ import {
 	formatPagesList,
 } from './atlassian.pages.formatter.js';
 import atlassianPagesService from '../services/vendor.atlassian.pages.service.js';
-import { DEFAULT_PAGE_SIZE, PAGE_DEFAULTS } from '../utils/defaults.util.js';
+import {
+	DEFAULT_PAGE_SIZE,
+	PAGE_DEFAULTS,
+	applyDefaults,
+} from '../utils/defaults.util.js';
 import {
 	ListPagesParams,
 	BodyFormat,
@@ -46,16 +50,28 @@ async function list(
 	methodLogger.debug('Listing Confluence pages...', options);
 
 	try {
+		// Create defaults object with proper typing
+		const defaults: Partial<ListPagesOptions> = {
+			limit: DEFAULT_PAGE_SIZE,
+			sort: '-modified-date',
+		};
+
+		// Apply defaults
+		const mergedOptions = applyDefaults<ListPagesOptions>(
+			options,
+			defaults,
+		);
+
 		// Map controller options to service parameters
 		const serviceParams: ListPagesParams = {
 			// Optional filters
-			spaceId: options.spaceId,
-			status: options.status,
+			spaceId: mergedOptions.spaceId,
+			status: mergedOptions.status,
 			// Pagination
-			limit: options.limit || DEFAULT_PAGE_SIZE,
-			cursor: options.cursor,
-			// Set default sort to modified-date descending if not specified
-			sort: options.sort || '-modified-date',
+			limit: mergedOptions.limit,
+			cursor: mergedOptions.cursor,
+			// Sort order
+			sort: mergedOptions.sort,
 		};
 
 		const pagesData = await atlassianPagesService.list(serviceParams);
@@ -91,8 +107,8 @@ async function list(
 }
 
 /**
- * Gets details of a specific Confluence page
- * @param identifier The page identifier
+ * Gets details of a specific Confluence page by ID
+ * @param identifier The page identifier containing ID
  * @returns Formatted page details
  */
 async function get(identifier: PageIdentifier): Promise<ControllerResponse> {
@@ -102,20 +118,28 @@ async function get(identifier: PageIdentifier): Promise<ControllerResponse> {
 		'get',
 	);
 
-	methodLogger.debug(`Getting Confluence page with ID: ${id}...`);
+	methodLogger.debug(`Getting Confluence page by ID: ${id}...`);
 
 	try {
-		// Always use default settings with maximum detail
-		const serviceParams: GetPageByIdParams = {
+		// Create defaults object with proper typing for page details
+		const defaults = {
 			bodyFormat: PAGE_DEFAULTS.BODY_FORMAT as BodyFormat,
 			includeLabels: PAGE_DEFAULTS.INCLUDE_LABELS,
 			includeProperties: PAGE_DEFAULTS.INCLUDE_PROPERTIES,
-			includeWebresources: PAGE_DEFAULTS.INCLUDE_WEBRESOURCES,
+			includeWebResources: PAGE_DEFAULTS.INCLUDE_WEBRESOURCES,
 			includeCollaborators: PAGE_DEFAULTS.INCLUDE_COLLABORATORS,
 			includeVersion: PAGE_DEFAULTS.INCLUDE_VERSION,
 		};
 
-		const pageData = await atlassianPagesService.get(id, serviceParams);
+		// Map controller options to service parameters
+		const params: GetPageByIdParams = defaults;
+
+		methodLogger.debug('Using service params:', params);
+
+		// Get page data from the API
+		const pageData = await atlassianPagesService.get(id, params);
+
+		// Log only key information instead of the entire response
 		methodLogger.debug(
 			`Retrieved page: ${pageData.title} (${pageData.id})`,
 		);
@@ -129,7 +153,7 @@ async function get(identifier: PageIdentifier): Promise<ControllerResponse> {
 	} catch (error) {
 		handleControllerError(error, {
 			entityType: 'Page',
-			entityId: identifier,
+			entityId: id,
 			operation: 'retrieving',
 			source: 'controllers/atlassian.pages.controller.ts@get',
 		});

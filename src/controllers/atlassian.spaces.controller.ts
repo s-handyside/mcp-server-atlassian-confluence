@@ -12,7 +12,12 @@ import {
 } from '../controllers/atlassian.spaces.formatter.js';
 import { ControllerResponse } from '../types/common.types.js';
 import atlassianPagesController from './atlassian.pages.controller.js';
-import { DEFAULT_PAGE_SIZE } from '../utils/defaults.util.js';
+import {
+	DEFAULT_PAGE_SIZE,
+	SPACE_DEFAULTS,
+	applyDefaults,
+} from '../utils/defaults.util.js';
+import { ListSpacesParams } from '../services/vendor.atlassian.spaces.types.js';
 
 /**
  * Controller for managing Confluence spaces.
@@ -39,15 +44,27 @@ async function list(
 	controllerLogger.debug('Listing Confluence spaces with options:', options);
 
 	try {
+		// Create defaults object with proper typing
+		const defaults: Partial<ListSpacesOptions> = {
+			limit: DEFAULT_PAGE_SIZE,
+			sort: '-name',
+		};
+
+		// Apply defaults
+		const mergedOptions = applyDefaults<ListSpacesOptions>(
+			options,
+			defaults,
+		);
+
 		// Map controller options to service parameters
-		const params = {
-			type: options.type,
-			status: options.status,
-			limit: options.limit || DEFAULT_PAGE_SIZE,
-			cursor: options.cursor,
+		const params: ListSpacesParams = {
+			type: mergedOptions.type,
+			status: mergedOptions.status,
+			limit: mergedOptions.limit,
+			cursor: mergedOptions.cursor,
 			// Additional parameters
-			sort: '-name' as const, // Sort by name descending by default
-			descriptionFormat: 'view' as const,
+			sort: mergedOptions.sort, // Already typed correctly through ListSpacesParams
+			descriptionFormat: 'view',
 			includeIcon: true, // Include space icons in response
 		};
 
@@ -99,17 +116,18 @@ async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 	controllerLogger.debug(`Getting Confluence space with key: ${key}...`);
 
 	try {
-		// Hardcoded parameters for the service call
-		const params = {
-			// Content format
+		// Create defaults object with proper typing for space details
+		const defaults = {
 			descriptionFormat: 'view' as const,
-			// Include additional data
 			includeIcon: false,
 			includeLabels: true,
 			includeOperations: false,
-			includePermissions: false,
+			includePermissions: SPACE_DEFAULTS.INCLUDE_PERMISSIONS,
 			includeRoleAssignments: false,
 		};
+
+		// Hardcoded parameters for the service call - use defaults
+		const params = defaults;
 
 		controllerLogger.debug('Using params:', params);
 
