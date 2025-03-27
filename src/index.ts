@@ -18,6 +18,9 @@ const VERSION = '1.12.0';
 // Create a contextualized logger for this file
 const indexLogger = Logger.forContext('index.ts');
 
+// Log initialization
+indexLogger.debug('Confluence MCP server module loaded');
+
 let serverInstance: McpServer | null = null;
 let transportInstance: SSEServerTransport | StdioServerTransport | null = null;
 
