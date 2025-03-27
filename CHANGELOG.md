@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.10.0...v1.11.0) (2025-03-27)
+
+
+### Features
+
+* **confluence:** add default sorting to pages and spaces commands ([a91b5af](https://github.com/aashari/mcp-server-atlassian-confluence/commit/a91b5af4418b2928c538469967c574f96152e3fa))
+
 # [1.10.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.9.2...v1.10.0) (2025-03-27)
 
 
