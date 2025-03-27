@@ -260,6 +260,5 @@ class Logger {
 	}
 }
 
-// Export the default logger instance and the Logger class
-export const logger = new Logger();
+// Only export the Logger class to enforce contextual logging via Logger.forContext
 export { Logger };
