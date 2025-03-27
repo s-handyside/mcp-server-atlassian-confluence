@@ -143,6 +143,8 @@ function register(server: McpServer) {
         - Creation information and URL
         
         Results can be paginated using the 'limit' and 'cursor' parameters.
+        
+        SORTING: By default, spaces are sorted by name in descending order.
 
         EXAMPLES:
         - List all spaces: {}

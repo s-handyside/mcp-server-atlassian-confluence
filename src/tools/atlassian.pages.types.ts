@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PageSortOrder } from '../services/vendor.atlassian.pages.types.js';
 
 /**
  * Base pagination arguments for all tools
@@ -57,6 +58,22 @@ const ListPagesToolArgs = z.object({
 		),
 
 	...PaginationArgs,
+
+	sort: z
+		.enum([
+			'id',
+			'-id',
+			'created-date',
+			'-created-date',
+			'modified-date',
+			'-modified-date',
+			'title',
+			'-title',
+		] as [PageSortOrder, ...PageSortOrder[]])
+		.optional()
+		.describe(
+			'Property to sort pages by. Default is "-modified-date" which displays the most recently modified pages first. The "-" prefix indicates descending order. Valid values: "id", "-id", "created-date", "-created-date", "modified-date", "-modified-date", "title", "-title".',
+		),
 });
 
 type ListPagesToolArgsType = z.infer<typeof ListPagesToolArgs>;

@@ -37,6 +37,7 @@ async function listPages(
 			status: args.status,
 			limit: args.limit,
 			cursor: args.cursor,
+			sort: args.sort,
 		});
 
 		logger.debug(
@@ -129,12 +130,15 @@ function register(server: McpServer) {
         - If you only have the space *key* (use 'list-spaces' or 'get-space' to find the numeric 'spaceId' first).
 
         RETURNS: Formatted list of pages including ID, title, space ID, status, author, creation date, version, and URL. Includes pagination details if applicable (Confluence uses cursor-based pagination).
+        
+        SORTING: By default, pages are sorted by modified date in descending order (most recently modified first). You can change this by specifying a different value in the 'sort' parameter (e.g., "title" for alphabetical sorting).
 
         EXAMPLES:
         - List pages in space 123456: { spaceId: ["123456"] }
         - List archived pages in space 123456: { spaceId: ["123456"], status: ["archived"] }
         - Find pages with "Project Plan" in title/label in space 123456: { spaceId: ["123456"], query: "Project Plan" }
         - Paginate results: { limit: 10, cursor: "some-cursor-value" }
+        - Sort pages by title: { spaceId: ["123456"], sort: "title" }
 
         ERRORS:
         - Space ID not found: Verify the numeric 'spaceId' is correct.

@@ -43,6 +43,8 @@ function registerListPagesCommand(program: Command): void {
 
         Output: Formatted list of pages including ID, title, space ID, status, author, creation date, and URL. Supports filtering and pagination.
 
+        Sorting: By default, pages are sorted by modified date in descending order (most recently modified first).
+
         Note: --space-id requires numeric IDs. Use 'list-spaces' or 'get-space' first if you only have the space key.
 
         Examples:
@@ -72,6 +74,10 @@ function registerListPagesCommand(program: Command): void {
 			'-s, --status <status>',
 			'Filter by page status: current, archived',
 			'current',
+		)
+		.option(
+			'--sort <sort>',
+			'Sort order for pages (e.g., "title", "-modified-date"). Default is "-modified-date" (most recently modified first).',
 		)
 		.action(async (options) => {
 			const logPrefix = '[src/cli/atlassian.pages.cli.ts@list-pages]';
@@ -119,6 +125,7 @@ function registerListPagesCommand(program: Command): void {
 					}),
 					...(options.cursor && { cursor: options.cursor }),
 					...(options.query && { query: options.query }),
+					...(options.sort && { sort: options.sort }),
 				};
 
 				logger.debug(

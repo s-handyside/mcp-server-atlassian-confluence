@@ -41,6 +41,8 @@ function registerListSpacesCommand(program: Command): void {
         Use Case: Useful when you don't know the exact key of a space, or when exploring available spaces. Allows filtering by type (global/personal) and status (current/archived).
 
         Output: Formatted list including space name, key, ID, type, status, description snippet, and URL. Supports filtering and pagination.
+        
+        Sorting: By default, spaces are sorted by name in descending order.
 
         Examples:
   $ mcp-confluence list-spaces --type global --status current
