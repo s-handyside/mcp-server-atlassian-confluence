@@ -17,6 +17,12 @@ jest.mock('./logger.util.js', () => ({
 
 // NOTE: This file uses real API calls (no mocking of fetch)
 
+// Helper function to check for credentials and skip tests if not available
+const hasCredentials = (): boolean => {
+	const credentials = getAtlassianCredentials();
+	return credentials !== null;
+};
+
 describe('Transport Utility', () => {
 	// Load configuration before all tests
 	beforeAll(() => {
@@ -26,8 +32,9 @@ describe('Transport Utility', () => {
 
 	describe('getAtlassianCredentials', () => {
 		it('should return credentials when environment variables are set', () => {
-			// This test will be skipped if credentials are not available
 			const credentials = getAtlassianCredentials();
+
+			// Skip this test if credentials are not available
 			if (!credentials) {
 				console.warn(
 					'Skipping test: No Atlassian credentials available',
@@ -92,100 +99,104 @@ describe('Transport Utility', () => {
 	});
 
 	describe('fetchAtlassian', () => {
-		it('should successfully fetch data from the Atlassian API', async () => {
-			// This test will be skipped if credentials are not available
-			const credentials = getAtlassianCredentials();
-			if (!credentials) {
-				console.warn(
-					'Skipping test: No Atlassian credentials available',
-				);
-				return;
-			}
+		// Test will be conditionally skipped if no credentials
+		(hasCredentials() ? it : it.skip)(
+			'should successfully fetch data from the Atlassian API',
+			async () => {
+				const credentials = getAtlassianCredentials();
+				if (!credentials) {
+					throw new Error('Credentials unexpectedly missing');
+				}
 
-			// We need to use a valid endpoint for this test
-			// Make a real API call to get spaces (limiting to 1 result to reduce load)
-			const result = await fetchAtlassian<SpacesResponse>(
-				credentials,
-				'/wiki/api/v2/spaces?limit=1',
-			);
-
-			// Verify the response structure from the real API
-			expect(result).toHaveProperty('results');
-			expect(Array.isArray(result.results)).toBe(true);
-			expect(result).toHaveProperty('_links');
-		}, 15000);
-
-		it('should throw an error for invalid endpoints', async () => {
-			// This test will be skipped if credentials are not available
-			const credentials = getAtlassianCredentials();
-			if (!credentials) {
-				console.warn(
-					'Skipping test: No Atlassian credentials available',
-				);
-				return;
-			}
-
-			// Make a call to a non-existent endpoint
-			await expect(
-				fetchAtlassian(
+				// We need to use a valid endpoint for this test
+				// Make a real API call to get spaces (limiting to 1 result to reduce load)
+				const result = await fetchAtlassian<SpacesResponse>(
 					credentials,
-					'/wiki/api/v2/non-existent-endpoint',
-				),
-			).rejects.toThrow();
-		}, 15000);
-
-		it('should normalize paths that do not start with a slash', async () => {
-			// This test will be skipped if credentials are not available
-			const credentials = getAtlassianCredentials();
-			if (!credentials) {
-				console.warn(
-					'Skipping test: No Atlassian credentials available',
+					'/wiki/api/v2/spaces?limit=1',
 				);
-				return;
-			}
 
-			// Path without a leading slash (should be normalized)
-			const result = await fetchAtlassian<SpacesResponse>(
-				credentials,
-				'wiki/api/v2/spaces?limit=1',
-			);
+				// Verify the response structure from the real API
+				expect(result).toHaveProperty('results');
+				expect(Array.isArray(result.results)).toBe(true);
+				expect(result).toHaveProperty('_links');
+			},
+			15000,
+		);
 
-			// Verify the response structure
-			expect(result).toHaveProperty('results');
-			expect(Array.isArray(result.results)).toBe(true);
-			expect(result).toHaveProperty('_links');
-		}, 15000);
+		// Test will be conditionally skipped if no credentials
+		(hasCredentials() ? it : it.skip)(
+			'should throw an error for invalid endpoints',
+			async () => {
+				const credentials = getAtlassianCredentials();
+				if (!credentials) {
+					throw new Error('Credentials unexpectedly missing');
+				}
 
-		it('should support custom request options', async () => {
-			// This test will be skipped if credentials are not available
-			const credentials = getAtlassianCredentials();
-			if (!credentials) {
-				console.warn(
-					'Skipping test: No Atlassian credentials available',
+				// Make a call to a non-existent endpoint
+				await expect(
+					fetchAtlassian(
+						credentials,
+						'/wiki/api/v2/non-existent-endpoint',
+					),
+				).rejects.toThrow();
+			},
+			15000,
+		);
+
+		// Test will be conditionally skipped if no credentials
+		(hasCredentials() ? it : it.skip)(
+			'should normalize paths that do not start with a slash',
+			async () => {
+				const credentials = getAtlassianCredentials();
+				if (!credentials) {
+					throw new Error('Credentials unexpectedly missing');
+				}
+
+				// Path without a leading slash (should be normalized)
+				const result = await fetchAtlassian<SpacesResponse>(
+					credentials,
+					'wiki/api/v2/spaces?limit=1',
 				);
-				return;
-			}
 
-			// Custom request options
-			const options = {
-				method: 'GET' as const,
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-				},
-			};
+				// Verify the response structure
+				expect(result).toHaveProperty('results');
+				expect(Array.isArray(result.results)).toBe(true);
+				expect(result).toHaveProperty('_links');
+			},
+			15000,
+		);
 
-			// Make a call with custom options
-			const result = await fetchAtlassian<SpacesResponse>(
-				credentials,
-				'/wiki/api/v2/spaces?limit=1',
-				options,
-			);
+		// Test will be conditionally skipped if no credentials
+		(hasCredentials() ? it : it.skip)(
+			'should support custom request options',
+			async () => {
+				const credentials = getAtlassianCredentials();
+				if (!credentials) {
+					throw new Error('Credentials unexpectedly missing');
+				}
 
-			// Verify the response structure
-			expect(result).toHaveProperty('results');
-			expect(Array.isArray(result.results)).toBe(true);
-			expect(result).toHaveProperty('_links');
-		}, 15000);
+				// Custom request options
+				const options = {
+					method: 'GET' as const,
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json',
+					},
+				};
+
+				// Make a call with custom options
+				const result = await fetchAtlassian<SpacesResponse>(
+					credentials,
+					'/wiki/api/v2/spaces?limit=1',
+					options,
+				);
+
+				// Verify the response structure
+				expect(result).toHaveProperty('results');
+				expect(Array.isArray(result.results)).toBe(true);
+				expect(result).toHaveProperty('_links');
+			},
+			15000,
+		);
 	});
 });
