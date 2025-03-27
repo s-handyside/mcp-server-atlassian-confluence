@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.9.2...v1.10.0) (2025-03-27)
+
+
+### Features
+
+* **confluence:** add default sorting to list operations ([3d621c4](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3d621c440985186414e612471227cd0cbe893173))
+
 ## [1.9.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.9.1...v1.9.2) (2025-03-26)
 
 
