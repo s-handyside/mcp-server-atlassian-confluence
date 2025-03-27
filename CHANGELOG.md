@@ -8,6 +8,18 @@
 * standardize vendor types with other MCP projects ([3c1de7a](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3c1de7a363753aa6a1837deb42290526619ce8aa))
 * trigger new release ([341e71e](https://github.com/aashari/mcp-server-atlassian-confluence/commit/341e71e954c07568df8d88bc9c3448c90049a005))
 * update applyDefaults utility to work with TypeScript interfaces ([b0fb0a3](https://github.com/aashari/mcp-server-atlassian-confluence/commit/b0fb0a3fc4ce73b1d585e1da827fea0800cdaeb3))
+* update version to 1.13.0 to fix CI/CD workflows ([b70bb43](https://github.com/aashari/mcp-server-atlassian-confluence/commit/b70bb43f6627bf01e6bdc69dd3a571f5ad07348e))
+
+## [1.12.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.12.0...v1.12.1) (2025-03-27)
+
+
+### Bug Fixes
+
+* standardize logger utility exports to enforce contextual logging pattern ([a9e21f3](https://github.com/aashari/mcp-server-atlassian-confluence/commit/a9e21f381589db9ec29c72cacb0bd902d359ccab))
+* standardize startup logging messages for better consistency ([4fdb15c](https://github.com/aashari/mcp-server-atlassian-confluence/commit/4fdb15c96cc1aafa11f0145e95f4898e23a9d34c))
+* standardize vendor types with other MCP projects ([3c1de7a](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3c1de7a363753aa6a1837deb42290526619ce8aa))
+* trigger new release ([341e71e](https://github.com/aashari/mcp-server-atlassian-confluence/commit/341e71e954c07568df8d88bc9c3448c90049a005))
+* update applyDefaults utility to work with TypeScript interfaces ([b0fb0a3](https://github.com/aashari/mcp-server-atlassian-confluence/commit/b0fb0a3fc4ce73b1d585e1da827fea0800cdaeb3))
 
 # [1.12.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.11.1...v1.12.0) (2025-03-27)
 
