@@ -114,6 +114,16 @@ function registerListPagesCommand(program: Command): void {
 					);
 				}
 
+				// Validate limit if provided
+				if (options.limit) {
+					const limit = parseInt(options.limit, 10);
+					if (isNaN(limit) || limit <= 0) {
+						throw new Error(
+							'Invalid --limit value: Must be a positive integer.',
+						);
+					}
+				}
+
 				const filterOptions: ListPagesOptions = {
 					...(options.spaceId && {
 						spaceId: options.spaceId

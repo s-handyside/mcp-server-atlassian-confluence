@@ -70,6 +70,23 @@ function registerSearchCommand(program: Command): void {
 					...options,
 				});
 
+				// Validate CQL query
+				if (!options.cql || options.cql.trim() === '') {
+					throw new Error(
+						'CQL query must not be empty. Please provide a valid Confluence Query Language (CQL) query.',
+					);
+				}
+
+				// Validate limit if provided
+				if (options.limit) {
+					const limit = parseInt(options.limit, 10);
+					if (isNaN(limit) || limit <= 0) {
+						throw new Error(
+							'Invalid --limit value: Must be a positive integer.',
+						);
+					}
+				}
+
 				const searchOptions = {
 					cql: options.cql,
 					...(options.limit && {
