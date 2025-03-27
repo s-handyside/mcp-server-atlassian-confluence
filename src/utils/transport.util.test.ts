@@ -3,7 +3,7 @@ import { config } from './config.util.js';
 import { logger } from './logger.util.js';
 import { SpacesResponse } from '../services/vendor.atlassian.spaces.types.js';
 
-// Mock the logger module only
+// Mock the logger module only to prevent console output during tests
 jest.mock('./logger.util.js', () => ({
 	logger: {
 		debug: jest.fn(),
@@ -12,6 +12,8 @@ jest.mock('./logger.util.js', () => ({
 		error: jest.fn(),
 	},
 }));
+
+// NOTE: This file uses real API calls (no mocking of fetch)
 
 describe('Transport Utility', () => {
 	// Load configuration before all tests
