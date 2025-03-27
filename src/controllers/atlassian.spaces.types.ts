@@ -1,6 +1,7 @@
 import {
 	SpaceType,
 	SpaceStatus,
+	SpaceSortOrder,
 } from '../services/vendor.atlassian.spaces.types.js';
 import { PaginationOptions, EntityIdentifier } from '../types/common.types.js';
 
@@ -32,4 +33,10 @@ export interface ListSpacesOptions extends PaginationOptions {
 	 * Filter spaces by name or description
 	 */
 	query?: string;
+
+	/**
+	 * Property to sort by (e.g., 'name', '-id')
+	 * Default: '-name' (name descending)
+	 */
+	sort?: SpaceSortOrder;
 }

@@ -1,6 +1,7 @@
 import {
 	ContentStatus,
 	BodyFormat,
+	PageSortOrder,
 } from '../services/vendor.atlassian.pages.types.js';
 import { PaginationOptions, EntityIdentifier } from '../types/common.types.js';
 
@@ -38,6 +39,12 @@ export interface ListPagesOptions extends PaginationOptions {
 	 * Search by title, content, or labels.
 	 */
 	query?: string;
+
+	/**
+	 * Property to sort by (e.g., 'title', '-modified-date')
+	 * Default: '-modified-date' (most recently modified first)
+	 */
+	sort?: PageSortOrder;
 }
 
 /**

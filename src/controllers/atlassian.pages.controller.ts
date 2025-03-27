@@ -54,6 +54,8 @@ async function list(
 			// Pagination
 			limit: options.limit || DEFAULT_PAGE_SIZE,
 			cursor: options.cursor,
+			// Set default sort to modified-date descending if not specified
+			sort: options.sort || '-modified-date',
 		};
 
 		const pagesData = await atlassianPagesService.list(serviceParams);
