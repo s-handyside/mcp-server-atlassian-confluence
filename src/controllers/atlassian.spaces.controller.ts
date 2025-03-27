@@ -112,7 +112,11 @@ async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 
 		controllerLogger.debug('Using params:', params);
 
-		// Get space ID by key
+		// The Confluence API v2 doesn't provide a direct endpoint to get full space details by key.
+		// It only allows retrieving spaces by ID for detailed information. Therefore, we must:
+		// 1. Use the list endpoint with keys filter to find the space ID first
+		// 2. Use the get endpoint with the ID to retrieve complete space details
+		// This two-step lookup is necessary due to API constraints.
 		controllerLogger.debug('Searching for space by key');
 
 		const spacesResponse = await atlassianSpacesService.list({
