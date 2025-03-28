@@ -89,7 +89,7 @@ describe('Atlassian Spaces Controller', () => {
 
 			// Call the function with the extracted key
 			const result = await atlassianSpacesController.get({
-				key: spaceKey,
+				spaceKey: spaceKey,
 			});
 
 			// Verify the response structure
@@ -126,12 +126,12 @@ describe('Atlassian Spaces Controller', () => {
 
 			// Expect the function to throw an error
 			await expect(
-				atlassianSpacesController.get({ key: invalidKey }),
+				atlassianSpacesController.get({ spaceKey: invalidKey }),
 			).rejects.toThrow(McpError);
 
 			// Try to catch the error to verify its properties
 			try {
-				await atlassianSpacesController.get({ key: invalidKey });
+				await atlassianSpacesController.get({ spaceKey: invalidKey });
 				fail('Expected an error to be thrown');
 			} catch (error) {
 				expect(error).toBeInstanceOf(McpError);

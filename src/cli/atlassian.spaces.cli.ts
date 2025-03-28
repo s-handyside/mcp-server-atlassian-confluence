@@ -168,7 +168,7 @@ function registerGetSpaceCommand(program: Command): void {
         PURPOSE: Retrieve comprehensive metadata for a known space, including its full description, permissions, and homepage details.`,
 		)
 		.requiredOption(
-			'-k, --key <key>',
+			'-k, --space-key <key>',
 			'Key of the space to retrieve (e.g., DEV, MARKETING)',
 		)
 		.action(async (options) => {
@@ -180,16 +180,16 @@ function registerGetSpaceCommand(program: Command): void {
 				actionLogger.debug('Processing command options:', options);
 
 				// Validate space key format (typically uppercase alphanumeric)
-				if (!options.key.match(/^[A-Za-z0-9_]+$/)) {
+				if (!options.spaceKey.match(/^[A-Za-z0-9_]+$/)) {
 					throw new Error(
 						'Space key must contain only letters, numbers, and underscores.',
 					);
 				}
 
-				actionLogger.debug(`Fetching space: ${options.key}`);
+				actionLogger.debug(`Fetching space: ${options.spaceKey}`);
 
 				const result = await atlassianSpacesController.get({
-					key: options.key,
+					spaceKey: options.spaceKey,
 				});
 
 				console.log(result.content);

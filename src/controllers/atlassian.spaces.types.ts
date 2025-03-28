@@ -12,7 +12,7 @@ export interface SpaceIdentifier extends EntityIdentifier {
 	/**
 	 * The key of the space to retrieve
 	 */
-	key: string;
+	spaceKey: string;
 }
 
 /**

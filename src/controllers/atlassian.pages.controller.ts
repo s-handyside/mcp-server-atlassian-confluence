@@ -118,17 +118,17 @@ async function list(
 /**
  * Get details of a specific Confluence page
  * @param args - Object containing the ID of the page to retrieve
- * @param args.id - The ID of the page
+ * @param args.pageId - The ID of the page
  * @returns Promise with formatted page details content
  * @throws Error if page retrieval fails
  */
-async function get(args: { id: string }): Promise<ControllerResponse> {
-	const { id } = args;
+async function get(args: { pageId: string }): Promise<ControllerResponse> {
+	const { pageId } = args;
 	const methodLogger = Logger.forContext(
 		'controllers/atlassian.pages.controller.ts',
 		'get',
 	);
-	methodLogger.debug(`Getting Confluence page with ID: ${id}...`);
+	methodLogger.debug(`Getting Confluence page with ID: ${pageId}...`);
 
 	try {
 		// Map controller options to service parameters
@@ -144,7 +144,7 @@ async function get(args: { id: string }): Promise<ControllerResponse> {
 		methodLogger.debug('Using service params:', params);
 
 		// Get page data from the API
-		const pageData = await atlassianPagesService.get(id, params);
+		const pageData = await atlassianPagesService.get(pageId, params);
 
 		// Log only key information instead of the entire response
 		methodLogger.debug(
@@ -160,7 +160,7 @@ async function get(args: { id: string }): Promise<ControllerResponse> {
 	} catch (error) {
 		return handleControllerError(error, {
 			entityType: 'Page',
-			entityId: id,
+			entityId: pageId,
 			operation: 'retrieving',
 			source: 'controllers/atlassian.pages.controller.ts@get',
 		});

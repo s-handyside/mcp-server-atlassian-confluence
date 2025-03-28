@@ -85,7 +85,7 @@ async function getSpace(
 	try {
 		// Call the controller to get space details
 		const result = await atlassianSpacesController.get({
-			key: args.key,
+			spaceKey: args.spaceKey,
 		});
 
 		methodLogger.debug('Successfully retrieved space details');

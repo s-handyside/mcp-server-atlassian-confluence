@@ -14,7 +14,7 @@ export interface PageIdentifier extends EntityIdentifier {
 	 * The ID of the page to retrieve.
 	 * This is the unique numeric identifier for the Confluence page.
 	 */
-	id: string;
+	pageId: string;
 }
 
 /**

@@ -73,7 +73,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 		// List pages in the space
 		const listResult = await CliTestUtil.runCommand([
 			'list-pages',
-			'--space',
+			'--space-id',
 			spaceId,
 			'--limit',
 			'1',
@@ -114,7 +114,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run the CLI command
 			const result = await CliTestUtil.runCommand([
 				'list-pages',
-				'--space',
+				'--space-id',
 				spaceId,
 			]);
 
@@ -146,7 +146,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run the CLI command with limit
 			const result = await CliTestUtil.runCommand([
 				'list-pages',
-				'--space',
+				'--space-id',
 				spaceId,
 				'--limit',
 				'1',
@@ -192,7 +192,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run command with invalid ID
 			const result = await CliTestUtil.runCommand([
 				'list-pages',
-				'--space',
+				'--space-id',
 				invalidId,
 			]);
 
@@ -220,7 +220,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run the get-page command
 			const result = await CliTestUtil.runCommand([
 				'get-page',
-				'--id',
+				'--page-id',
 				pageInfo.pageId,
 			]);
 
@@ -262,7 +262,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run command with invalid ID
 			const result = await CliTestUtil.runCommand([
 				'get-page',
-				'--id',
+				'--page-id',
 				invalidId,
 			]);
 
@@ -283,7 +283,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run command with invalid format
 			const result = await CliTestUtil.runCommand([
 				'get-page',
-				'--id',
+				'--page-id',
 				invalidFormat,
 			]);
 
@@ -309,7 +309,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run the get-page command with expand options
 			const result = await CliTestUtil.runCommand([
 				'get-page',
-				'--id',
+				'--page-id',
 				pageInfo.pageId,
 			]);
 

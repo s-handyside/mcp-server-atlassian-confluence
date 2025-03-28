@@ -206,7 +206,9 @@ describe('Atlassian Pages Controller', () => {
 			const pageId = match[1];
 
 			// Call the function with the extracted ID
-			const result = await atlassianPagesController.get({ id: pageId });
+			const result = await atlassianPagesController.get({
+				pageId: pageId,
+			});
 
 			// Verify the response structure
 			expect(result).toHaveProperty('content');
@@ -241,7 +243,7 @@ describe('Atlassian Pages Controller', () => {
 
 			// Try to catch the error to verify its properties
 			try {
-				await atlassianPagesController.get({ id: invalidId });
+				await atlassianPagesController.get({ pageId: invalidId });
 				fail('Expected an error to be thrown');
 			} catch (error) {
 				expect(error).toBeInstanceOf(McpError);
@@ -264,12 +266,12 @@ describe('Atlassian Pages Controller', () => {
 
 			// Expect the function to throw an error
 			await expect(
-				atlassianPagesController.get({ id: nonExistentId }),
+				atlassianPagesController.get({ pageId: nonExistentId }),
 			).rejects.toThrow(McpError);
 
 			// Try to catch the error to verify its properties
 			try {
-				await atlassianPagesController.get({ id: nonExistentId });
+				await atlassianPagesController.get({ pageId: nonExistentId });
 			} catch (error) {
 				expect(error).toBeInstanceOf(McpError);
 				if (error instanceof McpError) {
@@ -310,7 +312,9 @@ describe('Atlassian Pages Controller', () => {
 			const pageId = match[1];
 
 			// Call the function with the extracted ID
-			const result = await atlassianPagesController.get({ id: pageId });
+			const result = await atlassianPagesController.get({
+				pageId: pageId,
+			});
 
 			// Verify the response structure
 			expect(result).toHaveProperty('content');

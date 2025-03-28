@@ -35,8 +35,8 @@ async function listPages(
 		// Map the tool args to controller options
 		const options: Record<string, unknown> = {};
 
-		if (args.containerId) {
-			options.spaceId = args.containerId;
+		if (args.spaceId) {
+			options.containerId = args.spaceId;
 		}
 		if (args.query) {
 			options.query = args.query;
@@ -98,7 +98,7 @@ async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
 	try {
 		// Call the controller to get page details
 		const result = await atlassianPagesController.get({
-			id: args.id,
+			pageId: args.pageId,
 		});
 
 		methodLogger.debug('Successfully retrieved page details');

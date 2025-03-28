@@ -100,17 +100,17 @@ async function list(
 /**
  * Get details of a specific Confluence space
  * @param args - Object containing the key of the space to retrieve
- * @param args.key - The key of the space
+ * @param args.spaceKey - The key of the space
  * @returns Promise with formatted space details content
  * @throws Error if space retrieval fails
  */
-async function get(args: { key: string }): Promise<ControllerResponse> {
-	const { key } = args;
+async function get(args: { spaceKey: string }): Promise<ControllerResponse> {
+	const { spaceKey } = args;
 	const controllerLogger = Logger.forContext(
 		'controllers/atlassian.spaces.controller.ts',
 		'get',
 	);
-	controllerLogger.debug(`Getting Confluence space with key: ${key}...`);
+	controllerLogger.debug(`Getting Confluence space with key: ${spaceKey}...`);
 
 	try {
 		// Create defaults object with proper typing for space details
@@ -136,7 +136,7 @@ async function get(args: { key: string }): Promise<ControllerResponse> {
 		controllerLogger.debug('Searching for space by key');
 
 		const spacesResponse = await atlassianSpacesService.list({
-			keys: [key],
+			keys: [spaceKey],
 			limit: 1,
 			...params,
 		});
@@ -144,7 +144,7 @@ async function get(args: { key: string }): Promise<ControllerResponse> {
 		// Check if space was found
 		if (!spacesResponse.results || spacesResponse.results.length === 0) {
 			throw createApiError(
-				`Space not found with key: ${key}. Verify the space key is correct and that you have access to this space.`,
+				`Space not found with key: ${spaceKey}. Verify the space key is correct and that you have access to this space.`,
 				404,
 			);
 		}
@@ -168,7 +168,7 @@ async function get(args: { key: string }): Promise<ControllerResponse> {
 					`Fetching homepage content for ID: ${spaceData.homepageId}`,
 				);
 				const homepageResult = await atlassianPagesController.get({
-					id: spaceData.homepageId,
+					pageId: spaceData.homepageId,
 				});
 
 				// Extract content from the homepage result
@@ -216,7 +216,7 @@ async function get(args: { key: string }): Promise<ControllerResponse> {
 		// Use the standardized error handler
 		return handleControllerError(error, {
 			entityType: 'Space',
-			entityId: key,
+			entityId: spaceKey,
 			operation: 'retrieving',
 			source: 'controllers/atlassian.spaces.controller.ts@get',
 		});

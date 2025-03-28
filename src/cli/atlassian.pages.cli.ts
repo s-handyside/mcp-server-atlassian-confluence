@@ -69,7 +69,7 @@ function registerListPagesCommand(program: Command): void {
 			'Filter pages by title, content, or labels (simple text search, not query language)',
 		)
 		.option(
-			'-s, --space <id1,id2,...>',
+			'-s, --space-id <id1,id2,...>',
 			'Filter by space IDs (comma-separated list to filter by multiple spaces). This is also referred to as "containerId" in the API for cross-service consistency.',
 		)
 		.option(
@@ -111,15 +111,15 @@ function registerListPagesCommand(program: Command): void {
 
 				// Process space IDs if provided (convert from comma-separated string to array)
 				let spaceIds: string[] | undefined;
-				if (options.space) {
-					spaceIds = options.space
+				if (options.spaceId) {
+					spaceIds = options.spaceId
 						.split(',')
 						.map((id: string) => id.trim());
 				}
 
 				// Create filter options for controller
 				const filterOptions: ListPagesOptions = {
-					// Map from CLI --space flag to the controller's standardized containerId parameter
+					// Map from CLI --space-id flag to the controller's standardized containerId parameter
 					...(spaceIds && { containerId: spaceIds }),
 					...(options.status && { status: [options.status] }),
 					...(options.limit && {
@@ -174,7 +174,10 @@ function registerGetPageCommand(program: Command): void {
 
         PURPOSE: Retrieve the full content (converted to Markdown) and comprehensive metadata for a specific Confluence page, identified by its numeric ID.`,
 		)
-		.requiredOption('-i, --id <id>', 'ID of the page to retrieve (numeric)')
+		.requiredOption(
+			'-p, --page-id <id>',
+			'ID of the page to retrieve (numeric)',
+		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
 				'cli/atlassian.pages.cli.ts',
@@ -184,14 +187,14 @@ function registerGetPageCommand(program: Command): void {
 				actionLogger.debug('Processing command options:', options);
 
 				// Validate page ID format (numeric)
-				if (!options.id.match(/^\d+$/)) {
+				if (!options.pageId.match(/^\d+$/)) {
 					throw new Error('Page ID must be numeric.');
 				}
 
-				actionLogger.debug(`Fetching page: ${options.id}`);
+				actionLogger.debug(`Fetching page: ${options.pageId}`);
 
 				const result = await atlassianPagesController.get({
-					id: options.id,
+					pageId: options.pageId,
 				});
 
 				console.log(result.content);
