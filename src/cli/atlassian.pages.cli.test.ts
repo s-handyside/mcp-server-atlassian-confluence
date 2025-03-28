@@ -20,10 +20,13 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 	// Helper function to skip tests when credentials are missing
 	const skipIfNoCredentials = () => {
 		const credentials = getAtlassianCredentials();
-		if (!credentials) {
-			return true;
+		// If we're running in CI or test environment, use mock responses instead of skipping
+		if (!credentials && process.env.NODE_ENV === 'test') {
+			// Return false to allow tests to run with potential mocks
+			return false;
 		}
-		return false;
+		// Skip if no credentials are available (for integration tests)
+		return !credentials;
 	};
 
 	// Helper function to get a valid space key for testing
@@ -201,6 +204,31 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 
 			// Result should indicate no pages were found or contain an error message
 			expect(result.stdout).toContain('No Confluence pages found');
+		}, 30000);
+
+		// Test with multiple space IDs
+		it('should handle multiple space IDs', async () => {
+			if (skipIfNoCredentials()) {
+				return;
+			}
+
+			// Get a valid space ID
+			const spaceId = await getSpaceKey();
+			if (!spaceId) {
+				return; // Skip if no valid space ID found
+			}
+
+			// Use the valid space ID twice to test multiple ID support
+			// With commander's array syntax, multiple values are passed as separate arguments
+			const result = await CliTestUtil.runCommand([
+				'list-pages',
+				'--space-id',
+				spaceId,
+				'999999999', // Adding an invalid ID alongside the valid one
+			]);
+
+			// Command should succeed regardless
+			expect(result.exitCode).toBe(0);
 		}, 30000);
 	});
 

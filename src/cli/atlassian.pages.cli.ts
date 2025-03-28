@@ -69,8 +69,8 @@ function registerListPagesCommand(program: Command): void {
 			'Filter pages by title, content, or labels (simple text search, not query language)',
 		)
 		.option(
-			'-s, --space-id <id1,id2,...>',
-			'Filter by space IDs (comma-separated list to filter by multiple spaces). This is also referred to as "containerId" in the API for cross-service consistency.',
+			'-s, --space-id <ids...>',
+			'Filter by one or more space IDs (numeric), separated by spaces. This is also referred to as "containerId" in the API for cross-service consistency.',
 		)
 		.option(
 			'-S, --status <status>',
@@ -109,18 +109,10 @@ function registerListPagesCommand(program: Command): void {
 					}
 				}
 
-				// Process space IDs if provided (convert from comma-separated string to array)
-				let spaceIds: string[] | undefined;
-				if (options.spaceId) {
-					spaceIds = options.spaceId
-						.split(',')
-						.map((id: string) => id.trim());
-				}
-
 				// Create filter options for controller
 				const filterOptions: ListPagesOptions = {
 					// Map from CLI --space-id flag to the controller's standardized containerId parameter
-					...(spaceIds && { containerId: spaceIds }),
+					...(options.spaceId && { containerId: options.spaceId }),
 					...(options.status && { status: [options.status] }),
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
