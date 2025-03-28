@@ -28,8 +28,9 @@ const PaginationArgs = {
 const SearchToolArgs = z.object({
 	cql: z
 		.string()
+		.optional()
 		.describe(
-			'Search query using Confluence Query Language (CQL). Use this to search for content using standard CQL syntax (e.g., "text ~ \'project plan\' AND space = DEV").',
+			'Search query using Confluence Query Language (CQL). Use this to search for content using standard CQL syntax (e.g., "text ~ \'project plan\' AND space = DEV"). If omitted, returns recent content sorted by last modified date.',
 		),
 
 	...PaginationArgs,

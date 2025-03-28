@@ -70,11 +70,11 @@ function registerListPagesCommand(program: Command): void {
 			'Filter pages by title, content, or labels (simple text search, not query language)',
 		)
 		.option(
-			'--space-id <id1,id2,...>',
+			'-s, --space <id1,id2,...>',
 			'Filter by space IDs (comma-separated list of numeric IDs)',
 		)
 		.option(
-			'-s, --status <status>',
+			'-S, --status <status>',
 			'Filter by page status: current, archived',
 			'current',
 		)
@@ -91,14 +91,14 @@ function registerListPagesCommand(program: Command): void {
 				actionLogger.debug('Processing command options:', options);
 
 				// Validate space ID if provided
-				if (options.spaceId) {
-					const spaceIds = options.spaceId
+				if (options.space) {
+					const spaceIds = options.space
 						.split(',')
 						.map((id: string) => id.trim());
 					for (const id of spaceIds) {
 						if (!/^\d+$/.test(id)) {
 							throw new Error(
-								'Invalid --space-id: Must contain only numeric space IDs. Use list-spaces to find the IDs if you only have the keys.',
+								'Space IDs must be numeric. If you have space keys instead of IDs, use list-spaces to find the numeric IDs.',
 							);
 						}
 					}
@@ -125,8 +125,8 @@ function registerListPagesCommand(program: Command): void {
 				}
 
 				const filterOptions: ListPagesOptions = {
-					...(options.spaceId && {
-						spaceId: options.spaceId
+					...(options.space && {
+						spaceId: options.space
 							.split(',')
 							.map((id: string) => id.trim()),
 					}),
@@ -185,45 +185,34 @@ function registerGetPageCommand(program: Command): void {
 	program
 		.command('get-page')
 		.description(
-			`Get detailed information about a specific Confluence page using its numeric ID.
+			`Get detailed information about a specific Confluence page using its ID.
 
-        PURPOSE: Retrieve the full content (converted to Markdown) and comprehensive metadata for a *known* page, including labels, properties, and links. Requires the numeric page ID.
-
-        Use Case: Essential for reading, analyzing, or summarizing the content of a specific page identified via 'list-pages' or 'search'.
-
-        Output: Formatted details of the specified page, including its full body content in Markdown. Fetches all available details by default.
-
-        Examples:
-  $ mcp-confluence get-page --page 123456`,
+        PURPOSE: Retrieve the full content (converted to Markdown) and comprehensive metadata for a specific Confluence page, identified by its numeric ID.`,
 		)
-		.requiredOption('--page <id>', 'ID of the page to retrieve (numeric)')
+		.requiredOption('-i, --id <id>', 'ID of the page to retrieve (numeric)')
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
 				'cli/atlassian.pages.cli.ts',
 				'get-page',
 			);
 			try {
-				actionLogger.debug(
-					`Fetching details for page ID: ${options.page}`,
-				);
+				actionLogger.debug('Processing command options:', options);
 
-				// Validate that the page ID is a proper Confluence ID (numeric)
-				const pageId = options.page;
-				if (!pageId.match(/^\d+$/)) {
+				// Validate page ID (must be numeric)
+				if (!options.id || !/^\d+$/.test(options.id)) {
 					throw new Error(
-						'Page ID must be a numeric string. If you are using a page title or key, please use the search command to find the page ID first.',
+						'Page ID must be a valid numeric identifier.',
 					);
 				}
 
-				const result = await atlassianPagesController.get({
-					id: pageId,
-				});
+				actionLogger.debug(`Fetching page: ${options.id}`);
 
-				actionLogger.debug('Successfully retrieved page details');
+				const result = await atlassianPagesController.get({
+					id: options.id,
+				});
 
 				console.log(result.content);
 			} catch (error) {
-				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
 			}
 		});

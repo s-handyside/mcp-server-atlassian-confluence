@@ -54,11 +54,16 @@ export function formatSearchResults(searchData: SearchResult[]): string {
 }
 
 /**
- * Process CQL query to handle reserved keywords
- * @param cql - Original CQL query
- * @returns Processed CQL query with reserved keywords properly quoted
+ * Process and prepare a CQL query for sending to the API.
+ * Handles escaping special characters and proper formatting.
+ * @param cql - Raw CQL query string
+ * @returns Processed CQL query ready for the API
  */
-export function processCqlQuery(cql: string): string {
+export function processCqlQuery(cql: string | undefined): string {
+	if (!cql || cql.trim() === '') {
+		return 'type IN (page, blogpost) ORDER BY lastmodified DESC';
+	}
+
 	// List of CQL reserved keywords that might be used as space keys
 	const reservedKeywords = [
 		'AND',

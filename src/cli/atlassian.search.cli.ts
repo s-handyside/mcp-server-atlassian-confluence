@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
 import { handleCliError } from '../utils/error.util.js';
-import { formatHeading, formatPagination } from '../utils/formatter.util.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * CLI module for searching Confluence content.
@@ -37,28 +37,19 @@ function registerSearchCommand(program: Command): void {
 		.description(
 			`Search for Confluence content (pages, blog posts, attachments, etc.) using CQL (Confluence Query Language).
 
-        PURPOSE: Perform powerful, targeted searches across your entire Confluence instance using the flexible CQL syntax. Find content based on text, labels, space, type, dates, and more.
-
-        Use Case: Ideal for complex searches, finding specific attachments, or querying content across multiple spaces when 'list-pages' is too limited.
-
-        Output: Formatted list of search results including title, type, space, content snippet (excerpt), and URL. Supports pagination.
-
-        Examples:
-  $ mcp-confluence search --cql "space = TEAM AND title ~ Project"
-  $ mcp-confluence search --cql "type = page AND label = documentation ORDER BY lastModified DESC" --limit 50
-  $ mcp-confluence search --cql "text ~ 'security review' AND type = attachment" --cursor "next-cursor-value"`,
+        PURPOSE: Perform powerful, targeted searches across your entire Confluence instance using the flexible CQL syntax. Find content based on text, labels, space, type, dates, and more.`,
 		)
-		.requiredOption(
-			'-q, --cql <cql>',
-			'Filter content using Confluence Query Language (CQL) syntax',
+		.option(
+			'-q, --cql <query>',
+			'Filter content using Confluence Query Language (CQL) syntax (e.g., "text ~ \'project plan\' AND space = DEV")',
 		)
 		.option(
 			'-l, --limit <number>',
-			'Maximum number of results to return (1-100). Use this to control the response size. If omitted, defaults to 25.',
+			'Maximum number of items to return (1-100)',
 		)
 		.option(
-			'-c, --cursor <cursor>',
-			'Pagination cursor for retrieving the next set of results. Obtain this value from the previous response when more results are available.',
+			'-c, --cursor <string>',
+			'Pagination cursor for retrieving the next set of results',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
@@ -70,55 +61,31 @@ function registerSearchCommand(program: Command): void {
 					...options,
 				});
 
-				// Validate CQL query
-				if (!options.cql || options.cql.trim() === '') {
-					throw new Error(
-						'CQL query must not be empty. Please provide a valid Confluence Query Language (CQL) query.',
-					);
-				}
-
-				// Validate limit if provided
+				// Parse limit if provided
 				if (options.limit) {
 					const limit = parseInt(options.limit, 10);
-					if (isNaN(limit) || limit <= 0) {
+					if (isNaN(limit) || limit < 1 || limit > 100) {
 						throw new Error(
-							'Invalid --limit value: Must be a positive integer.',
+							'Limit must be a number between 1 and 100.',
 						);
 					}
+					options.limit = limit;
 				}
 
-				const searchOptions = {
-					cql: options.cql,
-					...(options.limit && {
-						limit: parseInt(options.limit, 10),
-					}),
-					...(options.cursor && { cursor: options.cursor }),
-				};
-
-				actionLogger.debug('Searching with options:', searchOptions);
-				const result =
-					await atlassianSearchController.search(searchOptions);
-				actionLogger.debug('Search completed successfully');
-
-				// Print the main content
-				console.log(formatHeading('Search Results', 2));
+				const result = await atlassianSearchController.search(options);
 				console.log(result.content);
 
-				// Print pagination information if available
 				if (result.pagination) {
 					console.log(
-						'\n' +
-							formatPagination(
-								result.pagination.count ?? 0,
-								result.pagination.hasMore,
-								result.pagination.nextCursor,
-							),
+						formatPagination(
+							result.pagination.count || 0,
+							result.pagination.hasMore,
+							result.pagination.nextCursor,
+						),
 					);
 				}
 			} catch (error) {
-				actionLogger.error('Error executing search command', error);
 				handleCliError(error);
-				process.exit(1);
 			}
 		});
 }

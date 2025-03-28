@@ -11,7 +11,6 @@ import {
 	formatSearchResults,
 	processCqlQuery,
 } from './atlassian.search.formatter.js';
-import { ExcerptStrategy } from '../services/vendor.atlassian.types.js';
 import { DEFAULT_PAGE_SIZE, applyDefaults } from '../utils/defaults.util.js';
 
 /**
@@ -29,64 +28,54 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 		'controllers/atlassian.search.controller.ts',
 		'search',
 	);
-	controllerLogger.debug('Searching Confluence with CQL:', options);
 
 	try {
-		if (!options.cql) {
-			// Instead of throwing createApiError directly, use handleControllerError
-			handleControllerError(
-				new Error('CQL query is required for search'),
-				{
-					entityType: 'Search',
-					operation: 'validating',
-					source: 'controllers/atlassian.search.controller.ts@search',
-				},
-			);
-		}
+		controllerLogger.debug('Searching content with options:', options);
 
-		// Create defaults object with proper typing
-		const defaults: Partial<SearchOptions> = {
+		// Apply defaults and set a default query if none provided
+		const mergedOptions = applyDefaults<SearchOptions>(options, {
 			limit: DEFAULT_PAGE_SIZE,
-		};
+			cql: 'type IN (page, blogpost) ORDER BY lastmodified DESC',
+		});
 
-		// Apply defaults
-		const mergedOptions = applyDefaults<SearchOptions>(options, defaults);
+		// Process CQL query: escape special characters, add any filters
+		const processedCql = processCqlQuery(mergedOptions.cql);
+		controllerLogger.debug('Processed CQL query:', { cql: processedCql });
 
-		// Set up search parameters
+		// Prepare search parameters for the service
 		const searchParams = {
-			cql: processCqlQuery(mergedOptions.cql || ''),
-			cursor: mergedOptions.cursor,
+			cql: processedCql,
 			limit: mergedOptions.limit,
-			excerpt: 'highlight' as ExcerptStrategy, // Always include highlighted excerpts in search results
+			cursor: mergedOptions.cursor,
+			excerpt: 'highlight' as any, // Show content matching search terms
 		};
 
-		controllerLogger.debug('Using search params:', searchParams);
+		// Call the service to perform the search
+		const searchResponse =
+			await atlassianSearchService.search(searchParams);
+		controllerLogger.debug('Search returned results:', {
+			count: searchResponse.results.length,
+			hasMoreResults: !!searchResponse._links?.next,
+		});
 
-		const searchData = await atlassianSearchService.search(searchParams);
-		controllerLogger.debug(
-			`Retrieved ${searchData.results?.length || 0} results`,
-		);
-
-		// Extract pagination information using the utility
+		// Extract pagination information for the response
 		const pagination = extractPaginationInfo(
-			searchData,
+			searchResponse,
 			PaginationType.CURSOR,
 		);
 
-		// Format the search results for display using the formatter
-		const formattedResults = formatSearchResults(searchData.results);
+		// Format the results for display
+		const formattedContent = formatSearchResults(searchResponse.results);
 
 		return {
-			content: formattedResults,
+			content: formattedContent,
 			pagination,
 		};
 	} catch (error) {
-		// Use the standardized error handler
-		handleControllerError(error, {
-			entityType: 'Search',
-			operation: 'searching',
-			source: 'controllers/atlassian.search.controller.ts@search',
-			additionalInfo: { options, cql: options.cql },
+		return handleControllerError(error, {
+			entityType: 'content',
+			operation: 'search',
+			source: 'atlassian.search.controller.ts',
 		});
 	}
 }

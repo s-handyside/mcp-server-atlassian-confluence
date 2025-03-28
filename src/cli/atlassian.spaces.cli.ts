@@ -163,19 +163,12 @@ function registerGetSpaceCommand(program: Command): void {
 	program
 		.command('get-space')
 		.description(
-			`Get detailed information about a specific Confluence space using its key.
+			`Get detailed information about a specific Confluence space.
 
-        PURPOSE: Retrieve comprehensive details for a *known* space, including its ID, name, description, labels, and homepage content snippet. Requires the space key.
-
-        Use Case: Useful when you have a specific space key (often obtained via 'list-spaces') and need its full metadata or homepage overview.
-
-        Output: Formatted details of the specified space, including a snippet of its homepage content. Fetches all available details by default.
-
-        Examples:
-  $ mcp-confluence get-space --space DEV`,
+        PURPOSE: Retrieve comprehensive metadata for a known space, including its full description, permissions, and homepage details.`,
 		)
 		.requiredOption(
-			'--space <key>',
+			'-k, --key <key>',
 			'Key of the space to retrieve (e.g., DEV, MARKETING)',
 		)
 		.action(async (options) => {
@@ -184,26 +177,23 @@ function registerGetSpaceCommand(program: Command): void {
 				'get-space',
 			);
 			try {
-				actionLogger.debug(
-					`Fetching details for space key: ${options.space}`,
-				);
+				actionLogger.debug('Processing command options:', options);
 
-				// Validate that the space key is a proper Confluence space key
-				// Space keys should be alphanumeric with no special characters except underscore
-				if (!options.space.match(/^[A-Za-z0-9_]+$/)) {
+				// Validate space key format (typically uppercase alphanumeric)
+				if (!options.key.match(/^[A-Za-z0-9_]+$/)) {
 					throw new Error(
-						'Space key must contain only letters, numbers, and underscores. If you are using a space name, please use the list-spaces command to find the space key first.',
+						'Space key must contain only letters, numbers, and underscores.',
 					);
 				}
 
+				actionLogger.debug(`Fetching space: ${options.key}`);
+
 				const result = await atlassianSpacesController.get({
-					key: options.space,
+					key: options.key,
 				});
-				actionLogger.debug('Successfully retrieved space details');
 
 				console.log(result.content);
 			} catch (error) {
-				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
 			}
 		});
