@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.13.0...v1.13.1) (2025-03-28)
+
+
+### Performance Improvements
+
+* rename tools to use underscore instead of hyphen ([5ab5861](https://github.com/aashari/mcp-server-atlassian-confluence/commit/5ab5861b3954a286e93afd4522f978885ffced38))
+
 # [1.13.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.12.0...v1.13.0) (2025-03-27)
 
 
