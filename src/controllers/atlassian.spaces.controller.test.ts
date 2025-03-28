@@ -1,145 +1,187 @@
 import atlassianSpacesController from './atlassian.spaces.controller.js';
-import { McpError } from '../utils/error.util.js';
+import { getAtlassianCredentials } from '../utils/transport.util.js';
 import { config } from '../utils/config.util.js';
+import { McpError } from '../utils/error.util.js';
 
 describe('Atlassian Spaces Controller', () => {
-	// Load configuration before tests
+	// Load configuration and check for credentials before all tests
 	beforeAll(() => {
-		config.load();
+		config.load(); // Ensure config is loaded
+		const credentials = getAtlassianCredentials();
+		if (!credentials) {
+			console.warn(
+				'Skipping Atlassian Spaces Controller tests: No credentials available',
+			);
+		}
 	});
 
-	// Helper function to check if credentials are available
-	function hasCredentials() {
-		return (
-			config.get('ATLASSIAN_AUTH_HEADER') ||
-			(config.get('ATLASSIAN_API_KEY') && config.get('ATLASSIAN_EMAIL'))
-		);
-	}
+	// Helper function to skip tests when credentials are missing
+	const skipIfNoCredentials = () => !getAtlassianCredentials();
 
-	describe('list()', () => {
-		it('should return a formatted list of spaces', async () => {
-			// Check if credentials are available
-			if (!hasCredentials()) {
-				console.warn('Skipping test: No credentials available');
-				return; // Skip this test if no credentials
-			}
+	describe('list', () => {
+		it('should return a formatted list of spaces in Markdown', async () => {
+			if (skipIfNoCredentials()) return;
 
-			// Call the function with no filters
 			const result = await atlassianSpacesController.list();
 
-			// Verify the response structure
+			// Verify the ControllerResponse structure
 			expect(result).toHaveProperty('content');
-			expect(result).toHaveProperty('pagination');
 			expect(typeof result.content).toBe('string');
+			expect(result).toHaveProperty('pagination');
 
-			// Check pagination structure
-			expect(result.pagination).toHaveProperty('hasMore');
-			expect(result.pagination).toHaveProperty('count');
-
-			// Verify the content format based on example output
-			expect(result.content).toContain('## Spaces');
-			expect(result.content).toContain('| Space Key | Name | Type |');
-			expect(result.content).toContain('| --- | --- | --- |');
-		}, 15000); // Increase timeout for API call
-
-		it('should filter spaces by type', async () => {
-			// Check if credentials are available
-			if (!hasCredentials()) {
-				console.warn('Skipping test: No credentials available');
-				return; // Skip this test if no credentials
+			// Basic Markdown content checks
+			if (
+				result.content !==
+				'No Confluence spaces found matching your criteria.'
+			) {
+				expect(result.content).toMatch(/^# Confluence Spaces/m); // Main heading for spaces list
+				// The actual format is now a numbered list rather than a table
+				expect(result.content).toContain('**ID**:');
+				expect(result.content).toContain('**Key**:');
+				expect(result.content).toContain('**Type**:');
 			}
 
-			// Call the function with type filter
-			const result = await atlassianSpacesController.list({
+			// Verify pagination structure
+			expect(result.pagination).toBeDefined();
+			expect(result.pagination).toHaveProperty('hasMore');
+			expect(typeof result.pagination?.hasMore).toBe('boolean');
+			expect(result.pagination).toHaveProperty('count'); // Should have count from service
+			// nextCursor might be undefined if hasMore is false
+			if (result.pagination?.hasMore) {
+				expect(result.pagination).toHaveProperty('nextCursor');
+				expect(typeof result.pagination?.nextCursor).toBe('string');
+			}
+		}, 30000); // Increased timeout
+
+		it('should handle pagination options (limit/cursor)', async () => {
+			if (skipIfNoCredentials()) return;
+
+			// Fetch first page
+			const result1 = await atlassianSpacesController.list({ limit: 1 });
+			expect(result1.pagination?.count).toBeLessThanOrEqual(1);
+
+			// If there's a next page, fetch it
+			if (result1.pagination?.hasMore && result1.pagination.nextCursor) {
+				const result2 = await atlassianSpacesController.list({
+					limit: 1,
+					cursor: result1.pagination.nextCursor, // Use cursor from previous response
+				});
+				expect(result2.pagination?.count).toBeLessThanOrEqual(1);
+				// Check if content is different (simple check)
+				if (
+					result1.content !==
+						'No Confluence spaces found matching your criteria.' &&
+					result2.content !==
+						'No Confluence spaces found matching your criteria.'
+				) {
+					expect(result1.content).not.toEqual(result2.content);
+				}
+			} else {
+				console.warn(
+					'Skipping controller cursor step: Only one page of spaces found.',
+				);
+			}
+		}, 30000);
+
+		it('should handle filtering options (type/status/query)', async () => {
+			if (skipIfNoCredentials()) return;
+
+			// Test filtering by type
+			const resultType = await atlassianSpacesController.list({
 				type: 'global',
+				limit: 5,
 			});
+			expect(resultType.pagination?.count).toBeLessThanOrEqual(5);
+			// Could add check that all returned spaces have type 'global' if parsing Markdown
 
-			// Verify the response structure
-			expect(result).toHaveProperty('content');
-			expect(typeof result.content).toBe('string');
+			// Test filtering by status
+			const resultStatus = await atlassianSpacesController.list({
+				status: 'current',
+				limit: 5,
+			});
+			expect(resultStatus.pagination?.count).toBeLessThanOrEqual(5);
+			// Could add check that all returned spaces have status 'current'
 
-			// The test would ideally verify that only spaces of the specified type are returned,
-			// but that would require parsing the output or examining the internal service call results
-			// For now, we just verify that we get a valid response
-		}, 15000); // Increase timeout for API call
+			// Test filtering by query (use a common term)
+			const resultQuery = await atlassianSpacesController.list({
+				query: 'a',
+				limit: 5,
+			});
+			expect(resultQuery.pagination?.count).toBeLessThanOrEqual(5);
+			// Result content should contain 'a' if matches found
+		}, 30000);
 	});
 
-	describe('get()', () => {
-		it('should return detailed information for a valid space', async () => {
-			// Check if credentials are available
-			if (!hasCredentials()) {
-				console.warn('Skipping test: No credentials available');
-				return; // Skip this test if no credentials
+	describe('get', () => {
+		// Helper to get a valid key for testing 'get'
+		async function getFirstSpaceKeyForController(): Promise<string | null> {
+			if (skipIfNoCredentials()) return null;
+			try {
+				const listResult = await atlassianSpacesController.list({
+					limit: 1,
+				});
+				if (
+					listResult.content ===
+					'No Confluence spaces found matching your criteria.'
+				)
+					return null;
+				// Extract key from Markdown content - find the Key pattern in the content
+				const keyMatch = listResult.content.match(
+					/\*\*Key\*\*:\s+([A-Z0-9_~]+)/,
+				);
+				return keyMatch ? keyMatch[1] : null;
+			} catch (error) {
+				console.warn(
+					"Could not fetch space list for controller 'get' test setup:",
+					error,
+				);
+				return null;
 			}
+		}
 
-			// Get a list of spaces
-			const spacesResult = await atlassianSpacesController.list({
-				limit: 1,
-			});
-
-			// Extract a space key from the result
-			// Look for "| Key | Name |" pattern in the table
-			const match = spacesResult.content.match(/\| ([A-Z]+) \|/);
-			if (!match) {
-				console.warn('No spaces found, skipping test');
+		it('should return formatted details for a valid space key in Markdown', async () => {
+			const spaceKey = await getFirstSpaceKeyForController();
+			if (!spaceKey) {
+				console.warn(
+					'Skipping controller get test: No space key found.',
+				);
 				return;
 			}
 
-			const spaceKey = match[1];
+			const result = await atlassianSpacesController.get({ spaceKey });
 
-			// Call the function with the extracted key
-			const result = await atlassianSpacesController.get({
-				spaceKey: spaceKey,
-			});
-
-			// Verify the response structure
+			// Verify the ControllerResponse structure
 			expect(result).toHaveProperty('content');
 			expect(typeof result.content).toBe('string');
+			expect(result).not.toHaveProperty('pagination'); // 'get' shouldn't have pagination
 
-			// Verify the content format based on example output
-			expect(result.content).toContain('# Confluence Space:');
-			expect(result.content).toContain('**ID**:');
+			// Verify Markdown content
+			expect(result.content).toMatch(/^# Confluence Space:/m); // Main heading for space details
 			expect(result.content).toContain(`**Key**: ${spaceKey}`);
-			expect(result.content).toContain('**Type**:');
-			expect(result.content).toContain('**Status**:');
-			expect(result.content).toContain('**Created At**:');
-			expect(result.content).toContain('**Author ID**:');
-			expect(result.content).toContain('**Homepage ID**:');
+			expect(result.content).toContain('## Basic Information');
+			expect(result.content).toContain('## Homepage Content'); // Should attempt to fetch
+			expect(result.content).toContain('## Labels'); // Included by default now
 			expect(result.content).toContain('## Links');
-			expect(result.content).toContain('**Web UI**:');
-			expect(result.content).toContain('## Labels');
-			expect(result.content).toContain('*Space information retrieved at');
-			expect(result.content).toContain(
-				'*To view this space in Confluence, visit:',
-			);
-		}, 15000); // Increase timeout for API call
+		}, 30000);
 
-		it('should handle invalid space keys', async () => {
-			// Check if credentials are available
-			if (!hasCredentials()) {
-				console.warn('Skipping test: No credentials available');
-				return; // Skip this test if no credentials
-			}
+		it('should throw McpError for an invalid space key', async () => {
+			if (skipIfNoCredentials()) return;
 
-			// Use an invalid space key
-			const invalidKey = 'invalid-space-id';
+			const invalidKey = 'THISSPACEDOESNOTEXIST123';
 
-			// Expect the function to throw an error
+			// Expect the controller call to reject with an McpError
 			await expect(
 				atlassianSpacesController.get({ spaceKey: invalidKey }),
 			).rejects.toThrow(McpError);
 
-			// Try to catch the error to verify its properties
+			// Optionally check the status code and message via the error handler's behavior
 			try {
 				await atlassianSpacesController.get({ spaceKey: invalidKey });
-				fail('Expected an error to be thrown');
-			} catch (error) {
-				expect(error).toBeInstanceOf(McpError);
-				if (error instanceof McpError) {
-					// Don't check for specific message content since it comes from the API
-					expect(error.type).toBe('API_ERROR');
-				}
+			} catch (e) {
+				expect(e).toBeInstanceOf(McpError);
+				expect((e as McpError).statusCode).toBe(404); // Expecting Not Found from the initial list call
+				expect((e as McpError).message).toContain('not found');
 			}
-		}, 15000); // Increase timeout for API call
+		}, 30000);
 	});
 });
