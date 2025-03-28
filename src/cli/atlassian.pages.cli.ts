@@ -2,8 +2,10 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
-import { ListPagesOptions } from '../controllers/atlassian.pages.types.js';
-import { ContentStatus } from '../services/vendor.atlassian.pages.types.js';
+import {
+	ListPagesOptions,
+	ContentStatus,
+} from '../controllers/atlassian.pages.types.js';
 import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 
 /**
@@ -71,7 +73,7 @@ function registerListPagesCommand(program: Command): void {
 		)
 		.option(
 			'-s, --space <id1,id2,...>',
-			'Filter by space IDs (comma-separated list of numeric IDs)',
+			'Filter by space IDs (comma-separated list to filter by multiple spaces)',
 		)
 		.option(
 			'-S, --status <status>',
@@ -79,7 +81,7 @@ function registerListPagesCommand(program: Command): void {
 			'current',
 		)
 		.option(
-			'--sort <sort>',
+			'-s, --sort <sort>',
 			'Sort order for pages (e.g., "title", "-modified-date"). Default is "-modified-date" (most recently modified first).',
 		)
 		.action(async (options) => {
@@ -124,7 +126,9 @@ function registerListPagesCommand(program: Command): void {
 					}
 				}
 
-				const filterOptions: ListPagesOptions = {
+				// Prepare controller options
+				const controllerOptions = {
+					...(options.query && { query: options.query }),
 					...(options.space && {
 						spaceId: options.space
 							.split(',')
@@ -133,21 +137,20 @@ function registerListPagesCommand(program: Command): void {
 					...(options.status && {
 						status: [options.status as ContentStatus],
 					}),
+					...(options.sort && { sort: options.sort }),
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
 					}),
 					...(options.cursor && { cursor: options.cursor }),
-					...(options.query && { query: options.query }),
-					...(options.sort && { sort: options.sort }),
 				};
 
 				actionLogger.debug(
 					'Fetching pages with filters:',
-					filterOptions,
+					controllerOptions,
 				);
 
 				const result =
-					await atlassianPagesController.list(filterOptions);
+					await atlassianPagesController.list(controllerOptions);
 
 				actionLogger.debug(
 					`Successfully retrieved ${
