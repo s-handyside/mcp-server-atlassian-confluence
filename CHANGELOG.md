@@ -1,3 +1,10 @@
+## [1.13.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.13.1...v1.13.2) (2025-03-28)
+
+
+### Bug Fixes
+
+* **markdown:** improve table formatting by consolidating whitespace in cells ([3e917aa](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3e917aa943cf2b14abc5b86df47d97cb214a4eba))
+
 ## [1.13.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.13.0...v1.13.1) (2025-03-28)
 
 
