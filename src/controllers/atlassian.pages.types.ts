@@ -29,6 +29,13 @@ export interface ListPagesOptions extends PaginationOptions {
 	spaceId?: string[];
 
 	/**
+	 * Standardized alternative to spaceId for consistency across services.
+	 * Has the same functionality as spaceId but provides a consistent parameter
+	 * name across different Atlassian services.
+	 */
+	containerId?: string[];
+
+	/**
 	 * Filter pages by status.
 	 * Examples: 'current', 'draft', 'archived'
 	 */

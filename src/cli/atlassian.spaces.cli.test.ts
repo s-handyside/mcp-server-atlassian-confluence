@@ -234,7 +234,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 			// Run the get-space command
 			const result = await CliTestUtil.runCommand([
 				'get-space',
-				'--space',
+				'--key',
 				spaceKey,
 			]);
 
@@ -281,7 +281,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 			// Run command with invalid key
 			const result = await CliTestUtil.runCommand([
 				'get-space',
-				'--space',
+				'--key',
 				invalidKey,
 			]);
 
@@ -304,7 +304,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 			// Run command with invalid format
 			const result = await CliTestUtil.runCommand([
 				'get-space',
-				'--space',
+				'--key',
 				invalidFormat,
 			]);
 

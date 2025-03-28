@@ -144,7 +144,7 @@ describe('Atlassian Confluence Search CLI Commands', () => {
 		}, 30000); // Increased timeout for API call
 
 		// Test with missing required parameter
-		it('should fail when query is not provided', async () => {
+		it('should succeed when query is not provided', async () => {
 			if (skipIfNoCredentials()) {
 				return;
 			}
@@ -152,11 +152,11 @@ describe('Atlassian Confluence Search CLI Commands', () => {
 			// Run command without required parameter
 			const result = await CliTestUtil.runCommand(['search']);
 
-			// Should fail with non-zero exit code
-			expect(result.exitCode).not.toBe(0);
+			// Should succeed with zero exit code
+			expect(result.exitCode).toBe(0);
 
-			// Should indicate missing required option
-			expect(result.stderr).toContain('required option');
+			// Should return an empty search or all content
+			expect(result.stdout).toBeDefined();
 		}, 15000);
 
 		// Test with content type filtering

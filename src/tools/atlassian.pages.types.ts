@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PageSortOrder } from '../services/vendor.atlassian.pages.types.js';
+import type { PageSortOrder } from '../services/vendor.atlassian.pages.types.js';
 
 /**
  * Base pagination arguments for all tools
@@ -27,7 +27,7 @@ const PaginationArgs = {
  * Matches the controller's ListPagesOptions interface
  */
 const ListPagesToolArgs = z.object({
-	spaceId: z
+	containerId: z
 		.array(z.string())
 		.optional()
 		.describe(
@@ -83,7 +83,7 @@ type ListPagesToolArgsType = z.infer<typeof ListPagesToolArgs>;
  * Matches the controller's get function signature
  */
 const GetPageToolArgs = z.object({
-	pageId: z
+	id: z
 		.string()
 		.describe(
 			'The numeric ID of the Confluence page to retrieve (e.g., "456789"). This is required and must be a valid page ID from your Confluence instance. The page content will be returned in Markdown format for easy reading.',

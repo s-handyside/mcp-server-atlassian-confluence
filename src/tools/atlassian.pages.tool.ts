@@ -1,15 +1,14 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { Logger } from '../utils/logger.util.js';
-import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
-import {
-	ListPagesToolArgsType,
-	GetPageToolArgsType,
-	ListPagesToolArgs,
-	GetPageToolArgs,
-} from './atlassian.pages.types.js';
-
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
+import {
+	ListPagesToolArgs,
+	ListPagesToolArgsType,
+	GetPageToolArgs,
+	GetPageToolArgsType,
+} from './atlassian.pages.types.js';
 
 /**
  * MCP Tool: List Confluence Pages
@@ -26,38 +25,54 @@ async function listPages(
 	args: ListPagesToolArgsType,
 	_extra: RequestHandlerExtra,
 ) {
-	const toolLogger = Logger.forContext(
+	const methodLogger = Logger.forContext(
 		'tools/atlassian.pages.tool.ts',
 		'listPages',
 	);
-	toolLogger.debug('Listing Confluence pages with filters:', args);
+	methodLogger.debug('Tool called with args:', args);
 
 	try {
-		// Pass the options to the controller
-		const message = await atlassianPagesController.list({
-			spaceId: args.spaceId,
-			query: args.query,
-			status: args.status,
-			limit: args.limit,
-			cursor: args.cursor,
-			sort: args.sort,
-		});
+		// Map the tool args to controller options
+		const options: Record<string, unknown> = {};
 
-		toolLogger.debug(
-			'Successfully retrieved pages from controller',
-			message,
-		);
+		if (args.containerId) {
+			options.spaceId = args.containerId;
+		}
+		if (args.query) {
+			options.query = args.query;
+		}
+		if (args.status) {
+			options.status = args.status;
+		}
+		if (args.limit) {
+			options.limit = args.limit;
+		}
+		if (args.cursor) {
+			options.cursor = args.cursor;
+		}
+		if (args.sort) {
+			options.sort = args.sort;
+		}
 
+		methodLogger.debug('Calling controller with options:', options);
+
+		// Call the controller to list pages with the provided options
+		const result = await atlassianPagesController.list(options);
+
+		methodLogger.debug('Successfully retrieved pages list');
+
+		// Convert the string content to an MCP text resource with the correct type
 		return {
 			content: [
 				{
 					type: 'text' as const,
-					text: message.content,
+					text: result.content,
 				},
 			],
 		};
 	} catch (error) {
-		toolLogger.error('Failed to list pages', error);
+		methodLogger.error('Error listing pages:', error);
+		// Format the error for MCP tools
 		return formatErrorForMcpTool(error);
 	}
 }
@@ -74,30 +89,32 @@ async function listPages(
  * @throws Will return error message if page retrieval fails
  */
 async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
-	const toolLogger = Logger.forContext(
+	const methodLogger = Logger.forContext(
 		'tools/atlassian.pages.tool.ts',
 		'getPage',
 	);
-	toolLogger.debug(`Retrieving page details for ID: ${args.pageId}`);
+	methodLogger.debug('Tool called with args:', args);
 
 	try {
-		const message = await atlassianPagesController.get({ id: args.pageId });
+		// Call the controller to get page details
+		const result = await atlassianPagesController.get({
+			id: args.id,
+		});
 
-		toolLogger.debug(
-			'Successfully retrieved page details from controller',
-			message,
-		);
+		methodLogger.debug('Successfully retrieved page details');
 
+		// Convert the string content to an MCP text resource with the correct type
 		return {
 			content: [
 				{
 					type: 'text' as const,
-					text: message.content,
+					text: result.content,
 				},
 			],
 		};
 	} catch (error) {
-		toolLogger.error('Failed to get page details', error);
+		methodLogger.error('Error retrieving page details:', error);
+		// Format the error for MCP tools
 		return formatErrorForMcpTool(error);
 	}
 }

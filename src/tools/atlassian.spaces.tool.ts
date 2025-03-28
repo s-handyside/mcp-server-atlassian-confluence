@@ -76,31 +76,32 @@ async function getSpace(
 	args: GetSpaceToolArgsType,
 	_extra: RequestHandlerExtra,
 ) {
-	const toolLogger = Logger.forContext(
+	const methodLogger = Logger.forContext(
 		'tools/atlassian.spaces.tool.ts',
 		'getSpace',
 	);
-	toolLogger.debug('Retrieving space details for key:', args.spaceKey);
+	methodLogger.debug('Tool called with args:', args);
 
 	try {
-		const message = await atlassianSpacesController.get({
-			key: args.spaceKey,
+		// Call the controller to get space details
+		const result = await atlassianSpacesController.get({
+			key: args.key,
 		});
-		toolLogger.debug(
-			'Successfully retrieved space details from controller',
-			message,
-		);
 
+		methodLogger.debug('Successfully retrieved space details');
+
+		// Convert the string content to an MCP text resource
 		return {
 			content: [
 				{
 					type: 'text' as const,
-					text: message.content,
+					text: result.content,
 				},
 			],
 		};
 	} catch (error) {
-		toolLogger.error('Failed to get space details', error);
+		methodLogger.error('Error retrieving space details:', error);
+		// Format the error for MCP tools
 		return formatErrorForMcpTool(error);
 	}
 }

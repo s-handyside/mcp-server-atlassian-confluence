@@ -57,7 +57,7 @@ type ListSpacesToolArgsType = z.infer<typeof ListSpacesToolArgs>;
  * Matches the controller's get function signature
  */
 const GetSpaceToolArgs = z.object({
-	spaceKey: z
+	key: z
 		.string()
 		.describe(
 			'The key of the Confluence space to retrieve (e.g., "DEV" or "MARKETING"). The space key is a unique identifier for a space, typically a short uppercase code.',

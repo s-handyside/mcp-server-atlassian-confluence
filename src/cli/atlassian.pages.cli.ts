@@ -2,9 +2,8 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
-import { formatPagination } from '../utils/formatter.util.js';
-import { ContentStatus } from '../services/vendor.atlassian.pages.types.js';
-import { formatHeading } from '../utils/formatter.util.js';
+import { ListPagesOptions } from '../controllers/atlassian.pages.types.js';
+import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 
 /**
  * CLI module for managing Confluence pages.
@@ -71,7 +70,7 @@ function registerListPagesCommand(program: Command): void {
 		)
 		.option(
 			'-s, --space <id1,id2,...>',
-			'Filter by space IDs (comma-separated list to filter by multiple spaces)',
+			'Filter by space IDs (comma-separated list to filter by multiple spaces). This is also referred to as "containerId" in the API for cross-service consistency.',
 		)
 		.option(
 			'-S, --status <status>',
@@ -79,7 +78,7 @@ function registerListPagesCommand(program: Command): void {
 			'current',
 		)
 		.option(
-			'-s, --sort <sort>',
+			'--sort <sort>',
 			'Sort order for pages (e.g., "title", "-modified-date"). Default is "-modified-date" (most recently modified first).',
 		)
 		.action(async (options) => {
@@ -89,20 +88,6 @@ function registerListPagesCommand(program: Command): void {
 			);
 			try {
 				actionLogger.debug('Processing command options:', options);
-
-				// Validate space ID if provided
-				if (options.space) {
-					const spaceIds = options.space
-						.split(',')
-						.map((id: string) => id.trim());
-					for (const id of spaceIds) {
-						if (!/^\d+$/.test(id)) {
-							throw new Error(
-								'Space IDs must be numeric. If you have space keys instead of IDs, use list-spaces to find the numeric IDs.',
-							);
-						}
-					}
-				}
 
 				// Validate status if provided
 				if (
@@ -124,37 +109,36 @@ function registerListPagesCommand(program: Command): void {
 					}
 				}
 
-				// Prepare controller options
-				const controllerOptions = {
-					...(options.query && { query: options.query }),
-					...(options.space && {
-						spaceId: options.space
-							.split(',')
-							.map((id: string) => id.trim()),
-					}),
-					...(options.status && {
-						status: [options.status as ContentStatus],
-					}),
-					...(options.sort && { sort: options.sort }),
+				// Process space IDs if provided (convert from comma-separated string to array)
+				let spaceIds: string[] | undefined;
+				if (options.space) {
+					spaceIds = options.space
+						.split(',')
+						.map((id: string) => id.trim());
+				}
+
+				// Create filter options for controller
+				const filterOptions: ListPagesOptions = {
+					// Map from CLI --space flag to the controller's standardized containerId parameter
+					...(spaceIds && { containerId: spaceIds }),
+					...(options.status && { status: [options.status] }),
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
 					}),
 					...(options.cursor && { cursor: options.cursor }),
+					...(options.query && { query: options.query }),
+					...(options.sort && { sort: options.sort }),
 				};
 
 				actionLogger.debug(
 					'Fetching pages with filters:',
-					controllerOptions,
+					filterOptions,
 				);
 
 				const result =
-					await atlassianPagesController.list(controllerOptions);
+					await atlassianPagesController.list(filterOptions);
 
-				actionLogger.debug(
-					`Successfully retrieved ${
-						result.pagination?.count || 'all'
-					} pages`,
-				);
+				actionLogger.debug('Successfully retrieved pages');
 
 				// Print the main content
 				console.log(formatHeading('Pages', 2));
@@ -199,11 +183,9 @@ function registerGetPageCommand(program: Command): void {
 			try {
 				actionLogger.debug('Processing command options:', options);
 
-				// Validate page ID (must be numeric)
-				if (!options.id || !/^\d+$/.test(options.id)) {
-					throw new Error(
-						'Page ID must be a valid numeric identifier.',
-					);
+				// Validate page ID format (numeric)
+				if (!options.id.match(/^\d+$/)) {
+					throw new Error('Page ID must be numeric.');
 				}
 
 				actionLogger.debug(`Fetching page: ${options.id}`);

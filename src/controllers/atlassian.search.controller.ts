@@ -11,6 +11,7 @@ import {
 	formatSearchResults,
 	processCqlQuery,
 } from './atlassian.search.formatter.js';
+import { ExcerptStrategy } from '../services/vendor.atlassian.types.js';
 import { DEFAULT_PAGE_SIZE, applyDefaults } from '../utils/defaults.util.js';
 
 /**
@@ -47,7 +48,7 @@ async function search(options: SearchOptions): Promise<ControllerResponse> {
 			cql: processedCql,
 			limit: mergedOptions.limit,
 			cursor: mergedOptions.cursor,
-			excerpt: 'highlight' as any, // Show content matching search terms
+			excerpt: 'highlight' as ExcerptStrategy, // Show content matching search terms
 		};
 
 		// Call the service to perform the search

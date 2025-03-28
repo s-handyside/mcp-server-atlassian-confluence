@@ -1,8 +1,5 @@
 import { Logger } from '../utils/logger.util.js';
-import {
-	SpaceIdentifier,
-	ListSpacesOptions,
-} from './atlassian.spaces.types.js';
+import { ListSpacesOptions } from './atlassian.spaces.types.js';
 import { createApiError } from '../utils/error.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
 import atlassianSpacesService from '../services/vendor.atlassian.spaces.service.js';
@@ -102,13 +99,13 @@ async function list(
 
 /**
  * Get details of a specific Confluence space
- * @param identifier - Object containing the key of the space to retrieve
- * @param identifier.key - The key of the space
+ * @param args - Object containing the key of the space to retrieve
+ * @param args.key - The key of the space
  * @returns Promise with formatted space details content
  * @throws Error if space retrieval fails
  */
-async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
-	const { key } = identifier;
+async function get(args: { key: string }): Promise<ControllerResponse> {
+	const { key } = args;
 	const controllerLogger = Logger.forContext(
 		'controllers/atlassian.spaces.controller.ts',
 		'get',
@@ -219,7 +216,7 @@ async function get(identifier: SpaceIdentifier): Promise<ControllerResponse> {
 		// Use the standardized error handler
 		return handleControllerError(error, {
 			entityType: 'Space',
-			entityId: identifier,
+			entityId: key,
 			operation: 'retrieving',
 			source: 'controllers/atlassian.spaces.controller.ts@get',
 		});

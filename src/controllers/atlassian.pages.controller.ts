@@ -1,11 +1,7 @@
 import { Logger } from '../utils/logger.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
-import {
-	extractPaginationInfo,
-	PaginationType,
-} from '../utils/pagination.util.js';
 import { ControllerResponse } from '../types/common.types.js';
-import { ListPagesOptions, PageIdentifier } from './atlassian.pages.types.js';
+import { ListPagesOptions } from './atlassian.pages.types.js';
 import {
 	formatPageDetails,
 	formatPagesList,
@@ -18,8 +14,8 @@ import {
 } from '../utils/defaults.util.js';
 import {
 	ListPagesParams,
-	BodyFormat,
 	GetPageByIdParams,
+	BodyFormat,
 } from '../services/vendor.atlassian.pages.types.js';
 
 /**
@@ -36,103 +32,114 @@ const controllerLogger = Logger.forContext(
 controllerLogger.debug('Confluence pages controller initialized');
 
 /**
- * Lists Confluence pages with pagination and filtering options
- * @param options Options for listing pages
- * @returns Formatted list of pages with pagination information
+ * List pages from Confluence with filtering options
+ * @param options - Options for filtering pages
+ * @param options.spaceId - Filter by space ID(s)
+ * @param options.containerId - Alternative form of spaceId for consistency across services
+ * @param options.query - Filter by text in title, content or labels
+ * @param options.status - Filter by page status
+ * @param options.sort - Sort order for results
+ * @param options.limit - Maximum number of pages to return
+ * @param options.cursor - Pagination cursor for subsequent requests
+ * @returns Promise with formatted pages list content
+ * @throws Error if page listing fails
  */
 async function list(
-	options: ListPagesOptions = {},
+	options: ListPagesOptions & { containerId?: string[] } = {},
 ): Promise<ControllerResponse> {
 	const methodLogger = Logger.forContext(
 		'controllers/atlassian.pages.controller.ts',
 		'list',
 	);
-	methodLogger.debug('Listing Confluence pages...', options);
+	methodLogger.debug('Listing Confluence pages with options:', options);
 
 	try {
 		// Create defaults object with proper typing
 		const defaults: Partial<ListPagesOptions> = {
 			limit: DEFAULT_PAGE_SIZE,
 			sort: '-modified-date',
+			status: ['current'],
 		};
 
-		// Apply defaults
+		// Apply defaults to ensure all standard properties are set
 		const mergedOptions = applyDefaults<ListPagesOptions>(
 			options,
 			defaults,
 		);
 
+		// Support containerId (standardized) or spaceId (Confluence-specific)
+		const spaceId = options.containerId || options.spaceId;
+
 		// Map controller options to service parameters
-		const serviceParams: ListPagesParams = {
-			// Optional filters
-			spaceId: mergedOptions.spaceId,
-			status: mergedOptions.status,
-			// Pagination
+		const params: ListPagesParams = {
+			...(spaceId && { spaceId }),
+			...(mergedOptions.query && { query: mergedOptions.query }),
+			...(mergedOptions.status && { status: mergedOptions.status }),
+			...(mergedOptions.sort && { sort: mergedOptions.sort }),
+			// Additional parameters with defaults
 			limit: mergedOptions.limit,
 			cursor: mergedOptions.cursor,
-			// Sort order
-			sort: mergedOptions.sort,
+			bodyFormat: 'storage',
 		};
 
-		const pagesData = await atlassianPagesService.list(serviceParams);
-		methodLogger.debug(`Retrieved ${pagesData.results?.length || 0} pages`);
+		methodLogger.debug('Using service params:', params);
 
-		// Extract pagination information
-		const pagination = extractPaginationInfo(
-			pagesData,
-			PaginationType.CURSOR,
+		// Get pages data from the API
+		const pagesData = await atlassianPagesService.list(params);
+
+		// Log only summary information instead of the entire response
+		methodLogger.debug(
+			`Retrieved ${pagesData.results.length} pages. Has more: ${pagesData._links?.next ? 'yes' : 'no'}`,
 		);
 
-		// Extract the base URL from response links
-		const baseUrl = pagesData._links?.base || '';
-
-		// Format the pages data for display
-		const formattedPages = formatPagesList(
-			pagesData.results || [],
-			baseUrl,
-		);
+		// The formatPagesList function expects a pagesData parameter with results
+		// Extract the nextCursor from the links
+		const nextCursor = pagesData._links?.next?.split('cursor=')[1] || '';
+		const formattedPages = formatPagesList(pagesData.results);
 
 		return {
 			content: formattedPages,
-			pagination,
+			pagination: {
+				count: pagesData.results.length,
+				hasMore: !!pagesData._links?.next,
+				nextCursor: nextCursor,
+			},
 		};
 	} catch (error) {
-		handleControllerError(error, {
+		// Use the standardized error handler
+		return handleControllerError(error, {
 			entityType: 'Pages',
 			operation: 'listing',
 			source: 'controllers/atlassian.pages.controller.ts@list',
-			additionalInfo: { options },
 		});
 	}
 }
 
 /**
- * Gets details of a specific Confluence page by ID
- * @param identifier The page identifier containing ID
- * @returns Formatted page details
+ * Get details of a specific Confluence page
+ * @param args - Object containing the ID of the page to retrieve
+ * @param args.id - The ID of the page
+ * @returns Promise with formatted page details content
+ * @throws Error if page retrieval fails
  */
-async function get(identifier: PageIdentifier): Promise<ControllerResponse> {
-	const { id } = identifier;
+async function get(args: { id: string }): Promise<ControllerResponse> {
+	const { id } = args;
 	const methodLogger = Logger.forContext(
 		'controllers/atlassian.pages.controller.ts',
 		'get',
 	);
-
-	methodLogger.debug(`Getting Confluence page by ID: ${id}...`);
+	methodLogger.debug(`Getting Confluence page with ID: ${id}...`);
 
 	try {
-		// Create defaults object with proper typing for page details
-		const defaults = {
+		// Map controller options to service parameters
+		const params: GetPageByIdParams = {
 			bodyFormat: PAGE_DEFAULTS.BODY_FORMAT as BodyFormat,
 			includeLabels: PAGE_DEFAULTS.INCLUDE_LABELS,
 			includeProperties: PAGE_DEFAULTS.INCLUDE_PROPERTIES,
-			includeWebResources: PAGE_DEFAULTS.INCLUDE_WEBRESOURCES,
+			includeWebresources: PAGE_DEFAULTS.INCLUDE_WEBRESOURCES,
 			includeCollaborators: PAGE_DEFAULTS.INCLUDE_COLLABORATORS,
 			includeVersion: PAGE_DEFAULTS.INCLUDE_VERSION,
 		};
-
-		// Map controller options to service parameters
-		const params: GetPageByIdParams = defaults;
 
 		methodLogger.debug('Using service params:', params);
 
@@ -151,7 +158,7 @@ async function get(identifier: PageIdentifier): Promise<ControllerResponse> {
 			content: formattedPage,
 		};
 	} catch (error) {
-		handleControllerError(error, {
+		return handleControllerError(error, {
 			entityType: 'Page',
 			entityId: id,
 			operation: 'retrieving',
