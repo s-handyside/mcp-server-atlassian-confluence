@@ -80,13 +80,13 @@ function register(server: McpServer) {
         - When you need to search for specific text or patterns within page content (not just titles).
         - When you need to combine multiple search criteria (e.g., text + space + date + type).
         - When you need to search using complex logical operators (AND, OR, NOT).
-        - When simple title/label searches via 'list-pages' are insufficient.
+        - When simple title/label searches via 'list_pages' are insufficient.
         - When you need to search across all content types (pages, blog posts, attachments, etc.).
         - When you need fine-grained sorting control over search results.
 
         WHEN NOT TO USE:
-        - When you already know the page ID (use 'get-page' instead).
-        - When you only need to list pages in a space by title (use 'list-pages' with optional query).
+        - When you already know the page ID (use 'get_page' instead).
+        - When you only need to list pages in a space by title (use 'list_pages' with optional query).
         - When you need to explore or browse spaces (use space-related tools).
         - When you're not searching for actual content (e.g., for space metadata).
 
@@ -94,7 +94,7 @@ function register(server: McpServer) {
         - Result type (page, blog, attachment, etc.)
         - Title and content excerpt with highlighted match terms
         - Space information, creation metadata, and URL
-        - Content ID for use with other tools like 'get-page'
+        - Content ID for use with other tools like 'get_page'
         
         Results can be paginated using the 'limit' and 'cursor' parameters.
 

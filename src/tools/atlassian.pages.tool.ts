@@ -119,21 +119,21 @@ function register(server: McpServer) {
 
 	// Register the list pages tool
 	server.tool(
-		'list-pages',
+		'list_pages',
 		`List Confluence pages, optionally filtering by space ID(s), status, or title/content/label query, with pagination.
 
-        PURPOSE: Discover pages within specific spaces or across the instance based on status or simple text matching. Provides page metadata and IDs needed for the 'get-page' tool.
+        PURPOSE: Discover pages within specific spaces or across the instance based on status or simple text matching. Provides page metadata and IDs needed for the 'get_page' tool.
 
         WHEN TO USE:
         - To list pages within one or more specific spaces (using 'spaceId').
         - To find pages based on their status ('current', 'archived', etc.).
         - To perform simple text searches on page titles or labels ('query').
         - To get an overview of recent pages in a space before getting full content.
-        - To obtain 'pageId' values for use with 'get-page'.
+        - To obtain 'pageId' values for use with 'get_page'.
 
         WHEN NOT TO USE:
         - When you need to search the *full content* of pages with complex logic (use 'search' with CQL).
-        - When you already know the 'pageId' and need details (use 'get-page').
+        - When you already know the 'pageId' and need details (use 'get_page').
         - When you need space information (use space tools).
         - If you only have the space *key* (use 'list-spaces' or 'get-space' to find the numeric 'spaceId' first).
 
@@ -159,7 +159,7 @@ function register(server: McpServer) {
 
 	// Register the get page details tool
 	server.tool(
-		'get-page',
+		'get_page',
 		`Retrieve a Confluence page's full content and metadata by its numeric ID.
 
         PURPOSE: Fetches the complete content (converted to Markdown) and comprehensive metadata for a specific Confluence page, identified by its numeric ID. The page content is properly formatted with headings, tables, lists, and other Markdown elements.
@@ -167,12 +167,12 @@ function register(server: McpServer) {
         WHEN TO USE:
         - When you need to read, analyze, or summarize the full content of a specific page.
         - When you need detailed page metadata (author, version, status, etc.).
-        - After finding a page ID through 'list-pages' or 'search' and need its complete content.
+        - After finding a page ID through 'list_pages' or 'search' and need its complete content.
         - When you need the actual content of a page rather than just its metadata.
 
         WHEN NOT TO USE:
-        - When you only have a space ID or space key (use 'list-pages' first).
-        - When you need to find pages based on criteria (use 'list-pages' or 'search').
+        - When you only have a space ID or space key (use 'list_pages' first).
+        - When you need to find pages based on criteria (use 'list_pages' or 'search').
         - When you want to discover spaces rather than specific pages (use space tools).
         - When you need to search across multiple pages (use 'search').
 

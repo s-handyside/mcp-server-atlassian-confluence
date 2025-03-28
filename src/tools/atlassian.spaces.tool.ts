@@ -122,7 +122,7 @@ function register(server: McpServer) {
 
 	// Register the list spaces tool
 	server.tool(
-		'list-spaces',
+		'list_spaces',
 		`List available Confluence spaces with filtering options and pagination support.
 
         PURPOSE: Discovers accessible Confluence spaces, providing metadata about each space including ID, key, name, description, and status. This tool is essential for finding spaces before working with their content.
@@ -133,13 +133,13 @@ function register(server: McpServer) {
         - When you need to filter spaces by type ('global', 'personal', 'archived').
         - When you need to locate a space by partial name matching.
         - When you need to browse available content sources.
-        - As a first step before using 'list-pages' or content search tools.
+        - As a first step before using 'list_pages' or content search tools.
 
         WHEN NOT TO USE:
-        - When you already know the specific space ID/key (use 'get-space' instead).
+        - When you already know the specific space ID/key (use 'get_space' instead).
         - When you need to search for page content (use 'search' instead).
-        - When you need to list pages within a known space (use 'list-pages' instead).
-        - When you need detailed information about a specific space (use 'get-space' instead).
+        - When you need to list pages within a known space (use 'list_pages' instead).
+        - When you need detailed information about a specific space (use 'get_space' instead).
 
         RETURNS: Formatted list of spaces including:
         - Numeric ID (used for most API operations)
@@ -170,24 +170,24 @@ function register(server: McpServer) {
 
 	// Register the get space details tool
 	server.tool(
-		'get-space',
+		'get_space',
 		`Retrieve comprehensive details about a specific Confluence space by ID.
 
         PURPOSE: Fetches complete metadata and configuration information for a space, identified by its numeric ID. Provides all available details about a space, including permissions, themes, and homepage.
 
         WHEN TO USE:
         - When you need detailed information about a specific space's configuration.
-        - When you need the numeric ID of a space's homepage to use with 'get-page'.
+        - When you need the numeric ID of a space's homepage to use with 'get_page'.
         - When you need to verify permissions, status, or theme settings.
         - When you need to analyze space metadata before working with its content.
-        - After finding a space through 'list-spaces' and needing more details.
+        - After finding a space through 'list_spaces' and needing more details.
         - When you need to determine if a space is active, archived, or has specific restrictions.
 
         WHEN NOT TO USE:
-        - When you need to discover spaces (use 'list-spaces' instead).
-        - When you need to list pages in a space (use 'list-pages' instead).
+        - When you need to discover spaces (use 'list_spaces' instead).
+        - When you need to list pages in a space (use 'list_pages' instead).
         - When you need to search for content (use 'search' instead).
-        - When you only have a space key and need the ID (use 'list-spaces' first).
+        - When you only have a space key and need the ID (use 'list_spaces' first).
 
         RETURNS: Comprehensive space details formatted in Markdown, including:
         - Full name, key, and ID information
