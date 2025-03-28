@@ -537,7 +537,7 @@ describe('Atlassian Pages Controller', () => {
 			} catch (error) {
 				if (error instanceof McpError) {
 					expect(error.statusCode).toBe(404);
-					expect(error.type).toBe('API_ERROR'); // API_ERROR for resource not found
+					expect(error.type).toBe('NOT_FOUND'); // NOT_FOUND for resource not found (updated to match error handler behavior)
 				}
 			}
 		}, 15000);

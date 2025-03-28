@@ -1,4 +1,9 @@
-import { createApiError } from './error.util.js';
+import {
+	createApiError,
+	createNotFoundError,
+	ErrorType,
+	McpError,
+} from './error.util.js';
 import { Logger } from './logger.util.js';
 
 /**
@@ -63,6 +68,14 @@ export function detectErrorType(
 		error instanceof Error && 'statusCode' in error
 			? (error as { statusCode: number }).statusCode
 			: undefined;
+
+	// Check if it's already an McpError with NOT_FOUND type
+	if (error instanceof McpError && error.type === ErrorType.NOT_FOUND) {
+		return {
+			code: ErrorCode.NOT_FOUND,
+			statusCode: error.statusCode || 404,
+		};
+	}
 
 	// Not Found detection
 	if (
@@ -247,6 +260,10 @@ export function handleControllerError(
 			? errorMessage
 			: createUserFriendlyErrorMessage(code, context, errorMessage);
 
-	// Throw an appropriate API error with the user-friendly message
-	throw createApiError(message, finalStatusCode, error);
+	// Throw an appropriate error based on the detected error code
+	if (code === ErrorCode.NOT_FOUND) {
+		throw createNotFoundError(message, error);
+	} else {
+		throw createApiError(message, finalStatusCode, error);
+	}
 }
