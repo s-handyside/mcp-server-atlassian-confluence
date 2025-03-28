@@ -2,11 +2,9 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
-import {
-	ListPagesOptions,
-	ContentStatus,
-} from '../controllers/atlassian.pages.types.js';
-import { formatHeading, formatPagination } from '../utils/formatter.util.js';
+import { formatPagination } from '../utils/formatter.util.js';
+import { ContentStatus } from '../services/vendor.atlassian.pages.types.js';
+import { formatHeading } from '../utils/formatter.util.js';
 
 /**
  * CLI module for managing Confluence pages.
