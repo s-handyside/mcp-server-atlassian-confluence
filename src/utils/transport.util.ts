@@ -4,6 +4,7 @@ import {
 	createAuthInvalidError,
 	createApiError,
 	createUnexpectedError,
+	createNotFoundError,
 	McpError,
 } from './error.util.js';
 
@@ -170,7 +171,7 @@ export async function fetchAtlassian<T>(
 			if (response.status === 401 || response.status === 403) {
 				throw createAuthInvalidError('Invalid Atlassian credentials');
 			} else if (response.status === 404) {
-				throw createApiError(`Resource not found`, 404, errorText);
+				throw createNotFoundError(`Resource not found`, errorText);
 			} else {
 				// For other API errors, preserve the original error message from Atlassian API
 				throw createApiError(errorMessage, response.status, errorText);

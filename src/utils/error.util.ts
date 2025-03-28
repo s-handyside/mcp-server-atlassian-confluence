@@ -7,6 +7,7 @@ export enum ErrorType {
 	AUTH_MISSING = 'AUTH_MISSING',
 	AUTH_INVALID = 'AUTH_INVALID',
 	API_ERROR = 'API_ERROR',
+	NOT_FOUND = 'NOT_FOUND',
 	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
 }
 
@@ -64,6 +65,16 @@ export function createApiError(
 		statusCode,
 		originalError,
 	);
+}
+
+/**
+ * Create a not found error
+ */
+export function createNotFoundError(
+	message: string = 'Resource not found',
+	originalError?: unknown,
+): McpError {
+	return new McpError(message, ErrorType.NOT_FOUND, 404, originalError);
 }
 
 /**
