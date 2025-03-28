@@ -52,7 +52,9 @@ turndownService.addRule('strikethrough', {
 turndownService.addRule('tableCell', {
 	filter: ['th', 'td'],
 	replacement: (content: string, _node: TurndownService.Node): string => {
-		return ` ${content} |`;
+		// Simplify content by consolidating whitespace
+		const simplifiedContent = content.replace(/\s+/g, ' ').trim();
+		return ` ${simplifiedContent} |`;
 	},
 });
 
