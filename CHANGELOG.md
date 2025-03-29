@@ -1,3 +1,32 @@
+# [1.14.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.13.2...v1.14.0) (2025-03-29)
+
+
+### Bug Fixes
+
+* add NOT_FOUND error type and use createNotFoundError in transport utility ([98ec69b](https://github.com/aashari/mcp-server-atlassian-confluence/commit/98ec69be89158ae08bcfa7cc47043815b16d0bd9))
+* **cli:** standardize parameter naming conventions ([8c53d15](https://github.com/aashari/mcp-server-atlassian-confluence/commit/8c53d15fc053ef33c242bbc05a4e662515dc8c74))
+* handle api errors in transport tests without mocking ([fe1acf6](https://github.com/aashari/mcp-server-atlassian-confluence/commit/fe1acf6569b7144eea677e1ab1d4d9dce4914ff4))
+* make tests work properly without authentication for CI ([37a09bd](https://github.com/aashari/mcp-server-atlassian-confluence/commit/37a09bd9df363cd80373960602cb44aad4f77a46))
+* preserve NOT_FOUND error type in error handling flow ([0c9d994](https://github.com/aashari/mcp-server-atlassian-confluence/commit/0c9d994355411191e6a08ab66bd489ecfd10f430))
+* properly skip Atlassian Pages tests when credentials are not available ([4e385ad](https://github.com/aashari/mcp-server-atlassian-confluence/commit/4e385ad0c4f613ee04065dab97b0ad008488de06))
+* properly skip fetchAtlassian tests when credentials aren't available ([bef0138](https://github.com/aashari/mcp-server-atlassian-confluence/commit/bef01380e78a10cb05ed15ea6f9b1be82073f846))
+* properly skip tests when credentials are not available ([9aad033](https://github.com/aashari/mcp-server-atlassian-confluence/commit/9aad033042de9597d2e5c34128ab48d0144f49bb))
+* resolve build errors with status imports ([19e7d11](https://github.com/aashari/mcp-server-atlassian-confluence/commit/19e7d1163c47bfc8906e16204b7dba8b0ab4af36))
+* resolve TypeScript errors and lint warnings in Confluence MCP server ([a80d463](https://github.com/aashari/mcp-server-atlassian-confluence/commit/a80d46314ea985e8f1089e12b83c5d88701b7a45))
+* standardize CLI binary name to mcp-atlassian-confluence ([9e55363](https://github.com/aashari/mcp-server-atlassian-confluence/commit/9e5536349f0c8920c0df50f51c0947ddecb0487a))
+* standardize sort and array parameters in Confluence CLI ([4f633c5](https://github.com/aashari/mcp-server-atlassian-confluence/commit/4f633c5257f79ebd203166c8aa85a487ac6f06bc))
+* **tests:** add mock implementation to eliminate skipped tests ([1075287](https://github.com/aashari/mcp-server-atlassian-confluence/commit/10752872d6e99ebeebd229f2aa00e26a3c89ea74))
+* update CLI test expectations to match implementation behavior ([623b048](https://github.com/aashari/mcp-server-atlassian-confluence/commit/623b048616d9beb7915f660eb28241ac5952e93b))
+* update page CLI test expectations to handle both local and CI environments ([d2319ce](https://github.com/aashari/mcp-server-atlassian-confluence/commit/d2319ceb560cde065c650c6c40105ae62b3b8985))
+* update page CLI test expectations to match implementation ([3128935](https://github.com/aashari/mcp-server-atlassian-confluence/commit/31289353df44be3b2f7f6d56b268b46920359bb4))
+* update tests to handle NOT_FOUND errors consistently ([934a490](https://github.com/aashari/mcp-server-atlassian-confluence/commit/934a490ab7e61a0b24f28e51dc1958dda78f0f4c))
+
+
+### Features
+
+* standardize CLI flag patterns and parameter optionality ([66adb3d](https://github.com/aashari/mcp-server-atlassian-confluence/commit/66adb3dc60b4af1ecbb0327e88fbc8c4e3543e1f))
+* **test:** add improved integration tests for Confluence spaces service and controller ([3a502f7](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3a502f792c183dc1d240ba41d8f6d756b67d3b86))
+
 ## [1.13.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.13.1...v1.13.2) (2025-03-28)
 
 
