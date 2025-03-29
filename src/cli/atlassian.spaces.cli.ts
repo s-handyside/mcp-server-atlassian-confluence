@@ -48,9 +48,9 @@ function registerListSpacesCommand(program: Command): void {
         Sorting: By default, spaces are sorted by name in descending order.
 
         Examples:
-  $ mcp-confluence list-spaces --type global --status current
-  $ mcp-confluence list-spaces --limit 50
-  $ mcp-confluence list-spaces --query "Documentation"`,
+  $ mcp-atlassian-confluence list-spaces --type global --status current
+  $ mcp-atlassian-confluence list-spaces --limit 50
+  $ mcp-atlassian-confluence list-spaces --query "Documentation"`,
 		)
 		.option(
 			'-l, --limit <number>',

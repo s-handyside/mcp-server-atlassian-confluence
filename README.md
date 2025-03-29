@@ -177,13 +177,13 @@ npx -y @aashari/mcp-server-atlassian-confluence search --cql "type=page AND text
 #### Global Installation (Optional)
 
 1.  `npm install -g @aashari/mcp-server-atlassian-confluence`
-2.  Use the `mcp-confluence` command:
+2.  Use the `mcp-atlassian-confluence` command:
 
 ```bash
-mcp-confluence list-spaces --limit 5
-mcp-confluence get-space --space DEV
-mcp-confluence list-pages --space-id 12345 --status archived
-mcp-confluence --help # See all commands
+mcp-atlassian-confluence list-spaces --limit 5
+mcp-atlassian-confluence get-space --space DEV
+mcp-atlassian-confluence list-pages --space-id 12345 --status archived
+mcp-atlassian-confluence --help # See all commands
 ```
 
 ## Troubleshooting
