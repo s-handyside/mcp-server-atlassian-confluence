@@ -21,39 +21,27 @@ describe('Transport Utility', () => {
 	beforeAll(() => {
 		// Load configuration from all sources
 		config.load();
-
-		const credentials = getAtlassianCredentials();
-		if (!credentials) {
-			console.warn(
-				'Skipping Atlassian Transport Utility tests that require credentials',
-			);
-		}
 	});
-
-	// Helper function to skip tests when credentials are missing
-	const skipIfNoCredentials = () => !getAtlassianCredentials();
 
 	describe('getAtlassianCredentials', () => {
 		it('should return credentials when environment variables are set', () => {
 			const credentials = getAtlassianCredentials();
 
-			// Skip this test if credentials are not available
-			if (!credentials) {
-				console.warn(
-					'Skipping test: No Atlassian credentials available',
-				);
-				return;
+			// This test is not skipped - it should pass either way
+			if (credentials) {
+				// Verify the structure of the credentials
+				expect(credentials).toHaveProperty('siteName');
+				expect(credentials).toHaveProperty('userEmail');
+				expect(credentials).toHaveProperty('apiToken');
+
+				// Verify the credentials are not empty
+				expect(credentials.siteName).toBeTruthy();
+				expect(credentials.userEmail).toBeTruthy();
+				expect(credentials.apiToken).toBeTruthy();
+			} else {
+				// If no credentials, this is also valid (test passes)
+				expect(credentials).toBeNull();
 			}
-
-			// Verify the structure of the credentials
-			expect(credentials).toHaveProperty('siteName');
-			expect(credentials).toHaveProperty('userEmail');
-			expect(credentials).toHaveProperty('apiToken');
-
-			// Verify the credentials are not empty
-			expect(credentials.siteName).toBeTruthy();
-			expect(credentials.userEmail).toBeTruthy();
-			expect(credentials.apiToken).toBeTruthy();
 		});
 
 		it('should return null and log a warning when environment variables are missing', () => {
@@ -101,106 +89,117 @@ describe('Transport Utility', () => {
 		});
 	});
 
-	describe('fetchAtlassian', () => {
-		it('should handle API requests appropriately', async () => {
-			if (skipIfNoCredentials()) return;
-
-			// Since we skip the test if credentials are null, we can safely assert non-null here
-			const credentials = getAtlassianCredentials()!;
-
-			try {
-				// We need to use a valid endpoint for this test
-				// Make a real API call to get spaces (limiting to 1 result to reduce load)
-				const result = await fetchAtlassian<SpacesResponse>(
-					credentials,
-					'/wiki/api/v2/spaces?limit=1',
-				);
-
-				// If the call succeeds, verify the response structure
-				expect(result).toHaveProperty('results');
-				expect(Array.isArray(result.results)).toBe(true);
-				expect(result).toHaveProperty('_links');
-			} catch (error) {
-				// If API is unavailable, at least check that we're getting a proper McpError
-				expect(error).toBeInstanceOf(McpError);
-			}
-		}, 15000);
-
-		it('should throw an error for invalid endpoints', async () => {
-			if (skipIfNoCredentials()) return;
-
-			// Since we skip the test if credentials are null, we can safely assert non-null here
-			const credentials = getAtlassianCredentials()!;
-
-			// Make a call to a non-existent endpoint
-			try {
-				await fetchAtlassian(
-					credentials,
-					'/wiki/api/v2/non-existent-endpoint',
-				);
-				// If we get here, fail the test
-				fail('Expected an error to be thrown');
-			} catch (error) {
-				// Verify it's the right kind of error
-				expect(error).toBeInstanceOf(McpError);
-				if (error instanceof McpError) {
-					expect(error.statusCode).toBe(404);
+	// Conditional test suite that only runs when credentials are available
+	(getAtlassianCredentials() ? describe : describe.skip)(
+		'fetchAtlassian with credentials',
+		() => {
+			it('should handle API requests appropriately', async () => {
+				const credentials = getAtlassianCredentials();
+				// We know credentials won't be null here because the whole describe block is skipped if credentials are null
+				if (!credentials) {
+					// This is just a safety check - we should never get here
+					return;
 				}
-			}
-		}, 15000);
 
-		it('should normalize paths', async () => {
-			if (skipIfNoCredentials()) return;
+				try {
+					// Make a real API call to get spaces (limiting to 1 result to reduce load)
+					const result = await fetchAtlassian<SpacesResponse>(
+						credentials,
+						'/wiki/api/v2/spaces?limit=1',
+					);
 
-			// Since we skip the test if credentials are null, we can safely assert non-null here
-			const credentials = getAtlassianCredentials()!;
+					// If the call succeeds, verify the response structure
+					expect(result).toHaveProperty('results');
+					expect(Array.isArray(result.results)).toBe(true);
+					expect(result).toHaveProperty('_links');
+				} catch (error) {
+					// If API is unavailable, at least check that we're getting a proper McpError
+					expect(error).toBeInstanceOf(McpError);
+				}
+			}, 15000);
 
-			try {
-				// Path without a leading slash (should be normalized)
-				const result = await fetchAtlassian<SpacesResponse>(
-					credentials,
-					'wiki/api/v2/spaces?limit=1',
-				);
+			it('should throw an error for invalid endpoints', async () => {
+				const credentials = getAtlassianCredentials();
+				// We know credentials won't be null here because the whole describe block is skipped if credentials are null
+				if (!credentials) {
+					// This is just a safety check - we should never get here
+					return;
+				}
 
-				// If the call succeeds, verify the response structure
-				expect(result).toHaveProperty('results');
-				expect(Array.isArray(result.results)).toBe(true);
-			} catch (error) {
-				// If API is unavailable, at least check that we're getting a proper McpError
-				expect(error).toBeInstanceOf(McpError);
-			}
-		}, 15000);
+				// Make a call to a non-existent endpoint
+				try {
+					await fetchAtlassian(
+						credentials,
+						'/wiki/api/v2/non-existent-endpoint',
+					);
+					// If we get here, fail the test
+					fail('Expected an error to be thrown');
+				} catch (error) {
+					// Verify it's the right kind of error
+					expect(error).toBeInstanceOf(McpError);
+					if (error instanceof McpError) {
+						expect(error.statusCode).toBe(404);
+					}
+				}
+			}, 15000);
 
-		it('should support custom request options', async () => {
-			if (skipIfNoCredentials()) return;
+			it('should normalize paths', async () => {
+				const credentials = getAtlassianCredentials();
+				// We know credentials won't be null here because the whole describe block is skipped if credentials are null
+				if (!credentials) {
+					// This is just a safety check - we should never get here
+					return;
+				}
 
-			// Since we skip the test if credentials are null, we can safely assert non-null here
-			const credentials = getAtlassianCredentials()!;
+				try {
+					// Path without a leading slash (should be normalized)
+					const result = await fetchAtlassian<SpacesResponse>(
+						credentials,
+						'wiki/api/v2/spaces?limit=1',
+					);
 
-			// Custom request options
-			const options = {
-				method: 'GET' as const,
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-				},
-			};
+					// If the call succeeds, verify the response structure
+					expect(result).toHaveProperty('results');
+					expect(Array.isArray(result.results)).toBe(true);
+				} catch (error) {
+					// If API is unavailable, at least check that we're getting a proper McpError
+					expect(error).toBeInstanceOf(McpError);
+				}
+			}, 15000);
 
-			try {
-				// Make a call with custom options
-				const result = await fetchAtlassian<SpacesResponse>(
-					credentials,
-					'/wiki/api/v2/spaces?limit=1',
-					options,
-				);
+			it('should support custom request options', async () => {
+				const credentials = getAtlassianCredentials();
+				// We know credentials won't be null here because the whole describe block is skipped if credentials are null
+				if (!credentials) {
+					// This is just a safety check - we should never get here
+					return;
+				}
 
-				// If the call succeeds, verify the response structure
-				expect(result).toHaveProperty('results');
-				expect(Array.isArray(result.results)).toBe(true);
-			} catch (error) {
-				// If API is unavailable, at least check that we're getting a proper McpError
-				expect(error).toBeInstanceOf(McpError);
-			}
-		}, 15000);
-	});
+				// Custom request options
+				const options = {
+					method: 'GET' as const,
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json',
+					},
+				};
+
+				try {
+					// Make a call with custom options
+					const result = await fetchAtlassian<SpacesResponse>(
+						credentials,
+						'/wiki/api/v2/spaces?limit=1',
+						options,
+					);
+
+					// If the call succeeds, verify the response structure
+					expect(result).toHaveProperty('results');
+					expect(Array.isArray(result.results)).toBe(true);
+				} catch (error) {
+					// If API is unavailable, at least check that we're getting a proper McpError
+					expect(error).toBeInstanceOf(McpError);
+				}
+			}, 15000);
+		},
+	);
 });
