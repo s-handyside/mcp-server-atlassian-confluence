@@ -4,7 +4,7 @@ import { config } from '../utils/config.util.js';
 import { McpError } from '../utils/error.util.js';
 
 describe('Atlassian Pages Controller', () => {
-	// Load configuration and skip all tests if Atlassian credentials are not available
+	// Load configuration before all tests
 	beforeAll(() => {
 		// Load configuration from all sources
 		config.load();

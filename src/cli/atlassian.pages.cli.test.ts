@@ -182,9 +182,12 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			if (result.exitCode === 0) {
 				// Should have some output if successful
 				expect(result.stdout).toBeDefined();
+				expect(result.stdout.length).toBeGreaterThan(0);
 			} else {
 				// If it failed, there should be an error message
 				expect(result.stderr).toBeDefined();
+				expect(result.stderr.length).toBeGreaterThan(0);
+				expect(result.stderr).toContain('error');
 			}
 		}, 15000);
 

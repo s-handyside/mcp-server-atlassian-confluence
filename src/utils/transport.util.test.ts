@@ -15,20 +15,22 @@ jest.mock('./logger.util.js', () => ({
 	},
 }));
 
-// NOTE: This file uses real API calls (no mocking of fetch)
-
-// Helper function to check for credentials and skip tests if not available
-const hasCredentials = (): boolean => {
-	const credentials = getAtlassianCredentials();
-	return credentials !== null;
-};
-
 describe('Transport Utility', () => {
 	// Load configuration before all tests
 	beforeAll(() => {
 		// Load configuration from all sources
 		config.load();
+
+		const credentials = getAtlassianCredentials();
+		if (!credentials) {
+			console.warn(
+				'Skipping Atlassian Transport Utility tests that require credentials',
+			);
+		}
 	});
+
+	// Helper function to skip tests when credentials are missing
+	const skipIfNoCredentials = () => !getAtlassianCredentials();
 
 	describe('getAtlassianCredentials', () => {
 		it('should return credentials when environment variables are set', () => {
@@ -99,76 +101,10 @@ describe('Transport Utility', () => {
 	});
 
 	describe('fetchAtlassian', () => {
-		// Mock fetch behavior when no credentials
-		let originalFetch: typeof fetch;
-
-		beforeAll(() => {
-			originalFetch = global.fetch;
-			if (!hasCredentials()) {
-				global.fetch = jest
-					.fn()
-					.mockImplementation(async (url: string) => {
-						if (url.includes('non-existent-endpoint')) {
-							return {
-								ok: false,
-								status: 404,
-								statusText: 'Not Found',
-								json: async () => ({
-									errors: [
-										{
-											status: 404,
-											message: 'Resource not found',
-										},
-									],
-								}),
-							} as Response;
-						}
-
-						if (url.includes('spaces')) {
-							return {
-								ok: true,
-								status: 200,
-								statusText: 'OK',
-								json: async () => ({
-									results: [
-										{
-											id: '123',
-											key: 'TEST',
-											name: 'Test Space',
-											type: 'global',
-											status: 'current',
-											_links: { webui: '/spaces/TEST' },
-										},
-									],
-									_links: {
-										next: '/wiki/api/v2/spaces?cursor=next-cursor',
-									},
-								}),
-							} as Response;
-						}
-
-						return {
-							ok: true,
-							status: 200,
-							statusText: 'OK',
-							json: async () => ({}),
-						} as Response;
-					});
-			}
-		});
-
-		afterAll(() => {
-			global.fetch = originalFetch;
-		});
-
-		// This now can run with either real credentials or mocked fetch
 		it('should successfully fetch data from the Atlassian API', async () => {
-			const credentials = getAtlassianCredentials() || {
-				siteName: 'mock-site',
-				userEmail: 'mock@example.com',
-				apiToken: 'mock-token',
-				baseUrl: 'https://mock-site.atlassian.net',
-			};
+			if (skipIfNoCredentials()) return;
+
+			const credentials = getAtlassianCredentials();
 
 			// We need to use a valid endpoint for this test
 			// Make a real API call to get spaces (limiting to 1 result to reduce load)
@@ -183,14 +119,10 @@ describe('Transport Utility', () => {
 			expect(result).toHaveProperty('_links');
 		}, 15000);
 
-		// This now can run with either real credentials or mocked fetch
 		it('should throw an error for invalid endpoints', async () => {
-			const credentials = getAtlassianCredentials() || {
-				siteName: 'mock-site',
-				userEmail: 'mock@example.com',
-				apiToken: 'mock-token',
-				baseUrl: 'https://mock-site.atlassian.net',
-			};
+			if (skipIfNoCredentials()) return;
+
+			const credentials = getAtlassianCredentials();
 
 			// Make a call to a non-existent endpoint
 			await expect(
@@ -201,14 +133,10 @@ describe('Transport Utility', () => {
 			).rejects.toThrow();
 		}, 15000);
 
-		// This now can run with either real credentials or mocked fetch
 		it('should normalize paths that do not start with a slash', async () => {
-			const credentials = getAtlassianCredentials() || {
-				siteName: 'mock-site',
-				userEmail: 'mock@example.com',
-				apiToken: 'mock-token',
-				baseUrl: 'https://mock-site.atlassian.net',
-			};
+			if (skipIfNoCredentials()) return;
+
+			const credentials = getAtlassianCredentials();
 
 			// Path without a leading slash (should be normalized)
 			const result = await fetchAtlassian<SpacesResponse>(
@@ -222,14 +150,10 @@ describe('Transport Utility', () => {
 			expect(result).toHaveProperty('_links');
 		}, 15000);
 
-		// This now can run with either real credentials or mocked fetch
 		it('should support custom request options', async () => {
-			const credentials = getAtlassianCredentials() || {
-				siteName: 'mock-site',
-				userEmail: 'mock@example.com',
-				apiToken: 'mock-token',
-				baseUrl: 'https://mock-site.atlassian.net',
-			};
+			if (skipIfNoCredentials()) return;
+
+			const credentials = getAtlassianCredentials();
 
 			// Custom request options
 			const options = {
