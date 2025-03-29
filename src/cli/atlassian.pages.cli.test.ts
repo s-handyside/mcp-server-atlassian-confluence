@@ -176,8 +176,8 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run command without required parameter
 			const result = await CliTestUtil.runCommand(['list-pages']);
 
-			// Should fail with non-zero exit code
-			expect(result.exitCode).toBe(0); // Actually, it doesn't fail because space-id is optional
+			// The space-id parameter is actually optional, so this should pass
+			expect(result.exitCode).toBe(0);
 
 			// Should indicate that it's listing all pages
 			expect(result.stdout).toBeDefined();
