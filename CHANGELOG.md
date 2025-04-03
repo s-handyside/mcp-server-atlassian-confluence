@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.15.0...v1.16.0) (2025-04-03)
+
+
+### Features
+
+* trigger new release ([666721d](https://github.com/aashari/mcp-server-atlassian-confluence/commit/666721d58bd5e5dca4131af382deacb1eb98d0f2))
+
 # [1.15.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.14.2...v1.15.0) (2025-04-03)
 
 
