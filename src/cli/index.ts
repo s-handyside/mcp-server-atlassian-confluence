@@ -1,13 +1,12 @@
 import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
+import { VERSION, CLI_NAME } from '../utils/constants.util.js';
 
 import atlassianSpacesCli from './atlassian.spaces.cli.js';
 import atlassianPagesCli from './atlassian.pages.cli.js';
 import atlassianSearchCli from './atlassian.search.cli.js';
 
-// Get the version from package.json
-const VERSION = '1.14.0'; // This should match the version in src/index.ts
-const NAME = 'mcp-atlassian-confluence';
+// Package description
 const DESCRIPTION =
 	'A Model Context Protocol (MCP) server for Atlassian Confluence integration';
 
@@ -18,7 +17,7 @@ export async function runCli(args: string[]) {
 	cliLogger.info(`Starting Confluence CLI v${VERSION}`);
 
 	const program = new Command();
-	program.name(NAME).description(DESCRIPTION).version(VERSION);
+	program.name(CLI_NAME).description(DESCRIPTION).version(VERSION);
 
 	// Register CLI commands
 	cliLogger.debug('Registering CLI commands...');

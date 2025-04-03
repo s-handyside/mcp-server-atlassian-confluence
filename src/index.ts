@@ -5,15 +5,13 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { Logger } from './utils/logger.util.js';
 import { config } from './utils/config.util.js';
 import { createUnexpectedError } from './utils/error.util.js';
+import { VERSION, PACKAGE_NAME } from './utils/constants.util.js';
 import { runCli } from './cli/index.js';
 
 // Import Confluence-specific tools
 import atlassianSpacesTools from './tools/atlassian.spaces.tool.js';
 import atlassianPagesTools from './tools/atlassian.pages.tool.js';
 import atlassianSearchTools from './tools/atlassian.search.tool.js';
-
-// Define version constant for easier management and consistent versioning
-const VERSION = '1.14.0';
 
 // Create a contextualized logger for this file
 const indexLogger = Logger.forContext('index.ts');
@@ -53,7 +51,7 @@ export async function startServer(mode: 'stdio' | 'sse' = 'stdio') {
 
 	serverLogger.info(`Initializing Confluence MCP server v${VERSION}`);
 	serverInstance = new McpServer({
-		name: '@aashari/mcp-atlassian-confluence',
+		name: PACKAGE_NAME,
 		version: VERSION,
 	});
 
@@ -128,3 +126,4 @@ if (require.main === module) {
 export { Logger } from './utils/logger.util.js';
 export { config };
 export * from './utils/error.util.js';
+export { VERSION, PACKAGE_NAME, CLI_NAME } from './utils/constants.util.js';
