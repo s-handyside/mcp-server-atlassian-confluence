@@ -1,3 +1,10 @@
+## [1.14.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.14.0...v1.14.1) (2025-04-03)
+
+
+### Performance Improvements
+
+* **confluence:** improve version handling and module exports ([413be54](https://github.com/aashari/mcp-server-atlassian-confluence/commit/413be544774a56196af129159e8647e4f3f27744))
+
 # [1.14.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.13.2...v1.14.0) (2025-03-29)
 
 
