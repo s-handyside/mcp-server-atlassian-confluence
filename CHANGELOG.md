@@ -1,3 +1,10 @@
+## [1.14.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.14.1...v1.14.2) (2025-04-03)
+
+
+### Bug Fixes
+
+* **logger:** ensure consistent logger implementation across all projects ([e49e0df](https://github.com/aashari/mcp-server-atlassian-confluence/commit/e49e0df5e9710f386403b17953f8b42525ae212d))
+
 ## [1.14.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.14.0...v1.14.1) (2025-04-03)
 
 
