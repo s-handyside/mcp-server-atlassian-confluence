@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.14.2...v1.15.0) (2025-04-03)
+
+
+### Features
+
+* **logging:** add file logging with session ID to ~/.mcp/data/ ([cb1691b](https://github.com/aashari/mcp-server-atlassian-confluence/commit/cb1691b6a735e231eff0a63a34cb9280de81a302))
+
 ## [1.14.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.14.1...v1.14.2) (2025-04-03)
 
 
