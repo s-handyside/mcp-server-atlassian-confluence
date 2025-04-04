@@ -1,130 +1,76 @@
 # Atlassian Confluence MCP Server
 
-This project provides a Model Context Protocol (MCP) server that acts as a bridge between AI assistants (like Anthropic's Claude, Cursor AI, or other MCP-compatible clients) and your Atlassian Confluence instance. It allows AI to securely access and interact with your Confluence spaces and pages in real-time.
+This project provides a Model Context Protocol (MCP) server that acts as a bridge between AI assistants (like Anthropic's Claude, Cursor AI, or other MCP-compatible clients) and your Atlassian Confluence instance. It allows AI to securely access and interact with your Confluence spaces and pages in real time.
 
-### What is MCP and Why Use This Server?
+---
 
-Model Context Protocol (MCP) is an open standard enabling AI models to connect securely to external tools and data sources. This server implements MCP specifically for Confluence.
+# Overview
 
-**Benefits:**
+## What is MCP?
 
-- **Real-time Access:** Your AI assistant can directly access up-to-date Confluence content.
-- **Eliminate Copy/Paste:** No need to manually transfer information between Confluence and your AI assistant.
-- **Enhanced AI Capabilities:** Enables AI to search, summarize, analyze, and reference your Confluence documentation contextually.
-- **Security:** You control access via an API token. The AI interacts through the server, and sensitive operations remain contained.
+Model Context Protocol (MCP) is an open standard that allows AI systems to securely and contextually connect with external tools and data sources.
 
-### Interface Philosophy: Simple Input, Rich Output
+This server implements MCP specifically for Confluence Cloud, bridging your Confluence data with AI assistants.
 
-This server follows a "Minimal Interface, Maximal Detail" approach:
+## Why Use This Server?
 
-1.  **Simple Tools:** Ask for only essential identifiers or filters (like `pageId`, `spaceKey`, `cql`).
-2.  **Rich Details:** When you ask for a specific item (like `get-page`), the server provides all relevant information by default (content, labels, links, etc.) without needing extra flags.
+- **Minimal Input, Maximum Output Philosophy**: Simple identifiers like `spaceKey` and `pageId` are all you need. Each tool returns comprehensive details without requiring extra flags.
 
-## Available Tools
+- **Complete Knowledge Base Access**: Provide your AI assistant with full visibility into your documentation, wikis, and knowledge base content in real time.
 
-This MCP server provides the following tools for your AI assistant:
+- **Rich Content Formatting**: All page content is automatically converted from Atlassian Document Format to Markdown with proper headings, tables, lists, and other formatting elements.
 
-### List Spaces (`list-spaces`)
+- **Secure Local Authentication**: Credentials are never stored in the server. The server runs locally, so your tokens never leave your machine and you can request only the permissions you need.
 
-**Purpose:** Discover available Confluence spaces and find their 'keys' (unique identifiers).
+- **Intuitive Markdown Responses**: All responses use well-structured Markdown for readability with consistent formatting and navigational links.
 
-**Use When:** You need to know which spaces exist, find a space's key, or filter spaces by type/status.
+---
 
-**Conversational Example:** "Show me all the Confluence spaces."
-
-**Parameter Example:** `{}` (no parameters needed for basic list) or `{ type: "global", status: "current" }` (to filter).
-
-### Get Space (`get-space`)
-
-**Purpose:** Retrieve detailed information about a _specific_ space using its key. Includes homepage content snippet.
-
-**Use When:** You know the space key (e.g., "DEV") and need its full details, labels, or homepage overview.
-
-**Conversational Example:** "Tell me about the 'DEV' space in Confluence."
-
-**Parameter Example:** `{ spaceKey: "DEV" }`
-
-### List Pages (`list-pages`)
-
-**Purpose:** List pages within specific spaces (using numeric space IDs) or across the instance, with filtering options.
-
-**Use When:** You need to find pages in a known space (requires numeric ID), filter by status, or do simple text searches on titles/labels.
-
-**Conversational Example:** "Show me current pages in space ID 123456." (Use `list-spaces` first if you only know the key).
-
-**Parameter Example:** `{ spaceId: ["123456"] }` or `{ status: ["archived"], query: "Meeting Notes" }`.
-
-### Get Page (`get-page`)
-
-**Purpose:** Retrieve the full content (in Markdown) and metadata of a _specific_ page using its numeric ID.
-
-**Use When:** You know the numeric page ID (found via `list-pages` or `search`) and need to read, analyze, or summarize its content.
-
-**Conversational Example:** "Get the content of Confluence page ID 12345678."
-
-**Parameter Example:** `{ pageId: "12345678" }`
-
-### Search (`search`)
-
-**Purpose:** Perform powerful searches across Confluence content (pages, blogs, attachments) using CQL (Confluence Query Language).
-
-**Use When:** You need complex searches involving multiple criteria, full-text search, or filtering by labels, dates, contributors, etc.
-
-**Conversational Example:** "Search Confluence for pages labeled 'meeting-notes' created in the last week."
-
-**Parameter Example:** `{ cql: "label = meeting-notes AND created > -7d" }`
+# Getting Started
 
 ## Prerequisites
 
-- **Node.js and npm:** Ensure you have Node.js (which includes npm) installed. Download from [nodejs.org](https://nodejs.org/).
-- **Atlassian Account:** An active Atlassian account with access to the Confluence instance you want to connect to.
+- **Node.js** (>=18.x): [Download](https://nodejs.org/)
+- **Atlassian Account** with access to Confluence Cloud
 
-## Quick Start Guide
+---
 
-Follow these steps to connect your AI assistant to Confluence:
+## Step 1: Get Your Atlassian API Token
 
-### Step 1: Get Your Atlassian API Token
+1. Go to your Atlassian API token management page:
+   [https://id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens)
+2. Click **Create API token**.
+3. Give it a descriptive **Label** (e.g., `mcp-confluence-access`).
+4. Click **Create**.
+5. **Copy the generated API token** immediately. You won't be able to see it again.
 
-**Important:** Treat your API token like a password. Do not share it or commit it to version control.
+---
 
-1.  Go to your Atlassian API token management page:
-    [https://id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens)
-2.  Click **Create API token**.
-3.  Give it a descriptive **Label** (e.g., `mcp-confluence-access`).
-4.  Click **Create**.
-5.  **Immediately copy the generated API token.** You won't be able to see it again. Store it securely.
+## Step 2: Configure Credentials
 
-### Step 2: Configure the Server Credentials
+### Method A: MCP Config File (Recommended)
 
-Choose **one** of the following methods:
+Create or edit `~/.mcp/configs.json`:
 
-#### Method A: Global MCP Config File (Recommended)
+```json
+{
+	"@aashari/mcp-server-atlassian-confluence": {
+		"environments": {
+			"ATLASSIAN_SITE_NAME": "<YOUR_SITE_NAME>",
+			"ATLASSIAN_USER_EMAIL": "<YOUR_ATLASSIAN_EMAIL>",
+			"ATLASSIAN_API_TOKEN": "<YOUR_COPIED_API_TOKEN>"
+		}
+	}
+}
+```
 
-This keeps credentials separate and organized.
+- `<YOUR_SITE_NAME>`: Your Confluence site name (e.g., `mycompany` for `mycompany.atlassian.net`).
+- `<YOUR_ATLASSIAN_EMAIL>`: Your Atlassian account email.
+- `<YOUR_COPIED_API_TOKEN>`: The API token from Step 1.
 
-1.  **Create the directory** (if needed): `~/.mcp/`
-2.  **Create/Edit the file:** `~/.mcp/configs.json`
-3.  **Add the configuration:** Paste the following JSON structure, replacing the placeholders:
+### Method B: Environment Variables
 
-    ```json
-    {
-    	"@aashari/mcp-server-atlassian-confluence": {
-    		"environments": {
-    			"ATLASSIAN_SITE_NAME": "<YOUR_SITE_NAME>",
-    			"ATLASSIAN_USER_EMAIL": "<YOUR_ATLASSIAN_EMAIL>",
-    			"ATLASSIAN_API_TOKEN": "<YOUR_COPIED_API_TOKEN>"
-    		}
-    	}
-    }
-    ```
-
-    - `<YOUR_SITE_NAME>`: Your Confluence site name (e.g., `mycompany` for `mycompany.atlassian.net`).
-    - `<YOUR_ATLASSIAN_EMAIL>`: Your Atlassian account email.
-    - `<YOUR_COPIED_API_TOKEN>`: The API token from Step 1.
-
-#### Method B: Environment Variables (Alternative)
-
-Set environment variables when running the server.
+Pass credentials directly when running the server:
 
 ```bash
 ATLASSIAN_SITE_NAME="<YOUR_SITE_NAME>" \
@@ -133,122 +79,152 @@ ATLASSIAN_API_TOKEN="<YOUR_API_TOKEN>" \
 npx -y @aashari/mcp-server-atlassian-confluence
 ```
 
-### Step 3: Connect Your AI Assistant
+---
 
-Configure your MCP client (Claude Desktop, Cursor, etc.) to run this server.
+## Step 3: Connect Your AI Assistant
 
-#### Claude Desktop
+Configure your MCP-compatible client to launch this server.
 
-1.  Open Settings (gear icon) > Edit Config.
-2.  Add or merge into `mcpServers`:
+**Claude / Cursor Configuration:**
 
-    ```json
-    {
-    	"mcpServers": {
-    		"aashari/mcp-server-atlassian-confluence": {
-    			"command": "npx",
-    			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
-    		}
-    	}
-    }
-    ```
-
-3.  Save and **Restart Claude Desktop**.
-4.  **Verify:** Click the "Tools" (hammer) icon; Confluence tools should be listed.
-
-#### Cursor AI
-
-1.  Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`) > **Cursor Settings > MCP**.
-2.  Click **+ Add new MCP server**.
-3.  Enter:
-    - Name: `aashari/mcp-server-atlassian-confluence`
-    - Type: `command`
-    - Command: `npx -y @aashari/mcp-server-atlassian-confluence`
-4.  Click **Add**.
-5.  **Verify:** Wait for the indicator next to the server name to turn green.
-
-### Step 4: Using the Tools
-
-You can now ask your AI assistant questions related to your Confluence instance:
-
-- "List the Confluence spaces."
-- "Search Confluence using CQL: `label = meeting-notes AND created > -7d`"
-- "Get the content of Confluence page ID 12345678."
-- "Summarize the 'API Guidelines' page in the DEV space." (You might need to use `search` or `list-pages` first to find the page ID).
-
-## Using as a Command-Line Tool (CLI)
-
-You can also use this package directly from your terminal:
-
-### Quick Use with `npx`
-
-No installation required - run directly using npx:
-
-```bash
-# List spaces
-npx -y @aashari/mcp-server-atlassian-confluence list-spaces
-
-# Get a specific page
-npx -y @aashari/mcp-server-atlassian-confluence get-page --page 123456
-
-# Search for content
-npx -y @aashari/mcp-server-atlassian-confluence search --cql "type=page AND text~API" --limit 10
+```json
+{
+	"mcpServers": {
+		"aashari/mcp-server-atlassian-confluence": {
+			"command": "npx",
+			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
+		}
+	}
+}
 ```
 
-### Global Installation
+This configuration launches the server automatically at runtime.
 
-For frequent use, you can install the package globally on your system:
+---
 
-1. **Install globally** using npm:
+# Tools
 
-    ```bash
-    npm install -g @aashari/mcp-server-atlassian-confluence
-    ```
+This section covers the MCP tools available when using this server with an AI assistant. Note that MCP tools use `snake_case` for tool names and `camelCase` for parameters.
 
-2. **Verify installation** by checking the version:
+## `list_spaces`
 
-    ```bash
-    mcp-atlassian-confluence --version
-    ```
+List available Confluence spaces with optional filtering.
 
-3. **Use the commands** without npx prefix:
+```json
+{}
+```
 
-    ```bash
-    # List spaces
-    mcp-atlassian-confluence list-spaces
+_or:_
 
-    # List spaces with filtering
-    mcp-atlassian-confluence list-spaces --type global --status current --limit 10
+```json
+{ "type": "global", "status": "current" }
+```
 
-    # Get space details
-    mcp-atlassian-confluence get-space --space DEV
+> "Show me all Confluence spaces."
 
-    # List pages in a space
-    mcp-atlassian-confluence list-pages --space-id 12345
+---
 
-    # Get page content
-    mcp-atlassian-confluence get-page --page 123456
+## `get_space`
 
-    # Search using CQL
-    mcp-atlassian-confluence search --cql "type=page AND text~API" --limit 10
-    ```
+Get full details for a specific space, including homepage information.
 
-### Configuration with Global Installation
+```json
+{ "spaceKey": "DEV" }
+```
 
-When installed globally, you can still use the same configuration methods:
+> "Tell me about the DEV space in Confluence."
 
-1. **Using environment variables**:
+---
 
-    ```bash
-    ATLASSIAN_SITE_NAME="<YOUR_SITE_NAME>" \
-    ATLASSIAN_USER_EMAIL="<YOUR_EMAIL>" \
-    ATLASSIAN_API_TOKEN="<YOUR_API_TOKEN>" \
-    mcp-atlassian-confluence list-spaces
-    ```
+## `list_pages`
 
-2. **Using global MCP config file** (recommended):
-   Set up the `~/.mcp/configs.json` file as described in the Quick Start Guide.
+List pages within one or more spaces with optional filtering.
 
-## License
+```json
+{ "spaceId": ["123456"] }
+```
 
-[ISC](https://opensource.org/licenses/ISC)
+_or:_
+
+```json
+{ "status": ["current"], "query": "Project Plan" }
+```
+
+> "Show me current pages in space 123456."
+
+---
+
+## `get_page`
+
+Get full content and metadata for a specific page.
+
+```json
+{ "pageId": "12345678" }
+```
+
+> "Get the content of Confluence page 12345678."
+
+---
+
+## `search`
+
+Search Confluence content using CQL (Confluence Query Language).
+
+```json
+{ "cql": "text ~ 'project plan'" }
+```
+
+_or:_
+
+```json
+{ "cql": "space = DEV AND label = api AND created >= '2023-01-01'" }
+```
+
+> "Search Confluence for pages about project plans."
+
+---
+
+# Command-Line Interface (CLI)
+
+The CLI uses kebab-case for commands (e.g., `list-spaces`) and options (e.g., `--space-key`).
+
+## Quick Use with `npx`
+
+```bash
+npx -y @aashari/mcp-server-atlassian-confluence list-spaces
+npx -y @aashari/mcp-server-atlassian-confluence get-page --page 12345678
+```
+
+## Install Globally
+
+```bash
+npm install -g @aashari/mcp-server-atlassian-confluence
+```
+
+Then run directly:
+
+```bash
+mcp-atlassian-confluence list-spaces
+```
+
+## Discover More CLI Options
+
+Use `--help` to see flags and usage for all available commands:
+
+```bash
+mcp-atlassian-confluence --help
+```
+
+Or get detailed help for a specific command:
+
+```bash
+mcp-atlassian-confluence get-space --help
+mcp-atlassian-confluence search --help
+mcp-atlassian-confluence list-pages --help
+```
+
+---
+
+# License
+
+[ISC License](https://opensource.org/licenses/ISC)
