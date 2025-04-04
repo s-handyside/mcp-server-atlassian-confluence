@@ -114,10 +114,10 @@ async function getSpace(
  *
  * @param {McpServer} server - The MCP server instance to register tools with
  */
-function register(server: McpServer) {
+function registerTools(server: McpServer) {
 	const toolLogger = Logger.forContext(
 		'tools/atlassian.spaces.tool.ts',
-		'register',
+		'registerTools',
 	);
 	toolLogger.debug('Registering Atlassian Spaces tools...');
 
@@ -215,4 +215,4 @@ function register(server: McpServer) {
 	toolLogger.debug('Successfully registered Atlassian Spaces tools');
 }
 
-export default { register };
+export default { registerTools };

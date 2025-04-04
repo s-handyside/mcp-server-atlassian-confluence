@@ -127,10 +127,10 @@ async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
  *
  * @param {McpServer} server - The MCP server instance to register tools with
  */
-function register(server: McpServer) {
+function registerTools(server: McpServer) {
 	const toolLogger = Logger.forContext(
 		'tools/atlassian.pages.tool.ts',
-		'register',
+		'registerTools',
 	);
 	toolLogger.debug('Registering Atlassian Pages tools...');
 
@@ -216,4 +216,4 @@ function register(server: McpServer) {
 	toolLogger.debug('Successfully registered Atlassian Pages tools');
 }
 
-export default { register };
+export default { registerTools };
