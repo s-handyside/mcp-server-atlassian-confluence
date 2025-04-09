@@ -1,3 +1,11 @@
+## [1.16.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.16.0...v1.16.1) (2025-04-04)
+
+
+### Bug Fixes
+
+* standardize README.md format across MCP servers ([91e8c72](https://github.com/aashari/mcp-server-atlassian-confluence/commit/91e8c728d6148abd894c22dbb7c718a4e385e101))
+* standardize tool registration function names to registerTools ([65247dc](https://github.com/aashari/mcp-server-atlassian-confluence/commit/65247dc1f07f6ef5ffefef8a1c35c3f1c0a3fb6d))
+
 # [1.16.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.15.0...v1.16.0) (2025-04-03)
 
 
