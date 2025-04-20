@@ -1,11 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Logger } from '../utils/logger.util.js';
-import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import {
+	ListSpacesToolArgs,
 	ListSpacesToolArgsType,
 	GetSpaceToolArgsType,
-	ListSpacesToolArgs,
 	GetSpaceToolArgs,
 } from './atlassian.spaces.types.js';
 
@@ -18,14 +17,10 @@ import atlassianSpacesController from '../controllers/atlassian.spaces.controlle
  * Returns a formatted markdown response with space details and pagination info.
  *
  * @param {ListSpacesToolArgsType} args - Tool arguments for filtering spaces
- * @param {RequestHandlerExtra} _extra - Extra request handler information (unused)
  * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted spaces list
  * @throws Will return error message if space listing fails
  */
-async function listSpaces(
-	args: ListSpacesToolArgsType,
-	_extra: RequestHandlerExtra,
-) {
+async function listSpaces(args: ListSpacesToolArgsType) {
 	const toolLogger = Logger.forContext(
 		'tools/atlassian.spaces.tool.ts',
 		'listSpaces',
@@ -68,14 +63,10 @@ async function listSpaces(
  * Returns a formatted markdown response with space metadata.
  *
  * @param {GetSpaceToolArgsType} args - Tool arguments containing the space key or ID
- * @param {RequestHandlerExtra} _extra - Extra request handler information (unused)
  * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted space details
  * @throws Will return error message if space retrieval fails
  */
-async function getSpace(
-	args: GetSpaceToolArgsType,
-	_extra: RequestHandlerExtra,
-) {
+async function getSpace(args: GetSpaceToolArgsType) {
 	const methodLogger = Logger.forContext(
 		'tools/atlassian.spaces.tool.ts',
 		'getSpace',

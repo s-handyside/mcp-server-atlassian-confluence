@@ -1,13 +1,12 @@
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Logger } from '../utils/logger.util.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
 import {
-	ListPagesToolArgs,
 	ListPagesToolArgsType,
-	GetPageToolArgs,
+	ListPagesToolArgs,
 	GetPageToolArgsType,
+	GetPageToolArgs,
 } from './atlassian.pages.types.js';
 
 /**
@@ -17,14 +16,10 @@ import {
  * Returns a formatted markdown response with page details and pagination info.
  *
  * @param {ListPagesToolArgsType} args - Tool arguments for filtering pages
- * @param {RequestHandlerExtra} _extra - Extra request handler information (unused)
  * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted pages list
  * @throws Will return error message if page listing fails
  */
-async function listPages(
-	args: ListPagesToolArgsType,
-	_extra: RequestHandlerExtra,
-) {
+async function listPages(args: ListPagesToolArgsType) {
 	const methodLogger = Logger.forContext(
 		'tools/atlassian.pages.tool.ts',
 		'listPages',
@@ -84,11 +79,10 @@ async function listPages(
  * Returns a formatted markdown response with page content and metadata.
  *
  * @param {GetPageToolArgsType} args - Tool arguments containing the page ID
- * @param {RequestHandlerExtra} _extra - Extra request handler information (unused)
  * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted page details
  * @throws Will return error message if page retrieval fails
  */
-async function getPage(args: GetPageToolArgsType, _extra: RequestHandlerExtra) {
+async function getPage(args: GetPageToolArgsType) {
 	const methodLogger = Logger.forContext(
 		'tools/atlassian.pages.tool.ts',
 		'getPage',
