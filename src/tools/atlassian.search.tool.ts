@@ -69,8 +69,8 @@ function registerTools(server: McpServer) {
 
 	// Register the search tool
 	server.tool(
-		'search',
-		`Search Confluence content using CQL (Confluence Query Language) for precise results.
+		'confluence_search',
+		`Search Confluence content using Confluence Query Language (CQL).
 
         PURPOSE: Performs advanced content searches across Confluence using CQL queries, allowing for complex search patterns, content filtering, and targeted results. This is the most powerful search tool for Confluence, supporting complex filtering and sorting.
 
@@ -116,7 +116,14 @@ function registerTools(server: McpServer) {
         - Invalid CQL syntax: Check query format against CQL documentation.
         - No results: Try broadening search criteria.
         - Authentication/permission failures: Ensure proper credentials.
-        - Rate limiting: For large result sets, use pagination and caching.`,
+        - Rate limiting: For large result sets, use pagination and caching.
+
+        Use the search tool to locate content based on keywords or other criteria,
+        then use the get_page tool with the ID found in the search results to
+        retrieve the full page content.
+        This provides a focused way to find relevant information quickly.
+        Example: Use 'confluence_search' to find pages, then 'confluence_get_page' to read one.
+        `,
 		SearchToolArgs.shape,
 		search,
 	);

@@ -114,7 +114,7 @@ function registerTools(server: McpServer) {
 
 	// Register the list spaces tool
 	server.tool(
-		'list_spaces',
+		'confluence_list_spaces',
 		`List available Confluence spaces with filtering options and pagination support.
 
         PURPOSE: Discovers accessible Confluence spaces, providing metadata about each space including ID, key, name, description, and status. This tool is essential for finding spaces before working with their content.
@@ -162,7 +162,7 @@ function registerTools(server: McpServer) {
 
 	// Register the get space details tool
 	server.tool(
-		'get_space',
+		'confluence_get_space',
 		`Retrieve comprehensive details about a specific Confluence space by ID.
 
         PURPOSE: Fetches complete metadata and configuration information for a space, identified by its numeric ID. Provides all available details about a space, including permissions, themes, and homepage.
