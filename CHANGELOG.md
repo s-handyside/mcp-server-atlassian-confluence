@@ -1,3 +1,15 @@
+# [1.17.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.16.4...v1.17.0) (2025-04-25)
+
+
+### Bug Fixes
+
+* unify tool names and descriptions for consistency ([9a24efc](https://github.com/aashari/mcp-server-atlassian-confluence/commit/9a24efc28921472d8f0764a0b4542d2fe7739f2b))
+
+
+### Features
+
+* prefix Confluence tool names with 'confluence_' for uniqueness ([513aac4](https://github.com/aashari/mcp-server-atlassian-confluence/commit/513aac448747b5b61db7065b618809e25bc16dc4))
+
 ## [1.16.4](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.16.3...v1.16.4) (2025-04-22)
 
 
