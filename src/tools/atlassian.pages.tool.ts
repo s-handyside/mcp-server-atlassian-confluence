@@ -131,39 +131,7 @@ function registerTools(server: McpServer) {
 	// Register the list pages tool
 	server.tool(
 		'confluence_list_pages',
-		`List Confluence pages, optionally filtering by space ID(s), status, or title/content/label query, with pagination.
-
-        PURPOSE: Discover pages within specific spaces or across the instance based on status or simple text matching. Provides page metadata and IDs needed for the 'confluence_get_page' tool.
-
-        WHEN TO USE:
-        - To list pages within one or more specific spaces (using 'spaceId').
-        - To find pages based on their status ('current', 'archived', etc.).
-        - To perform simple text searches on page titles or labels ('query').
-        - To get an overview of recent pages in a space before getting full content.
-        - To obtain 'pageId' values for use with 'confluence_get_page'.
-
-        WHEN NOT TO USE:
-        - When you need to search the *full content* of pages with complex logic (use 'confluence_search' with CQL).
-        - When you already know the 'pageId' and need details (use 'confluence_get_page').
-        - When you need space information (use space tools).
-        - If you only have the space *key* (use 'confluence_list_spaces' or 'confluence_get_space' to find the numeric 'spaceId' first).
-
-        RETURNS: Formatted list of pages including ID, title, space ID, status, author, creation date, version, and URL. Includes pagination details if applicable (Confluence uses cursor-based pagination).
-        
-        SORTING: By default, pages are sorted by modified date in descending order (most recently modified first). You can change this by specifying a different value in the 'sort' parameter (e.g., "title" for alphabetical sorting).
-
-        EXAMPLES:
-        - List pages in space 123456: { spaceId: ["123456"] }
-        - List archived pages in space 123456: { spaceId: ["123456"], status: ["archived"] }
-        - Find pages with "Project Plan" in title/label in space 123456: { spaceId: ["123456"], query: "Project Plan" }
-        - Paginate results: { limit: 10, cursor: "some-cursor-value" }
-        - Sort pages by title: { spaceId: ["123456"], sort: "title" }
-
-        ERRORS:
-        - Space ID not found: Verify the numeric 'spaceId' is correct.
-        - Invalid status: Ensure 'status' is one of the allowed values.
-        - Authentication failures: Check Confluence credentials.
-        - No pages found: Filters might be too restrictive, or the space is empty/inaccessible.`,
+		`Lists Confluence pages, optionally filtering by space ID(s) (\`spaceId\`), status (\`status\`), title/label query (\`query\`), or sorting (\`sort\`).\n- Use this to discover pages within spaces and find page IDs needed for \`confluence_get_page\`.\n- Simple text search (\`query\`) matches titles/labels, not full content. Use \`confluence_search\` for full content search.\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns a formatted list of pages including ID, title, space ID, status, author, and dates.\n**Note:** Requires numeric \`spaceId\`(s). Use \`confluence_list_spaces\` or \`confluence_get_space\` if you only have the space key. Default sort is by last modified date.`,
 		ListPagesToolArgs.shape,
 		listPages,
 	);
@@ -171,38 +139,7 @@ function registerTools(server: McpServer) {
 	// Register the get page details tool
 	server.tool(
 		'confluence_get_page',
-		`Retrieve a Confluence page's full content and metadata by its numeric ID.
-
-        PURPOSE: Fetches the complete content (converted to Markdown) and comprehensive metadata for a specific Confluence page, identified by its numeric ID. The page content is properly formatted with headings, tables, lists, and other Markdown elements.
-
-        WHEN TO USE:
-        - When you need to read, analyze, or summarize the full content of a specific page.
-        - When you need detailed page metadata (author, version, status, etc.).
-        - After finding a page ID through 'confluence_list_pages' or 'confluence_search' and need its complete content.
-        - When you need the actual content of a page rather than just its metadata.
-
-        WHEN NOT TO USE:
-        - When you only have a space ID or space key (use 'confluence_list_pages' first).
-        - When you need to find pages based on criteria (use 'confluence_list_pages' or 'confluence_search').
-        - When you want to discover spaces rather than specific pages (use space tools).
-        - When you need to search across multiple pages (use 'confluence_search').
-
-        RETURNS: Comprehensive page details formatted in Markdown, including:
-        - Full title, space information, and creation metadata
-        - Complete page content (converted from Atlassian Document Format to Markdown)
-        - Version information, permissions status, and URL
-        - Metadata including labels, restrictions, and ancestors
-        
-        The page content is fetched using the Confluence Content REST API, with the body transformed from ADF (Atlassian Document Format) to readable Markdown.
-
-        EXAMPLES:
-        - Get page with ID 123456: { pageId: "123456" }
-
-        ERRORS:
-        - Page not found (404): Verify the numeric page ID exists and is accessible.
-        - Permission denied (403): Check if the page has view restrictions.
-        - Authentication failure: Verify API credentials.
-        - Content conversion failures: Some complex content elements may not convert perfectly to Markdown.`,
+		`Retrieves the full content (converted to Markdown) and metadata for a specific Confluence page using its numeric ID (\`pageId\`).\n- Includes complete page body, title, space info, author, version, labels, and URL.\nUse this after finding a page ID via \`confluence_list_pages\` or \`confluence_search\` to get its full content.\nReturns comprehensive page details formatted as Markdown.`,
 		GetPageToolArgs.shape,
 		getPage,
 	);

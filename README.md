@@ -106,7 +106,7 @@ This configuration launches the server automatically at runtime.
 
 This section covers the MCP tools available when using this server with an AI assistant. Note that MCP tools use `snake_case` for tool names and `camelCase` for parameters.
 
-## `list_spaces`
+## `confluence_list_spaces`
 
 List available Confluence spaces with optional filtering.
 
@@ -124,7 +124,7 @@ _or:_
 
 ---
 
-## `get_space`
+## `confluence_get_space`
 
 Get full details for a specific space, including homepage information.
 
@@ -136,7 +136,7 @@ Get full details for a specific space, including homepage information.
 
 ---
 
-## `list_pages`
+## `confluence_list_pages`
 
 List pages within one or more spaces with optional filtering.
 
@@ -154,7 +154,7 @@ _or:_
 
 ---
 
-## `get_page`
+## `confluence_get_page`
 
 Get full content and metadata for a specific page.
 
@@ -166,7 +166,7 @@ Get full content and metadata for a specific page.
 
 ---
 
-## `search`
+## `confluence_search`
 
 Search Confluence content using CQL (Confluence Query Language).
 
@@ -186,13 +186,13 @@ _or:_
 
 # Command-Line Interface (CLI)
 
-The CLI uses kebab-case for commands (e.g., `list-spaces`) and options (e.g., `--space-key`).
+The CLI uses kebab-case for commands (e.g., `confluence-list-spaces`) and options (e.g., `--space-key`).
 
 ## Quick Use with `npx`
 
 ```bash
-npx -y @aashari/mcp-server-atlassian-confluence list-spaces
-npx -y @aashari/mcp-server-atlassian-confluence get-page --page 12345678
+npx -y @aashari/mcp-server-atlassian-confluence confluence-list-spaces
+npx -y @aashari/mcp-server-atlassian-confluence confluence-get-page --page-id 12345678
 ```
 
 ## Install Globally
@@ -204,7 +204,7 @@ npm install -g @aashari/mcp-server-atlassian-confluence
 Then run directly:
 
 ```bash
-mcp-atlassian-confluence list-spaces
+mcp-atlassian-confluence confluence-list-spaces
 ```
 
 ## Discover More CLI Options
@@ -218,9 +218,9 @@ mcp-atlassian-confluence --help
 Or get detailed help for a specific command:
 
 ```bash
-mcp-atlassian-confluence get-space --help
-mcp-atlassian-confluence search --help
-mcp-atlassian-confluence list-pages --help
+mcp-atlassian-confluence confluence-get-space --help
+mcp-atlassian-confluence confluence-search --help
+mcp-atlassian-confluence confluence-list-pages --help
 ```
 
 ---

@@ -70,60 +70,7 @@ function registerTools(server: McpServer) {
 	// Register the search tool
 	server.tool(
 		'confluence_search',
-		`Search Confluence content using Confluence Query Language (CQL).
-
-        PURPOSE: Performs advanced content searches across Confluence using CQL queries, allowing for complex search patterns, content filtering, and targeted results. This is the most powerful search tool for Confluence, supporting complex filtering and sorting.
-
-        WHEN TO USE:
-        - When you need to search for specific text or patterns within page content (not just titles).
-        - When you need to combine multiple search criteria (e.g., text + space + date + type).
-        - When you need to search using complex logical operators (AND, OR, NOT).
-        - When simple title/label searches via 'list_pages' are insufficient.
-        - When you need to search across all content types (pages, blog posts, attachments, etc.).
-        - When you need fine-grained sorting control over search results.
-
-        WHEN NOT TO USE:
-        - When you already know the page ID (use 'get_page' instead).
-        - When you only need to list pages in a space by title (use 'list_pages' with optional query).
-        - When you need to explore or browse spaces (use space-related tools).
-        - When you're not searching for actual content (e.g., for space metadata).
-
-        RETURNS: Formatted search results including:
-        - Result type (page, blog, attachment, etc.)
-        - Title and content excerpt with highlighted match terms
-        - Space information, creation metadata, and URL
-        - Content ID for use with other tools like 'get_page'
-        
-        Results can be paginated using the 'limit' and 'cursor' parameters.
-
-        CQL EXAMPLES:
-        - Basic text search: { cql: "text ~ 'project plan'" }
-        - Combined criteria: { cql: "text ~ 'quarterly report' AND space = DEV AND type = 'page'" }
-        - Date filtering: { cql: "created >= '2023-01-01' AND created <= '2023-12-31'" }
-        - Content by specific user: { cql: "creator = 'jsmith'" }
-        - Exact phrase with label: { cql: "text = 'API Documentation' AND label = 'public'" }
-        
-        Common CQL fields:
-        - text: Full-text content search
-        - title: Title search
-        - space: Space key
-        - type: Content type (page, blogpost, attachment)
-        - created/modified: Date criteria
-        - label: Content labels
-        - creator/contributor: User references
-
-        ERRORS:
-        - Invalid CQL syntax: Check query format against CQL documentation.
-        - No results: Try broadening search criteria.
-        - Authentication/permission failures: Ensure proper credentials.
-        - Rate limiting: For large result sets, use pagination and caching.
-
-        Use the search tool to locate content based on keywords or other criteria,
-        then use the get_page tool with the ID found in the search results to
-        retrieve the full page content.
-        This provides a focused way to find relevant information quickly.
-        Example: Use 'confluence_search' to find pages, then 'confluence_get_page' to read one.
-        `,
+		`Searches Confluence content (pages, blog posts, attachments, etc.) using a CQL query (\`cql\`), with pagination (\`limit\`, \`cursor\`).\n- Performs advanced search across full content, not just titles/labels like \`confluence_list_pages\`.\n- Supports complex criteria (text, space, type, dates, labels, users) and logical operators.\n- Use this to find content based on keywords or complex filters, then use \`confluence_get_page\` with the returned ID.\nReturns a formatted list of search results including type, title, excerpt, space info, URL, and content ID.\n**Note:** Requires valid CQL syntax. See Confluence documentation for CQL details.`,
 		SearchToolArgs.shape,
 		search,
 	);

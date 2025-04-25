@@ -115,47 +115,7 @@ function registerTools(server: McpServer) {
 	// Register the list spaces tool
 	server.tool(
 		'confluence_list_spaces',
-		`List available Confluence spaces with filtering options and pagination support.
-
-        PURPOSE: Discovers accessible Confluence spaces, providing metadata about each space including ID, key, name, description, and status. This tool is essential for finding spaces before working with their content.
-
-        WHEN TO USE:
-        - When you need to discover what spaces exist in the Confluence instance.
-        - When you need to find a space's ID or key to use with other tools.
-        - When you need to filter spaces by type ('global', 'personal', 'archived').
-        - When you need to locate a space by partial name matching.
-        - When you need to browse available content sources.
-        - As a first step before using 'list_pages' or content search tools.
-
-        WHEN NOT TO USE:
-        - When you already know the specific space ID/key (use 'get_space' instead).
-        - When you need to search for page content (use 'search' instead).
-        - When you need to list pages within a known space (use 'list_pages' instead).
-        - When you need detailed information about a specific space (use 'get_space' instead).
-
-        RETURNS: Formatted list of spaces including:
-        - Numeric ID (used for most API operations)
-        - Space key (short identifier, e.g., 'DEV', 'HR', etc.)
-        - Display name and description
-        - Type (global, personal) and status (current, archived)
-        - Creation information and URL
-        
-        Results can be paginated using the 'limit' and 'cursor' parameters.
-        
-        SORTING: By default, spaces are sorted by name in descending order.
-
-        EXAMPLES:
-        - List all spaces: {}
-        - Filter by type: { type: ["global"] }
-        - Filter by status: { status: ["current"] }
-        - Search by name: { query: "Engineering" }
-        - With pagination: { limit: 20, cursor: "some-cursor-value" }
-
-        ERRORS:
-        - Authentication failures: Check Confluence credentials.
-        - Permission issues: Ensure you have access to view spaces.
-        - Invalid filter values: Verify type/status values match allowed options.
-        - No spaces found: May indicate permission issues or overly restrictive filters.`,
+		`Lists Confluence spaces accessible to the user, optionally filtering by type (\`type\`), status (\`status\`), or name query (\`query\`).\n- Use this to discover spaces and find their numeric IDs or keys needed for other tools (\`confluence_list_pages\`, \`confluence_get_space\`, \`confluence_search\`).\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns a formatted list of spaces including numeric ID, key, name, type, status, and URL.\n**Note:** Default sort is by name descending.`,
 		ListSpacesToolArgs.shape,
 		listSpaces,
 	);
@@ -163,42 +123,7 @@ function registerTools(server: McpServer) {
 	// Register the get space details tool
 	server.tool(
 		'confluence_get_space',
-		`Retrieve comprehensive details about a specific Confluence space by ID.
-
-        PURPOSE: Fetches complete metadata and configuration information for a space, identified by its numeric ID. Provides all available details about a space, including permissions, themes, and homepage.
-
-        WHEN TO USE:
-        - When you need detailed information about a specific space's configuration.
-        - When you need the numeric ID of a space's homepage to use with 'get_page'.
-        - When you need to verify permissions, status, or theme settings.
-        - When you need to analyze space metadata before working with its content.
-        - After finding a space through 'list_spaces' and needing more details.
-        - When you need to determine if a space is active, archived, or has specific restrictions.
-
-        WHEN NOT TO USE:
-        - When you need to discover spaces (use 'list_spaces' instead).
-        - When you need to list pages in a space (use 'list_pages' instead).
-        - When you need to search for content (use 'search' instead).
-        - When you only have a space key and need the ID (use 'list_spaces' first).
-
-        RETURNS: Comprehensive space details formatted in Markdown, including:
-        - Full name, key, and ID information
-        - Description and homepage details
-        - Type, status, and theme configuration
-        - Permissions and restrictions
-        - Creation and modification metadata
-        - URLs for accessing the space directly
-        
-        All available metadata is fetched by default to provide complete information.
-
-        EXAMPLES:
-        - Get space with ID 123456: { spaceId: "123456" }
-
-        ERRORS:
-        - Space not found (404): Verify the numeric space ID exists and is accessible.
-        - Permission denied (403): Check if you have access to the space.
-        - Authentication failure: Verify Confluence credentials.
-        - Invalid ID format: Ensure the spaceId is a valid numeric identifier.`,
+		`Retrieves comprehensive details for a specific Confluence space using its key (\`spaceKey\`).\n- Includes description, homepage ID, type, status, theme, permissions, and other metadata.\nUse this after finding a space key via \`confluence_list_spaces\` to get its full details.\nReturns detailed space information formatted as Markdown.`,
 		GetSpaceToolArgs.shape,
 		getSpace,
 	);
