@@ -17,6 +17,10 @@ import {
 	GetPageByIdParams,
 	BodyFormat,
 } from '../services/vendor.atlassian.pages.types.js';
+import {
+	extractPaginationInfo,
+	PaginationType,
+} from '../utils/pagination.util.js';
 
 /**
  * Controller for managing Confluence pages.
@@ -94,16 +98,15 @@ async function list(
 
 		// The formatPagesList function expects a pagesData parameter with results
 		// Extract the nextCursor from the links
-		const nextCursor = pagesData._links?.next?.split('cursor=')[1] || '';
+		const pagination = extractPaginationInfo(
+			pagesData,
+			PaginationType.CURSOR,
+		);
 		const formattedPages = formatPagesList(pagesData.results);
 
 		return {
 			content: formattedPages,
-			pagination: {
-				count: pagesData.results.length,
-				hasMore: !!pagesData._links?.next,
-				nextCursor: nextCursor,
-			},
+			pagination,
 		};
 	} catch (error) {
 		// Use the standardized error handler
