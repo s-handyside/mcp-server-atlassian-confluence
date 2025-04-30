@@ -1,3 +1,10 @@
+## [1.18.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.18.1...v1.18.2) (2025-04-30)
+
+
+### Bug Fixes
+
+* **cli:** Align command names and descriptions with tool definitions ([2cfeb60](https://github.com/aashari/mcp-server-atlassian-confluence/commit/2cfeb602ee13ae140ebf0a13e6e9cb59bf8faff6))
+
 ## [1.18.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.18.0...v1.18.1) (2025-04-30)
 
 
