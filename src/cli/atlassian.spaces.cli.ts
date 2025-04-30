@@ -35,50 +35,37 @@ function register(program: Command): void {
  */
 function registerListSpacesCommand(program: Command): void {
 	program
-		.command('list-spaces')
+		.command('ls-spaces')
 		.description(
-			`List Confluence spaces accessible to the authenticated user.
-
-        PURPOSE: Discover available spaces, find their keys for use in other commands (like searching or listing pages), and get a high-level overview of space metadata.
-
-        Use Case: Useful when you don't know the exact key of a space, or when exploring available spaces. Allows filtering by type (global/personal) and status (current/archived).
-
-        Output: Formatted list including space name, key, ID, type, status, description snippet, and URL. Supports filtering and pagination.
-        
-        Sorting: By default, spaces are sorted by name in descending order.
-
-        Examples:
-  $ mcp-atlassian-confluence list-spaces --type global --status current
-  $ mcp-atlassian-confluence list-spaces --limit 50
-  $ mcp-atlassian-confluence list-spaces --query "Documentation"`,
+			'List Confluence spaces accessible to the user, with filtering and pagination.',
 		)
 		.option(
 			'-l, --limit <number>',
-			'Maximum number of items to return (1-100)',
+			'Maximum number of items to return (1-100). Use this to control the response size. Useful for pagination or when you only need a few results. The Confluence API caps results at 100 items per request.',
 			'25',
 		)
 		.option(
 			'-c, --cursor <string>',
-			'Pagination cursor for retrieving the next set of results',
+			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
 		)
 		.option(
 			'-q, --query <text>',
-			'Filter spaces by name, key, or description (simple text search, not query language)',
+			'Search filter to find spaces matching specific text in their name, key, or description (text search).',
 		)
 		.option(
 			'-t, --type <type>',
-			'Filter by space type: global, personal',
+			'Filter spaces by type. Options include: "global" (team spaces), "personal" (user spaces), or "archived" (archived spaces). If omitted, returns all types.',
 			'global',
 		)
 		.option(
 			'-s, --status <status>',
-			'Filter by space status: current, archived',
+			'Filter spaces by status. Options include: "current" (active spaces) or "archived" (archived spaces). If omitted, returns spaces with all statuses.',
 			'current',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
 				'cli/atlassian.spaces.cli.ts',
-				'list-spaces',
+				'ls-spaces',
 			);
 			try {
 				actionLogger.debug('Processing command options:', options);
@@ -163,13 +150,11 @@ function registerGetSpaceCommand(program: Command): void {
 	program
 		.command('get-space')
 		.description(
-			`Get detailed information about a specific Confluence space.
-
-        PURPOSE: Retrieve comprehensive metadata for a known space, including its full description, permissions, and homepage details.`,
+			'Get detailed information about a specific Confluence space using its key.',
 		)
 		.requiredOption(
 			'-k, --space-key <key>',
-			'Key of the space to retrieve (e.g., DEV, MARKETING)',
+			'The key of the Confluence space to retrieve (e.g., "DEV" or "MARKETING"). The space key is a unique identifier for a space, typically a short uppercase code.',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(

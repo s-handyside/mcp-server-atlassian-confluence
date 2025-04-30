@@ -35,21 +35,19 @@ function registerSearchCommand(program: Command): void {
 	program
 		.command('search')
 		.description(
-			`Search for Confluence content (pages, blog posts, attachments, etc.) using CQL (Confluence Query Language).
-
-        PURPOSE: Perform powerful, targeted searches across your entire Confluence instance using the flexible CQL syntax. Find content based on text, labels, space, type, dates, and more.`,
+			'Search Confluence content using CQL (Confluence Query Language), with pagination.',
 		)
 		.option(
 			'-q, --cql <query>',
-			'Filter content using Confluence Query Language (CQL) syntax (e.g., "text ~ \'project plan\' AND space = DEV")',
+			'Search query using Confluence Query Language (CQL). Use this to search for content using standard CQL syntax (e.g., "text ~ \'project plan\' AND space = DEV"). If omitted, returns recent content sorted by last modified date.',
 		)
 		.option(
 			'-l, --limit <number>',
-			'Maximum number of items to return (1-100)',
+			'Maximum number of items to return (1-100). Use this to control the response size. Useful for pagination or when you only need a few results. The Confluence search API caps results at 100 items per request.',
 		)
 		.option(
 			'-c, --cursor <string>',
-			'Pagination cursor for retrieving the next set of results',
+			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(

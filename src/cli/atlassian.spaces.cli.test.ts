@@ -30,7 +30,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 	async function getSpaceKey(): Promise<string | null> {
 		// First, get a list of spaces to find a valid key
 		const listResult = await CliTestUtil.runCommand([
-			'list-spaces',
+			'ls-spaces',
 			'--limit',
 			'1',
 		]);
@@ -51,7 +51,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 		return keyMatch[1].trim();
 	}
 
-	describe('list-spaces command', () => {
+	describe('ls-spaces command', () => {
 		// Test default behavior (list all spaces)
 		it('should list available spaces', async () => {
 			if (skipIfNoCredentials()) {
@@ -59,7 +59,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 			}
 
 			// Run the CLI command
-			const result = await CliTestUtil.runCommand(['list-spaces']);
+			const result = await CliTestUtil.runCommand(['ls-spaces']);
 
 			// Check command exit code
 			expect(result.exitCode).toBe(0);
@@ -82,7 +82,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 
 			// Run the CLI command with limit
 			const result = await CliTestUtil.runCommand([
-				'list-spaces',
+				'ls-spaces',
 				'--limit',
 				'1',
 			]);
@@ -108,7 +108,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 
 			// Test with global type
 			const result = await CliTestUtil.runCommand([
-				'list-spaces',
+				'ls-spaces',
 				'--type',
 				'global',
 			]);
@@ -132,7 +132,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 
 			// Test with current status
 			const result = await CliTestUtil.runCommand([
-				'list-spaces',
+				'ls-spaces',
 				'--status',
 				'current',
 			]);
@@ -159,7 +159,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 
 			// Run the CLI command with query
 			const result = await CliTestUtil.runCommand([
-				'list-spaces',
+				'ls-spaces',
 				'--query',
 				query,
 			]);
@@ -186,7 +186,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 
 			// Run the CLI command with invalid type value
 			const result = await CliTestUtil.runCommand([
-				'list-spaces',
+				'ls-spaces',
 				'--type',
 				'invalid-type',
 			]);
@@ -205,7 +205,7 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 
 			// Run the CLI command with invalid status value
 			const result = await CliTestUtil.runCommand([
-				'list-spaces',
+				'ls-spaces',
 				'--status',
 				'invalid-status',
 			]);

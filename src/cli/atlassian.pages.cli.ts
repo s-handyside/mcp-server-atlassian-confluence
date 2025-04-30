@@ -35,56 +35,40 @@ function register(program: Command): void {
  */
 function registerListPagesCommand(program: Command): void {
 	program
-		.command('list-pages')
+		.command('ls-pages')
 		.description(
-			`List Confluence pages, optionally filtering by space ID(s), status, or title/content/label query.
-
-        PURPOSE: Discover pages within specific spaces or across your instance based on status or simple text matching. Useful for finding page IDs for 'get-page'.
-
-        Use Case: Use this for browsing pages in a known space, finding archived pages, or doing simple text searches within titles/labels. For complex content searches, use the 'search' command with CQL.
-
-        Output: Formatted list of pages including ID, title, space ID, status, author, creation date, and URL. Supports filtering and pagination.
-
-        Sorting: By default, pages are sorted by modified date in descending order (most recently modified first).
-
-        Note: --space-id requires numeric IDs. Use 'list-spaces' or 'get-space' first if you only have the space key.
-
-        Examples:
-  $ mcp-atlassian-confluence list-pages --space-id 123456 --status current
-  $ mcp-atlassian-confluence list-pages --limit 50 --query "Project"
-  $ mcp-atlassian-confluence list-pages --space-id 123456,789012 --query "documentation"
-  $ mcp-atlassian-confluence list-pages --cursor "next-cursor-value"`,
+			'List Confluence pages, with filtering, sorting, and pagination.',
 		)
 		.option(
 			'-l, --limit <number>',
-			'Maximum number of items to return (1-100)',
+			'Maximum number of items to return (1-250). Use this to control the response size. Useful for pagination or when you only need a few results. The Confluence API caps results at 250 items per request.',
 			'25',
 		)
 		.option(
 			'-c, --cursor <string>',
-			'Pagination cursor for retrieving the next set of results',
+			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
 		)
 		.option(
 			'-q, --query <text>',
-			'Filter pages by title, content, or labels (simple text search, not query language)',
+			'Filter pages by title, content, or labels (text search). Use this to narrow down results to specific topics or content.',
 		)
 		.option(
 			'-s, --space-id <ids...>',
-			'Filter by one or more space IDs (numeric), separated by spaces. This is also referred to as "containerId" in the API for cross-service consistency.',
+			'Filter pages by space IDs. Provide one or more numeric space IDs separated by spaces (e.g., 123456 789012). Useful when focusing on content from specific spaces.',
 		)
 		.option(
 			'-S, --status <status>',
-			'Filter by page status: current, archived',
+			'Filter pages by status. Valid options: current, trashed, deleted, draft, archived, historical. Defaults to current.',
 			'current',
 		)
 		.option(
 			'--sort <sort>',
-			'Sort order for pages (e.g., "title", "-modified-date"). Default is "-modified-date" (most recently modified first).',
+			'Property to sort pages by. Default is "-modified-date". Prefix "-" for descending. Valid values: id, -id, created-date, -created-date, modified-date, -modified-date, title, -title.',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
 				'cli/atlassian.pages.cli.ts',
-				'list-pages',
+				'ls-pages',
 			);
 			try {
 				actionLogger.debug('Processing command options:', options);
@@ -162,13 +146,11 @@ function registerGetPageCommand(program: Command): void {
 	program
 		.command('get-page')
 		.description(
-			`Get detailed information about a specific Confluence page using its ID.
-
-        PURPOSE: Retrieve the full content (converted to Markdown) and comprehensive metadata for a specific Confluence page, identified by its numeric ID.`,
+			'Get detailed info and content (as Markdown) for a Confluence page by ID.',
 		)
 		.requiredOption(
 			'-p, --page-id <id>',
-			'ID of the page to retrieve (numeric)',
+			'The numeric ID of the Confluence page to retrieve (e.g., "456789"). Required. Content returned as Markdown.',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(

@@ -33,7 +33,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 	async function getSpaceKey(): Promise<string | null> {
 		// First, get a list of spaces to find a valid key
 		const listResult = await CliTestUtil.runCommand([
-			'list-spaces',
+			'ls-spaces',
 			'--limit',
 			'1',
 		]);
@@ -75,7 +75,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 
 		// List pages in the space
 		const listResult = await CliTestUtil.runCommand([
-			'list-pages',
+			'ls-pages',
 			'--space-id',
 			spaceId,
 			'--limit',
@@ -101,7 +101,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 		};
 	}
 
-	describe('list-pages command', () => {
+	describe('ls-pages command', () => {
 		// Test listing pages in a space
 		it('should list pages in a space', async () => {
 			if (skipIfNoCredentials()) {
@@ -116,7 +116,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 
 			// Run the CLI command
 			const result = await CliTestUtil.runCommand([
-				'list-pages',
+				'ls-pages',
 				'--space-id',
 				spaceId,
 			]);
@@ -148,7 +148,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 
 			// Run the CLI command with limit
 			const result = await CliTestUtil.runCommand([
-				'list-pages',
+				'ls-pages',
 				'--space-id',
 				spaceId,
 				'--limit',
@@ -174,7 +174,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			}
 
 			// Run command without space ID
-			const result = await CliTestUtil.runCommand(['list-pages']);
+			const result = await CliTestUtil.runCommand(['ls-pages']);
 
 			// In authenticated environment, this works with exit code 0
 			// In unauthenticated environment (CI), this fails with exit code 1
@@ -202,7 +202,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 
 			// Run command with invalid ID
 			const result = await CliTestUtil.runCommand([
-				'list-pages',
+				'ls-pages',
 				'--space-id',
 				invalidId,
 			]);
@@ -233,7 +233,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Use the valid space ID twice to test multiple ID support
 			// With commander's array syntax, multiple values are passed as separate arguments
 			const result = await CliTestUtil.runCommand([
-				'list-pages',
+				'ls-pages',
 				'--space-id',
 				spaceId,
 				'999999999', // Adding an invalid ID alongside the valid one

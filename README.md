@@ -188,13 +188,15 @@ _or:_
 
 # Command-Line Interface (CLI)
 
-The CLI uses kebab-case for commands (e.g., `confluence-list-spaces`) and options (e.g., `--space-key`).
+The CLI uses kebab-case for commands (e.g., `ls-spaces`) and options (e.g., `--space-key`).
 
 ## Quick Use with `npx`
 
 ```bash
-npx -y @aashari/mcp-server-atlassian-confluence confluence-list-spaces
-npx -y @aashari/mcp-server-atlassian-confluence confluence-get-page --page-id 12345678
+npx -y @aashari/mcp-server-atlassian-confluence ls-spaces --type global
+npx -y @aashari/mcp-server-atlassian-confluence get-page --page-id 12345678
+npx -y @aashari/mcp-server-atlassian-confluence ls-pages --space-id 98765
+npx -y @aashari/mcp-server-atlassian-confluence search --cql "text ~ 'release notes'"
 ```
 
 ## Install Globally
@@ -206,7 +208,8 @@ npm install -g @aashari/mcp-server-atlassian-confluence
 Then run directly:
 
 ```bash
-mcp-atlassian-confluence confluence-list-spaces
+mcp-atlassian-confluence ls-spaces
+mcp-atlassian-confluence get-page --page-id 12345678
 ```
 
 ## Discover More CLI Options
@@ -220,9 +223,11 @@ mcp-atlassian-confluence --help
 Or get detailed help for a specific command:
 
 ```bash
-mcp-atlassian-confluence confluence-get-space --help
-mcp-atlassian-confluence confluence-search --help
-mcp-atlassian-confluence confluence-list-pages --help
+mcp-atlassian-confluence ls-spaces --help
+mcp-atlassian-confluence get-space --help
+mcp-atlassian-confluence ls-pages --help
+mcp-atlassian-confluence get-page --help
+mcp-atlassian-confluence search --help
 ```
 
 ---
