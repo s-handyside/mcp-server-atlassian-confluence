@@ -54,7 +54,7 @@ Create or edit `~/.mcp/configs.json`:
 
 ```json
 {
-	"@aashari/mcp-server-atlassian-confluence": {
+	"confluence": {
 		"environments": {
 			"ATLASSIAN_SITE_NAME": "<YOUR_SITE_NAME>",
 			"ATLASSIAN_USER_EMAIL": "<YOUR_ATLASSIAN_EMAIL>",
@@ -67,6 +67,8 @@ Create or edit `~/.mcp/configs.json`:
 - `<YOUR_SITE_NAME>`: Your Confluence site name (e.g., `mycompany` for `mycompany.atlassian.net`).
 - `<YOUR_ATLASSIAN_EMAIL>`: Your Atlassian account email.
 - `<YOUR_COPIED_API_TOKEN>`: The API token from Step 1.
+
+**Note:** For backward compatibility, the server will also recognize configurations under the full package name (`@aashari/mcp-server-atlassian-confluence`), the unscoped package name (`mcp-server-atlassian-confluence`), or the `atlassian-confluence` format if the recommended `confluence` key is not found. However, using the short `confluence` key is preferred for new configurations.
 
 ### Method B: Environment Variables
 
@@ -90,7 +92,7 @@ Configure your MCP-compatible client to launch this server.
 ```json
 {
 	"mcpServers": {
-		"aashari/mcp-server-atlassian-confluence": {
+		"confluence": {
 			"command": "npx",
 			"args": ["-y", "@aashari/mcp-server-atlassian-confluence"]
 		}
