@@ -1,3 +1,15 @@
+# [1.18.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.17.0...v1.18.0) (2025-04-30)
+
+
+### Bug Fixes
+
+* Standardize and shorten MCP tool names ([d88a372](https://github.com/aashari/mcp-server-atlassian-confluence/commit/d88a3722c0ffcee7044bc82dd9c1fc971472b99a))
+
+
+### Features
+
+* Support multiple keys for global config lookup ([a4226f4](https://github.com/aashari/mcp-server-atlassian-confluence/commit/a4226f466f5fdd4914433cd0cf3777b5566f37ab))
+
 # [1.17.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.16.4...v1.17.0) (2025-04-25)
 
 
