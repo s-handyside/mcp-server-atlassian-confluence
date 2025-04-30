@@ -130,7 +130,7 @@ function registerTools(server: McpServer) {
 
 	// Register the list pages tool
 	server.tool(
-		'confluence_list_pages',
+		'conf_ls_pages',
 		`Lists Confluence pages, optionally filtering by space ID(s) (\`spaceId\`), status (\`status\`), title/label query (\`query\`), or sorting (\`sort\`).\n- Use this to discover pages within spaces and find page IDs needed for \`confluence_get_page\`.\n- Simple text search (\`query\`) matches titles/labels, not full content. Use \`confluence_search\` for full content search.\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns a formatted list of pages including ID, title, space ID, status, author, and dates.\n**Note:** Requires numeric \`spaceId\`(s). Use \`confluence_list_spaces\` or \`confluence_get_space\` if you only have the space key. Default sort is by last modified date.`,
 		ListPagesToolArgs.shape,
 		listPages,
@@ -138,7 +138,7 @@ function registerTools(server: McpServer) {
 
 	// Register the get page details tool
 	server.tool(
-		'confluence_get_page',
+		'conf_get_page',
 		`Retrieves the full content (converted to Markdown) and metadata for a specific Confluence page using its numeric ID (\`pageId\`).\n- Includes complete page body, title, space info, author, version, labels, and URL.\nUse this after finding a page ID via \`confluence_list_pages\` or \`confluence_search\` to get its full content.\nReturns comprehensive page details formatted as Markdown.`,
 		GetPageToolArgs.shape,
 		getPage,

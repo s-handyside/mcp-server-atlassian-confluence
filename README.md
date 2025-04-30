@@ -106,7 +106,7 @@ This configuration launches the server automatically at runtime.
 
 This section covers the MCP tools available when using this server with an AI assistant. Note that MCP tools use `snake_case` for tool names and `camelCase` for parameters.
 
-## `confluence_list_spaces`
+## `conf_ls_spaces`
 
 List available Confluence spaces with optional filtering.
 
@@ -124,7 +124,7 @@ _or:_
 
 ---
 
-## `confluence_get_space`
+## `conf_get_space`
 
 Get full details for a specific space, including homepage information.
 
@@ -136,7 +136,7 @@ Get full details for a specific space, including homepage information.
 
 ---
 
-## `confluence_list_pages`
+## `conf_ls_pages`
 
 List pages within one or more spaces with optional filtering.
 
@@ -154,7 +154,7 @@ _or:_
 
 ---
 
-## `confluence_get_page`
+## `conf_get_page`
 
 Get full content and metadata for a specific page.
 
@@ -166,7 +166,7 @@ Get full content and metadata for a specific page.
 
 ---
 
-## `confluence_search`
+## `conf_search`
 
 Search Confluence content using CQL (Confluence Query Language).
 

@@ -114,7 +114,7 @@ function registerTools(server: McpServer) {
 
 	// Register the list spaces tool
 	server.tool(
-		'confluence_list_spaces',
+		'conf_ls_spaces',
 		`Lists Confluence spaces accessible to the user, optionally filtering by type (\`type\`), status (\`status\`), or name query (\`query\`).\n- Use this to discover spaces and find their numeric IDs or keys needed for other tools (\`confluence_list_pages\`, \`confluence_get_space\`, \`confluence_search\`).\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns a formatted list of spaces including numeric ID, key, name, type, status, and URL.\n**Note:** Default sort is by name descending.`,
 		ListSpacesToolArgs.shape,
 		listSpaces,
@@ -122,7 +122,7 @@ function registerTools(server: McpServer) {
 
 	// Register the get space details tool
 	server.tool(
-		'confluence_get_space',
+		'conf_get_space',
 		`Retrieves comprehensive details for a specific Confluence space using its key (\`spaceKey\`).\n- Includes description, homepage ID, type, status, theme, permissions, and other metadata.\nUse this after finding a space key via \`confluence_list_spaces\` to get its full details.\nReturns detailed space information formatted as Markdown.`,
 		GetSpaceToolArgs.shape,
 		getSpace,

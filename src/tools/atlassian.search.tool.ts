@@ -69,7 +69,7 @@ function registerTools(server: McpServer) {
 
 	// Register the search tool
 	server.tool(
-		'confluence_search',
+		'conf_search',
 		`Searches Confluence content (pages, blog posts, attachments, etc.) using a CQL query (\`cql\`), with pagination (\`limit\`, \`cursor\`).\n- Performs advanced search across full content, not just titles/labels like \`confluence_list_pages\`.\n- Supports complex criteria (text, space, type, dates, labels, users) and logical operators.\n- Use this to find content based on keywords or complex filters, then use \`confluence_get_page\` with the returned ID.\nReturns a formatted list of search results including type, title, excerpt, space info, URL, and content ID.\n**Note:** Requires valid CQL syntax. See Confluence documentation for CQL details.`,
 		SearchToolArgs.shape,
 		search,
