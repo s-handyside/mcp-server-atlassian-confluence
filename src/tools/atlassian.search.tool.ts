@@ -80,7 +80,7 @@ function registerTools(server: McpServer) {
 
 	server.tool(
 		'conf_search',
-		`Searches Confluence content (pages, blog posts) using flexible criteria. Supports specific filters like \`title\`, \`spaceKey\`, \`label\`, and \`contentType\` (page or blogpost) or advanced filtering with \`cql\` for Confluence Query Language. All filters are combined with AND logic. Supports pagination via \`limit\` and \`cursor\`. Returns a formatted Markdown list of search results including type, title, excerpt, space information, URL, and content ID.`,
+		`Searches Confluence content (pages, blog posts) using flexible criteria. Supports specific filters like \`title\`, \`spaceKey\`, \`label\`, and \`contentType\` (page or blogpost) or advanced filtering with \`cql\` for Confluence Query Language. All filters are combined with AND logic. **When using \`cql\` directly, ensure values that are also CQL keywords (like IN, OR, AND, etc.) are enclosed in double quotes (e.g., \`space = "IN"\`).** Supports pagination via \`limit\` and \`cursor\`. Returns a formatted Markdown list of search results including type, title, excerpt, space information, URL, and content ID.`,
 		SearchToolArgs.shape,
 		search,
 	);

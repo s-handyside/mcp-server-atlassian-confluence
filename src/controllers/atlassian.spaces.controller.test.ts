@@ -189,39 +189,6 @@ describe('Atlassian Spaces Controller', () => {
 			expect(resultArchived).toBeDefined();
 		}, 30000);
 
-		it('should handle filtering by query text', async () => {
-			if (skipIfNoCredentials()) return;
-
-			// First, get all spaces to find a common substring to search for
-			const allSpaces = await atlassianSpacesController.list({
-				limit: 10,
-			});
-
-			// Skip if no spaces found
-			if (
-				allSpaces.content ===
-				'No Confluence spaces found matching your criteria.'
-			) {
-				console.warn('Skipping query test: No spaces available');
-				return;
-			}
-
-			// Find a common substring from space names to search for
-			// This could be a letter that's likely to be in multiple space names
-			const searchTerm = 'a'; // Simple search term that's likely to be in some space names
-
-			// Test filtering by query
-			const resultQuery = await atlassianSpacesController.list({
-				query: searchTerm,
-				limit: 5,
-			});
-
-			// We don't check specific content as results will vary, but
-			// we verify the function works without error
-			expect(resultQuery).toHaveProperty('content');
-			expect(typeof resultQuery.content).toBe('string');
-		}, 30000);
-
 		it('should handle empty result scenario gracefully', async () => {
 			if (skipIfNoCredentials()) return;
 
@@ -234,13 +201,18 @@ describe('Atlassian Spaces Controller', () => {
 			// Use a mock method only for this test
 			if (originalList) {
 				// Save original implementation
-				const originalMethod = originalList.value;
+				// const originalMethod = originalList.value; // <-- REMOVED
 
 				// Replace with mock implementation for this test only
 				Object.defineProperty(atlassianSpacesController, 'list', {
-					value: jest.fn().mockImplementation(async (options) => {
-						// When query contains our specific test term, return empty result
-						if (options?.query?.includes('NonExistentSpaceName')) {
+					value: jest
+						.fn()
+						.mockImplementation(async (/* options */) => {
+							// <-- Removed unused 'options'
+							// Use a specific condition unrelated to query to trigger empty result
+							// For example, check for a specific limit or status if needed,
+							// or just return empty always for this mock.
+							// Here, we just return empty for any call to this mock.
 							return {
 								content:
 									'No Confluence spaces found matching your criteria.',
@@ -250,21 +222,14 @@ describe('Atlassian Spaces Controller', () => {
 									nextCursor: undefined,
 								},
 							};
-						}
-						// For other calls, use the original method
-						return originalMethod.call(
-							atlassianSpacesController,
-							options,
-						);
-					}),
+						}),
 					configurable: true,
 					writable: true,
 				});
 
-				// Call with query that should yield no results
+				// Call with arbitrary options that should trigger the mock's empty response
 				const result = await atlassianSpacesController.list({
-					query: 'NonExistentSpaceName12345',
-					limit: 5,
+					limit: 1, // Use limit=1 to trigger the mock as designed
 				});
 
 				// Check specific empty result message

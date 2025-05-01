@@ -40,13 +40,6 @@ const ListSpacesToolArgs = z.object({
 			'Filter spaces by status. Options include: "current" (active spaces) or "archived" (archived spaces). If omitted, returns spaces with all statuses.',
 		),
 
-	query: z
-		.string()
-		.optional()
-		.describe(
-			'Search filter to find spaces matching specific text in their name, key, or description (text search).',
-		),
-
 	...PaginationArgs,
 });
 

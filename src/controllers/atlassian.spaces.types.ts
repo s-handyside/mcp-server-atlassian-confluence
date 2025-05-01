@@ -30,11 +30,6 @@ export interface ListSpacesOptions extends PaginationOptions {
 	status?: SpaceStatus;
 
 	/**
-	 * Filter spaces by name or description
-	 */
-	query?: string;
-
-	/**
 	 * Property to sort by (e.g., 'name', '-id')
 	 * Default: '-name' (name descending)
 	 */
