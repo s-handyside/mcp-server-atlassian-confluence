@@ -1,3 +1,10 @@
+## [1.18.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.18.2...v1.18.3) (2025-05-01)
+
+
+### Bug Fixes
+
+* align pages CLI option descriptions with Zod schema ([2d5ec86](https://github.com/aashari/mcp-server-atlassian-confluence/commit/2d5ec86d4c102e16c695bae4ac9384194306f500))
+
 ## [1.18.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.18.1...v1.18.2) (2025-04-30)
 
 
