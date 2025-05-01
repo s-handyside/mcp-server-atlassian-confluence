@@ -43,8 +43,8 @@ function buildCqlQuery(options: SearchOptions): string {
 	if (options.spaceKey) {
 		cqlParts.push(`space = "${escapeCqlValue(options.spaceKey)}"`);
 	}
-	if (options.label && options.label.length > 0) {
-		const escapedLabels = options.label.map(escapeCqlValue);
+	if (options.labels && options.labels.length > 0) {
+		const escapedLabels = options.labels.map(escapeCqlValue);
 		escapedLabels.forEach((label) => cqlParts.push(`label = "${label}"`));
 	}
 	if (options.contentType) {

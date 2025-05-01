@@ -27,18 +27,18 @@ const PaginationArgs = {
  * Matches the controller's ListPagesOptions interface
  */
 const ListPagesToolArgs = z.object({
-	spaceId: z
+	spaceIds: z
 		.array(z.string())
 		.optional()
 		.describe(
-			'Optional: Numeric Space IDs to filter by. Use this OR spaceKey.',
+			'Optional: Numeric Space IDs to filter by. Use this OR spaceKeys.',
 		),
 
-	spaceKey: z
+	spaceKeys: z
 		.array(z.string())
 		.optional()
 		.describe(
-			'Optional: Space Keys (e.g., "DEV") to filter by. Use this OR spaceId. Preferred for usability.',
+			'Optional: Space Keys (e.g., "DEV") to filter by. Use this OR spaceIds. Preferred for usability.',
 		),
 
 	query: z

@@ -44,8 +44,8 @@ const CACHE_TTL = 3600000; // 1 hour in milliseconds
 /**
  * List pages from Confluence with filtering options
  * @param options - Options for filtering pages
- * @param options.spaceId - Filter by space ID(s)
- * @param options.spaceKey - Filter by space key(s) - user-friendly alternative to spaceId
+ * @param options.spaceIds - Filter by space ID(s)
+ * @param options.spaceKeys - Filter by space key(s) - user-friendly alternative to spaceId
  * @param options.query - Filter by text in title, content or labels
  * @param options.status - Filter by page status
  * @param options.sort - Sort order for results
@@ -74,12 +74,13 @@ async function list(
 			defaults,
 		);
 
-		let resolvedSpaceIds = mergedOptions.spaceId || []; // Start with explicitly provided IDs
+		let resolvedSpaceIds = mergedOptions.spaceIds || []; // Use renamed option
 
 		// Handle space key resolution if provided
-		if (mergedOptions.spaceKey && mergedOptions.spaceKey.length > 0) {
+		if (mergedOptions.spaceKeys && mergedOptions.spaceKeys.length > 0) {
+			// Use renamed option
 			methodLogger.debug(
-				`Resolving ${mergedOptions.spaceKey.length} space keys to IDs`,
+				`Resolving ${mergedOptions.spaceKeys.length} space keys to IDs`, // Use renamed option
 			);
 
 			const currentTime = Date.now();
@@ -87,7 +88,8 @@ async function list(
 			const currentResolvedIds: string[] = []; // IDs resolved in this specific call
 
 			// Check cache first
-			mergedOptions.spaceKey.forEach((key) => {
+			mergedOptions.spaceKeys.forEach((key) => {
+				// Use renamed option
 				const cached = spaceKeyCache[key];
 				if (cached && currentTime - cached.timestamp < CACHE_TTL) {
 					methodLogger.debug(
@@ -169,7 +171,7 @@ async function list(
 
 		// Final check: If keys/IDs were provided but none resolved, return empty.
 		if (
-			(mergedOptions.spaceKey || mergedOptions.spaceId) &&
+			(mergedOptions.spaceKeys || mergedOptions.spaceIds) && // Use renamed options
 			resolvedSpaceIds.length === 0
 		) {
 			methodLogger.warn(
@@ -184,16 +186,32 @@ async function list(
 
 		// Map controller options to service parameters
 		const params: ListPagesParams = {
-			...(resolvedSpaceIds.length > 0 && { spaceId: resolvedSpaceIds }),
+			// Keep conditional spread for optional params
 			...(mergedOptions.query && { query: mergedOptions.query }),
 			...(mergedOptions.status && { status: mergedOptions.status }),
 			...(mergedOptions.sort && { sort: mergedOptions.sort }),
-			limit: mergedOptions.limit,
-			cursor: mergedOptions.cursor,
+			...(mergedOptions.limit !== undefined && {
+				limit: mergedOptions.limit,
+			}),
+			...(mergedOptions.cursor && { cursor: mergedOptions.cursor }),
 			bodyFormat: 'storage', // Keep storage format for now
 		};
 
-		methodLogger.debug('Using service params:', params);
+		// Explicitly add spaceId if resolvedSpaceIds has items
+		if (resolvedSpaceIds && resolvedSpaceIds.length > 0) {
+			params.spaceId = resolvedSpaceIds;
+		}
+
+		methodLogger.debug('Using service params (initial):', params);
+
+		// Add extra detailed log right before the service call
+		methodLogger.debug(
+			`Final check before service call - params.spaceId: ${JSON.stringify(params.spaceId)}`,
+		);
+		methodLogger.debug(
+			'Final check before service call - full params object:',
+			params,
+		);
 
 		const pagesData = await atlassianPagesService.list(params);
 

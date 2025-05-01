@@ -99,10 +99,10 @@ function registerListPagesCommand(program: Command): void {
 
 				// Create filter options for controller
 				const filterOptions: ListPagesOptions = {
-					// Map directly to spaceId
-					...(options.spaceId && { spaceId: options.spaceId }),
-					// Add space key support
-					...(options.spaceKey && { spaceKey: options.spaceKey }),
+					// Map directly to spaceIds (plural)
+					...(options.spaceId && { spaceIds: options.spaceId }),
+					// Map spaceKey to spaceKeys (plural)
+					...(options.spaceKey && { spaceKeys: options.spaceKey }),
 					...(options.status && { status: [options.status] }),
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),

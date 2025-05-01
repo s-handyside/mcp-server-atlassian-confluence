@@ -75,7 +75,9 @@ async function list(params: ListPagesParams = {}): Promise<PagesResponse> {
 		queryParams.set('id', params.id.join(','));
 	}
 	if (params.spaceId?.length) {
-		queryParams.set('space-id', params.spaceId.join(','));
+		params.spaceId.forEach((id) => {
+			queryParams.append('space-id', id);
+		});
 	}
 	if (params.parentId) {
 		queryParams.set('parent-id', params.parentId);

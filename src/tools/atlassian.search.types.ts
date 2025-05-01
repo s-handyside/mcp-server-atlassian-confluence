@@ -43,11 +43,11 @@ const SearchToolArgs = z.object({
 		.describe(
 			'Optional: Filter results to content within a specific space key. Example: "DEV", "HR".',
 		),
-	label: z
+	labels: z
 		.array(z.string())
 		.optional()
 		.describe(
-			'Optional: Filter results to content tagged with ALL of these labels. Example: ["project-x", "roadmap"]',
+			'Optional: Filter results to content tagged with ALL of these labels (array). Example: ["project-x", "roadmap"]',
 		),
 	contentType: z
 		.enum(['page', 'blogpost'])

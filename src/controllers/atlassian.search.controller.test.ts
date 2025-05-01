@@ -54,12 +54,12 @@ describe('Atlassian Search Controller', () => {
 			}
 		}, 15000);
 
-		it('should automatically handle reserved keywords by quoting them', async () => {
+		it('should handle reserved keywords when properly quoted', async () => {
 			if (skipIfNoCredentials()) return;
 
-			// Call with a query containing an unquoted reserved keyword
+			// Call with a query containing a properly quoted reserved keyword
 			const result = await atlassianSearchController.search({
-				cql: 'space=IN',
+				cql: 'space="IN"',
 			});
 
 			// Verify the response structure

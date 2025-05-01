@@ -26,14 +26,14 @@ export interface ListPagesOptions extends PaginationOptions {
 	 * Filter pages by space ID.
 	 * Limits results to pages in the specified spaces.
 	 */
-	spaceId?: string[];
+	spaceIds?: string[];
 
 	/**
 	 * Filter pages by space key.
 	 * More user-friendly alternative to spaceId that uses readable space keys
 	 * like "DEV" or "HR" instead of numeric IDs.
 	 */
-	spaceKey?: string[];
+	spaceKeys?: string[];
 
 	/**
 	 * Filter pages by status.

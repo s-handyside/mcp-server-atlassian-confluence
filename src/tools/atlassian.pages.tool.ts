@@ -31,11 +31,11 @@ async function listPages(args: ListPagesToolArgsType) {
 		// Map the tool args to controller options
 		const options: ListPagesOptions = {};
 
-		if (args.spaceId) {
-			options.spaceId = args.spaceId;
+		if (args.spaceIds) {
+			options.spaceIds = args.spaceIds;
 		}
-		if (args.spaceKey) {
-			options.spaceKey = args.spaceKey;
+		if (args.spaceKeys) {
+			options.spaceKeys = args.spaceKeys;
 		}
 		if (args.query) {
 			options.query = args.query;

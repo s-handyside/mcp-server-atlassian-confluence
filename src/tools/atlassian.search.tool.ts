@@ -31,7 +31,7 @@ async function search(args: SearchToolArgsType) {
 			...(args.cql && { cql: args.cql }),
 			...(args.title && { title: args.title }),
 			...(args.spaceKey && { spaceKey: args.spaceKey }),
-			...(args.label && { label: args.label }),
+			...(args.labels && { labels: args.labels }),
 			...(args.contentType && { contentType: args.contentType }),
 			...(args.limit && { limit: args.limit }),
 			...(args.cursor && { cursor: args.cursor }),

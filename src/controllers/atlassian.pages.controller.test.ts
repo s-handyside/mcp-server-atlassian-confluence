@@ -73,9 +73,9 @@ describe('Atlassian Pages Controller', () => {
 
 			const spaceId = match[1];
 
-			// Call the function with the space ID filter
+			// Call the function with the space ID filter using spaceIds
 			const result = await atlassianPagesController.list({
-				spaceId: [spaceId],
+				spaceIds: [spaceId],
 			});
 
 			// Verify the response
@@ -351,9 +351,9 @@ describe('Atlassian Pages Controller', () => {
 
 			const spaceId = spaceMatch[1];
 
-			// Combine filters: space ID + status + limit
+			// Combine filters: space ID + status + limit using spaceIds
 			const result = await atlassianPagesController.list({
-				spaceId: [spaceId],
+				spaceIds: [spaceId],
 				status: ['current'],
 				limit: 3,
 			});
@@ -381,17 +381,17 @@ describe('Atlassian Pages Controller', () => {
 		it('should handle invalid space ID by throwing an error', async () => {
 			if (skipIfNoCredentials()) return;
 
-			// Call with an invalid space ID format
+			// Call with an invalid space ID format using spaceIds
 			await expect(
 				atlassianPagesController.list({
-					spaceId: ['invalid-space-id'],
+					spaceIds: ['invalid-space-id'],
 				}),
 			).rejects.toThrow(McpError);
 
-			// Try to catch the error to verify its properties
+			// Try to catch the error to verify its properties using spaceIds
 			try {
 				await atlassianPagesController.list({
-					spaceId: ['invalid-space-id'],
+					spaceIds: ['invalid-space-id'],
 				});
 			} catch (error) {
 				expect(error).toBeInstanceOf(McpError);

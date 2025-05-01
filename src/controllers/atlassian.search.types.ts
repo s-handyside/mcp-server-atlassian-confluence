@@ -39,7 +39,7 @@ export interface SearchOptions extends PaginationOptions {
 	/**
 	 * Filter results to content tagged with specific labels.
 	 */
-	label?: string[];
+	labels?: string[];
 
 	/**
 	 * Filter results by specific content type.
