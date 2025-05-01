@@ -54,16 +54,16 @@ function registerListPagesCommand(program: Command): void {
 		)
 		.option(
 			'-s, --space-id <ids...>',
-			'Filter pages by space IDs. Provide one or more numeric space IDs separated by spaces (e.g., 123456 789012). Useful when focusing on content from specific spaces.',
+			'Filter pages by space IDs. Provide an array of space IDs (e.g., ["123456", "789012"]) to only show pages from specific spaces. Useful when you want to focus on content from particular projects or teams.',
 		)
 		.option(
 			'-S, --status <status>',
-			'Filter pages by status. Valid options: current, trashed, deleted, draft, archived, historical. Defaults to current.',
+			'Filter pages by status. Options include: "current" (published pages), "trashed" (pages in trash), "deleted" (permanently deleted), "draft" (unpublished drafts), "archived" (archived pages), or "historical" (previous versions). Defaults to "current" if not specified. Provide as an array to include multiple statuses.',
 			'current',
 		)
 		.option(
 			'--sort <sort>',
-			'Property to sort pages by. Default is "-modified-date". Prefix "-" for descending. Valid values: id, -id, created-date, -created-date, modified-date, -modified-date, title, -title.',
+			'Property to sort pages by. Default is "-modified-date" which displays the most recently modified pages first. The "-" prefix indicates descending order. Valid values: "id", "-id", "created-date", "-created-date", "modified-date", "-modified-date", "title", "-title".',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
@@ -150,7 +150,7 @@ function registerGetPageCommand(program: Command): void {
 		)
 		.requiredOption(
 			'-p, --page-id <id>',
-			'The numeric ID of the Confluence page to retrieve (e.g., "456789"). Required. Content returned as Markdown.',
+			'The numeric ID of the Confluence page to retrieve (e.g., "456789"). This is required and must be a valid page ID from your Confluence instance. The page content will be returned in Markdown format for easy reading.',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
