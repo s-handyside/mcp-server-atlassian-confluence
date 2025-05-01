@@ -1,3 +1,10 @@
+## [1.19.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.19.1...v1.19.2) (2025-05-01)
+
+
+### Bug Fixes
+
+* **confluence:** remove non-functional query param from conf_ls_spaces, clarify conf_search CQL usage ([a9fe32b](https://github.com/aashari/mcp-server-atlassian-confluence/commit/a9fe32b5896043f73f0609877bfadbd405b1bcae))
+
 ## [1.19.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.19.0...v1.19.1) (2025-05-01)
 
 
