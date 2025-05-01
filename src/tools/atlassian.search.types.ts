@@ -23,16 +23,38 @@ const PaginationArgs = {
 
 /**
  * Arguments for searching Confluence content
- * Matches the controller's search function parameters
  */
 const SearchToolArgs = z.object({
 	cql: z
 		.string()
 		.optional()
 		.describe(
-			'Search query using Confluence Query Language (CQL). Use this to search for content using standard CQL syntax (e.g., "text ~ \'project plan\' AND space = DEV"). If omitted, returns recent content sorted by last modified date.',
+			'Optional: Full Confluence Query Language (CQL) string for advanced filtering (e.g., \'type=page AND space=DEV AND text ~ "release notes"\'). Use this for complex queries. If combined with other specific filter arguments (title, spaceKey, etc.), they will be added with AND logic.',
 		),
-
+	title: z
+		.string()
+		.optional()
+		.describe(
+			'Optional: Filter results to content where the title contains this text (case-insensitive search). Example: "Meeting Notes"',
+		),
+	spaceKey: z
+		.string()
+		.optional()
+		.describe(
+			'Optional: Filter results to content within a specific space key. Example: "DEV", "HR".',
+		),
+	label: z
+		.array(z.string())
+		.optional()
+		.describe(
+			'Optional: Filter results to content tagged with ALL of these labels. Example: ["project-x", "roadmap"]',
+		),
+	contentType: z
+		.enum(['page', 'blogpost'])
+		.optional()
+		.describe(
+			'Optional: Filter results by content type. Choose either "page" or "blogpost".',
+		),
 	...PaginationArgs,
 });
 

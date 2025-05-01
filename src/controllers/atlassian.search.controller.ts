@@ -1,82 +1,135 @@
-import atlassianSearchService from '../services/vendor.atlassian.search.service.js';
 import { Logger } from '../utils/logger.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
+import { ControllerResponse } from '../types/common.types.js';
+import { SearchOptions } from './atlassian.search.types.js';
+import atlassianSearchService from '../services/vendor.atlassian.search.service.js';
+import { formatSearchResults } from './atlassian.search.formatter.js';
 import {
 	extractPaginationInfo,
 	PaginationType,
 } from '../utils/pagination.util.js';
-import { ControllerResponse } from '../types/common.types.js';
-import { SearchOptions } from './atlassian.search.types.js';
-import {
-	formatSearchResults,
-	processCqlQuery,
-} from './atlassian.search.formatter.js';
-import { ExcerptStrategy } from '../services/vendor.atlassian.types.js';
 import { DEFAULT_PAGE_SIZE, applyDefaults } from '../utils/defaults.util.js';
+import { SearchParams } from '../services/vendor.atlassian.search.types.js';
+
+const controllerLogger = Logger.forContext(
+	'controllers/atlassian.search.controller.ts',
+);
+controllerLogger.debug('Search controller initialized');
 
 /**
- * Controller for searching Confluence content.
- * Provides functionality for searching content using CQL.
+ * Escapes special characters in a string for safe use within CQL quotes.
+ * Uses JSON.stringify to handle escaping and removes the outer quotes.
+ * @param value The string to escape.
+ * @returns Escaped string, suitable for placing inside CQL double quotes.
  */
+function escapeCqlValue(value: string): string {
+	// JSON.stringify correctly escapes quotes, backslashes, etc.
+	const jsonString = JSON.stringify(value);
+	// Remove the leading and trailing double quotes added by stringify
+	return jsonString.slice(1, -1);
+}
+
+/**
+ * Builds a CQL query string from provided options.
+ * @param options SearchOptions containing filters.
+ * @returns The constructed CQL string.
+ */
+function buildCqlQuery(options: SearchOptions): string {
+	const cqlParts: string[] = [];
+
+	if (options.title) {
+		cqlParts.push(`title ~ "${escapeCqlValue(options.title)}"`);
+	}
+	if (options.spaceKey) {
+		cqlParts.push(`space = "${escapeCqlValue(options.spaceKey)}"`);
+	}
+	if (options.label && options.label.length > 0) {
+		const escapedLabels = options.label.map(escapeCqlValue);
+		escapedLabels.forEach((label) => cqlParts.push(`label = "${label}"`));
+	}
+	if (options.contentType) {
+		cqlParts.push(`type = ${options.contentType}`);
+	}
+
+	const generatedCql = cqlParts.join(' AND ');
+
+	if (options.cql && options.cql.trim()) {
+		if (generatedCql) {
+			return `(${generatedCql}) AND (${options.cql})`;
+		} else {
+			return options.cql;
+		}
+	} else {
+		return generatedCql || '';
+	}
+}
 
 /**
  * Search Confluence content using CQL
- * @param options - Search options including CQL query, cursor, and limit
- * @returns Promise with formatted search results and pagination information
+ * @param options - Search options including CQL query and pagination
+ * @returns Promise with formatted search results and pagination info
+ * @throws Error if search operation fails
  */
-async function search(options: SearchOptions): Promise<ControllerResponse> {
-	const controllerLogger = Logger.forContext(
+async function search(
+	options: SearchOptions = {},
+): Promise<ControllerResponse> {
+	const methodLogger = Logger.forContext(
 		'controllers/atlassian.search.controller.ts',
 		'search',
 	);
+	methodLogger.debug('Searching Confluence with options:', options);
 
 	try {
-		controllerLogger.debug('Searching content with options:', options);
-
-		// Apply defaults and set a default query if none provided
-		const mergedOptions = applyDefaults<SearchOptions>(options, {
+		const defaults: Partial<SearchOptions> = {
 			limit: DEFAULT_PAGE_SIZE,
-			cql: 'type IN (page, blogpost) ORDER BY lastmodified DESC',
-		});
+		};
+		const mergedOptions = applyDefaults<SearchOptions>(options, defaults);
 
-		// Process CQL query: escape special characters, add any filters
-		const processedCql = processCqlQuery(mergedOptions.cql);
-		controllerLogger.debug('Processed CQL query:', { cql: processedCql });
+		const finalCql = buildCqlQuery(mergedOptions);
 
-		// Prepare search parameters for the service
-		const searchParams = {
-			cql: processedCql,
+		if (!finalCql || finalCql.trim() === '') {
+			methodLogger.warn(
+				'No CQL criteria provided for search. Returning empty.',
+			);
+			return {
+				content:
+					'Please provide search criteria (CQL, title, space, etc.).',
+				pagination: { hasMore: false, count: 0 },
+			};
+		}
+
+		methodLogger.debug(`Executing generated CQL: ${finalCql}`);
+
+		const params: SearchParams = {
+			cql: finalCql,
 			limit: mergedOptions.limit,
 			cursor: mergedOptions.cursor,
-			excerpt: 'highlight' as ExcerptStrategy, // Show content matching search terms
+			excerpt: 'highlight',
+			includeArchivedSpaces: false,
 		};
 
-		// Call the service to perform the search
-		const searchResponse =
-			await atlassianSearchService.search(searchParams);
-		controllerLogger.debug('Search returned results:', {
-			count: searchResponse.results.length,
-			hasMoreResults: !!searchResponse._links?.next,
-		});
+		const searchData = await atlassianSearchService.search(params);
 
-		// Extract pagination information for the response
-		const pagination = extractPaginationInfo(
-			searchResponse,
-			PaginationType.CURSOR,
+		methodLogger.debug(
+			`Retrieved ${searchData.results.length} search results. Has more: ${searchData._links?.next ? 'yes' : 'no'}`,
 		);
 
-		// Format the results for display
-		const formattedContent = formatSearchResults(searchResponse.results);
+		const pagination = extractPaginationInfo(
+			searchData,
+			PaginationType.CURSOR,
+		);
+		const formattedResults = formatSearchResults(searchData.results);
 
 		return {
-			content: formattedContent,
+			content: formattedResults,
 			pagination,
+			metadata: { executedCql: finalCql },
 		};
 	} catch (error) {
 		return handleControllerError(error, {
-			entityType: 'content',
-			operation: 'search',
-			source: 'atlassian.search.controller.ts',
+			entityType: 'Search Results',
+			operation: 'searching',
+			source: 'controllers/atlassian.search.controller.ts@search',
 		});
 	}
 }

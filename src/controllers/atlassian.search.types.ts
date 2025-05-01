@@ -13,11 +13,36 @@ export interface SearchIdentifier extends EntityIdentifier {
 }
 
 /**
- * Options for searching Confluence content
+ * Options for the Confluence search controller.
+ * Defines filtering and pagination parameters for CQL searches.
  */
 export interface SearchOptions extends PaginationOptions {
 	/**
-	 * Confluence Query Language (CQL) query
+	 * The Confluence Query Language (CQL) string to execute.
+	 * Example: 'type=page AND space=DEV AND text ~ "release notes"'
+	 * If provided alongside specific filters (title, spaceKey, etc.),
+	 * the specific filters will be combined with this CQL using AND.
 	 */
 	cql?: string;
+
+	/**
+	 * Filter results to content where the title contains this text (case-insensitive).
+	 */
+	title?: string;
+
+	/**
+	 * Filter results to content within a specific space, identified by its key.
+	 * Example: "DEV", "HR"
+	 */
+	spaceKey?: string;
+
+	/**
+	 * Filter results to content tagged with specific labels.
+	 */
+	label?: string[];
+
+	/**
+	 * Filter results by specific content type.
+	 */
+	contentType?: 'page' | 'blogpost';
 }

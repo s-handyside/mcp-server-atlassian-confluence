@@ -1,8 +1,9 @@
 import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
-import atlassianSearchController from '../controllers/atlassian.search.controller.js';
 import { handleCliError } from '../utils/error.util.js';
-import { formatPagination } from '../utils/formatter.util.js';
+import atlassianSearchController from '../controllers/atlassian.search.controller.js';
+import { SearchOptions } from '../controllers/atlassian.search.types.js';
+import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 
 /**
  * CLI module for searching Confluence content.
@@ -38,16 +39,39 @@ function registerSearchCommand(program: Command): void {
 			'Search Confluence content using CQL (Confluence Query Language), with pagination.',
 		)
 		.option(
-			'-q, --cql <query>',
-			'Search query using Confluence Query Language (CQL). Use this to search for content using standard CQL syntax (e.g., "text ~ \'project plan\' AND space = DEV"). If omitted, returns recent content sorted by last modified date.',
-		)
-		.option(
 			'-l, --limit <number>',
 			'Maximum number of items to return (1-100). Use this to control the response size. Useful for pagination or when you only need a few results. The Confluence search API caps results at 100 items per request.',
+			'25',
 		)
 		.option(
 			'-c, --cursor <string>',
 			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
+		)
+		.option(
+			'-q, --cql <cql>',
+			'Optional: Full CQL query for advanced filtering. Combines with other options via AND.',
+		)
+		.option(
+			'-t, --title <text>',
+			'Optional: Filter by text contained in the title.',
+		)
+		.option(
+			'-k, --space-key <key>',
+			'Optional: Filter by space key (e.g., "DEV").',
+		)
+		.option(
+			'--label <labels...>',
+			'Optional: Filter by one or more labels (requires content to have ALL specified labels).',
+		)
+		.option(
+			'--type <type>',
+			'Optional: Filter by content type (page or blogpost).',
+			(value) => {
+				if (!['page', 'blogpost'].includes(value)) {
+					throw new Error('Type must be either "page" or "blogpost"');
+				}
+				return value;
+			},
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
@@ -55,34 +79,64 @@ function registerSearchCommand(program: Command): void {
 				'search',
 			);
 			try {
-				actionLogger.debug('Processing command options:', {
-					...options,
-				});
+				actionLogger.debug('Processing command options:', options);
 
-				// Parse limit if provided
+				// Validate limit if provided
 				if (options.limit) {
 					const limit = parseInt(options.limit, 10);
-					if (isNaN(limit) || limit < 1 || limit > 100) {
+					if (isNaN(limit) || limit <= 0) {
 						throw new Error(
-							'Limit must be a number between 1 and 100.',
+							'Invalid --limit value: Must be a positive integer.',
 						);
 					}
-					options.limit = limit;
 				}
 
-				const result = await atlassianSearchController.search(options);
+				const searchOptions: SearchOptions = {
+					...(options.cql && { cql: options.cql }),
+					...(options.title && { title: options.title }),
+					...(options.spaceKey && { spaceKey: options.spaceKey }),
+					...(options.label && { label: options.label }),
+					...(options.type && {
+						contentType: options.type as 'page' | 'blogpost',
+					}),
+					...(options.limit && {
+						limit: parseInt(options.limit, 10),
+					}),
+					...(options.cursor && { cursor: options.cursor }),
+				};
+
+				actionLogger.debug(
+					'Executing search with options:',
+					searchOptions,
+				);
+
+				const result =
+					await atlassianSearchController.search(searchOptions);
+
+				actionLogger.debug('Successfully received search results');
+
+				// Print the executed CQL if available in metadata
+				if (result.metadata?.executedCql) {
+					console.log(formatHeading('Executed CQL Query', 3));
+					console.log('`' + result.metadata.executedCql + '`\n');
+				}
+
+				console.log(formatHeading('Search Results', 2));
 				console.log(result.content);
 
+				// Print pagination information if available
 				if (result.pagination) {
 					console.log(
-						formatPagination(
-							result.pagination.count || 0,
-							result.pagination.hasMore,
-							result.pagination.nextCursor,
-						),
+						'\n' +
+							formatPagination(
+								result.pagination.count ?? 0,
+								result.pagination.hasMore,
+								result.pagination.nextCursor,
+							),
 					);
 				}
 			} catch (error) {
+				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
 			}
 		});

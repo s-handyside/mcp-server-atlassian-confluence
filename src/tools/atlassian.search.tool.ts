@@ -5,7 +5,7 @@ import {
 	SearchToolArgsType,
 	SearchToolArgs,
 } from './atlassian.search.types.js';
-
+import { SearchOptions } from '../controllers/atlassian.search.types.js';
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
 
 /**
@@ -15,7 +15,7 @@ import atlassianSearchController from '../controllers/atlassian.search.controlle
  * Returns a formatted markdown response with search results.
  *
  * @param {SearchToolArgsType} args - Tool arguments for the search query
- * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted search results
+ * @returns {Promise<{ content: Array<{ type: 'text', text: string }>, pagination?: { total: number; start: number; limit: number }; metadata?: any }>} MCP response with formatted search results
  * @throws Will return error message if search fails
  */
 async function search(args: SearchToolArgsType) {
@@ -26,26 +26,37 @@ async function search(args: SearchToolArgsType) {
 	toolLogger.debug('Searching Confluence with filters:', args);
 
 	try {
-		// Pass the search options to the controller
-		const message = await atlassianSearchController.search({
-			cql: args.cql,
-			limit: args.limit,
-			cursor: args.cursor,
-		});
+		// Map tool args to controller options
+		const controllerOptions: SearchOptions = {
+			...(args.cql && { cql: args.cql }),
+			...(args.title && { title: args.title }),
+			...(args.spaceKey && { spaceKey: args.spaceKey }),
+			...(args.label && { label: args.label }),
+			...(args.contentType && { contentType: args.contentType }),
+			...(args.limit && { limit: args.limit }),
+			...(args.cursor && { cursor: args.cursor }),
+		};
+
+		const message =
+			await atlassianSearchController.search(controllerOptions);
 
 		toolLogger.debug(
 			'Successfully retrieved search results from controller',
-			message,
 		);
 
-		return {
+		// Construct response, including metadata if present
+		const response = {
 			content: [
 				{
 					type: 'text' as const,
 					text: message.content,
 				},
 			],
+			...(message.pagination && { pagination: message.pagination }),
+			...(message.metadata && { metadata: message.metadata }),
 		};
+
+		return response;
 	} catch (error) {
 		toolLogger.error('Failed to search Confluence', error);
 		return formatErrorForMcpTool(error);
@@ -67,10 +78,9 @@ function registerTools(server: McpServer) {
 	);
 	toolLogger.debug('Registering Atlassian Search tools');
 
-	// Register the search tool
 	server.tool(
 		'conf_search',
-		`Searches Confluence content (pages, blog posts, attachments, etc.) using a CQL query (\`cql\`), with pagination (\`limit\`, \`cursor\`).\n- Performs advanced search across full content, not just titles/labels like \`confluence_list_pages\`.\n- Supports complex criteria (text, space, type, dates, labels, users) and logical operators.\n- Use this to find content based on keywords or complex filters, then use \`confluence_get_page\` with the returned ID.\nReturns a formatted list of search results including type, title, excerpt, space info, URL, and content ID.\n**Note:** Requires valid CQL syntax. See Confluence documentation for CQL details.`,
+		`Searches Confluence content (pages, blog posts) using flexible criteria.\n- Use specific filters like \`title\`, \`spaceKey\`, \`label\`, \`contentType\` for common searches.\n- Use \`cql\` for advanced filtering with Confluence Query Language.\n- Filters are combined with AND logic. If only specific filters are used, CQL is generated automatically.\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns a formatted list of search results including type, title, excerpt, space info, URL, and content ID.\n**Note:** See Confluence documentation for CQL syntax details if using the \`cql\` parameter.`,
 		SearchToolArgs.shape,
 		search,
 	);
