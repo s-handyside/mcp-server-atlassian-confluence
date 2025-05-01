@@ -1,3 +1,11 @@
+## [1.19.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.19.0...v1.19.1) (2025-05-01)
+
+
+### Performance Improvements
+
+* streamline Confluence search tool description for better AI consumption ([a5e83f7](https://github.com/aashari/mcp-server-atlassian-confluence/commit/a5e83f7205ddf7b296e5d8d9d32cb188113ad56f))
+* streamline tool descriptions for better AI consumption ([962fb8f](https://github.com/aashari/mcp-server-atlassian-confluence/commit/962fb8f963bb632141f540d18dd22155c6280677))
+
 # [1.19.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.18.3...v1.19.0) (2025-05-01)
 
 
