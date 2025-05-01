@@ -1,3 +1,16 @@
+# [1.19.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.18.3...v1.19.0) (2025-05-01)
+
+
+### Bug Fixes
+
+* ensure spaceId filter is applied and correct tests ([4ff79fc](https://github.com/aashari/mcp-server-atlassian-confluence/commit/4ff79fc4445f398675f26371e3710974056f983e))
+
+
+### Features
+
+* add dedicated filter parameters to confluence search ([4c8b09b](https://github.com/aashari/mcp-server-atlassian-confluence/commit/4c8b09ba532c624c9bcff24411d937c2bb53450e))
+* allow filtering pages by space key ([d2c7a84](https://github.com/aashari/mcp-server-atlassian-confluence/commit/d2c7a8402aa16d3a95a4aa8b3541913cda0d6304))
+
 ## [1.18.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.18.2...v1.18.3) (2025-05-01)
 
 
