@@ -1,5 +1,6 @@
 import { Logger } from '../utils/logger.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
+import { createApiError, ensureMcpError } from '../utils/error.util.js';
 import { ControllerResponse } from '../types/common.types.js';
 import { ListPagesOptions } from './atlassian.pages.types.js';
 import {
@@ -63,21 +64,17 @@ async function list(
 	methodLogger.debug('Listing Confluence pages with options:', options);
 
 	try {
-		// Create defaults object with proper typing
 		const defaults: Partial<ListPagesOptions> = {
 			limit: DEFAULT_PAGE_SIZE,
 			sort: '-modified-date',
 			status: ['current'],
 		};
-
-		// Apply defaults to ensure all standard properties are set
 		const mergedOptions = applyDefaults<ListPagesOptions>(
 			options,
 			defaults,
 		);
 
-		// Initialize spaceId array (may be populated by direct IDs or resolved from keys)
-		let spaceId = mergedOptions.spaceId || [];
+		let resolvedSpaceIds = mergedOptions.spaceId || []; // Start with explicitly provided IDs
 
 		// Handle space key resolution if provided
 		if (mergedOptions.spaceKey && mergedOptions.spaceKey.length > 0) {
@@ -87,157 +84,123 @@ async function list(
 
 			const currentTime = Date.now();
 			const keysToResolve: string[] = [];
-			const resolvedIds: string[] = [];
+			const currentResolvedIds: string[] = []; // IDs resolved in this specific call
 
 			// Check cache first
 			mergedOptions.spaceKey.forEach((key) => {
 				const cached = spaceKeyCache[key];
 				if (cached && currentTime - cached.timestamp < CACHE_TTL) {
-					// Cache hit
 					methodLogger.debug(
 						`Using cached ID for space key "${key}": ${cached.id}`,
 					);
-					resolvedIds.push(cached.id);
+					currentResolvedIds.push(cached.id);
 				} else {
-					// Cache miss or expired
 					keysToResolve.push(key);
 				}
 			});
 
-			// Log warning if many keys need resolution
 			if (keysToResolve.length > 10) {
 				methodLogger.warn(
 					`Resolving ${keysToResolve.length} space keys - this may impact performance`,
 				);
 			}
 
-			// Only call API if we have keys that need resolution
 			if (keysToResolve.length > 0) {
 				try {
-					// Resolve remaining keys via API
 					const spacesResponse = await atlassianSpacesService.list({
 						keys: keysToResolve,
-						limit: 100, // Get as many matching spaces as possible
+						limit: 100,
 					});
 
-					// Process results and update cache
 					if (
 						spacesResponse.results &&
 						spacesResponse.results.length > 0
 					) {
 						spacesResponse.results.forEach((space) => {
-							// Update cache
 							spaceKeyCache[space.key] = {
 								id: space.id,
 								timestamp: currentTime,
 							};
-							resolvedIds.push(space.id);
+							currentResolvedIds.push(space.id);
 						});
 
-						// Identify keys that failed to resolve
 						const resolvedKeys = spacesResponse.results.map(
 							(space) => space.key,
 						);
 						const failedKeys = keysToResolve.filter(
 							(key) => !resolvedKeys.includes(key),
 						);
-
 						if (failedKeys.length > 0) {
 							methodLogger.warn(
-								`Failed to resolve these space keys: ${failedKeys.join(', ')}`,
+								`Could not resolve space keys: ${failedKeys.join(', ')}`,
 							);
-
-							// If all keys failed and no direct IDs provided, return empty result
-							if (
-								resolvedIds.length === 0 &&
-								spaceId.length === 0
-							) {
-								return {
-									content: `No Confluence pages found. The specified space keys (${failedKeys.join(', ')}) could not be resolved to valid spaces.`,
-									pagination: {
-										count: 0,
-										hasMore: false,
-									},
-									metadata: {
-										errors: [
-											`Invalid space keys: ${failedKeys.join(', ')}`,
-										],
-									},
-								};
-							}
 						}
-					} else if (
-						keysToResolve.length > 0 &&
-						spaceId.length === 0
-					) {
-						// No spaces found and no direct IDs provided
-						return {
-							content: `No Confluence pages found. The specified space keys (${keysToResolve.join(', ')}) could not be resolved to valid spaces.`,
-							pagination: {
-								count: 0,
-								hasMore: false,
-							},
-							metadata: {
-								errors: [
-									`Invalid space keys: ${keysToResolve.join(', ')}`,
-								],
-							},
-						};
 					}
-				} catch (error) {
+				} catch (resolveError: unknown) {
+					// Type error explicitly
+					const error = ensureMcpError(resolveError); // Ensure it's an McpError
 					methodLogger.error(
-						'Error resolving space keys to IDs:',
-						error,
+						'Failed to resolve space keys',
+						error.message,
 					);
-
-					// If this is the only filter and it failed, return an error
-					if (spaceId.length === 0) {
-						return {
-							content:
-								'Error resolving space keys to IDs. Please try with numeric spaceId instead.',
-							pagination: {
-								count: 0,
-								hasMore: false,
-							},
-							metadata: {
-								errors: ['Space key resolution failed'],
-							},
-						};
+					if (
+						resolvedSpaceIds.length === 0 &&
+						currentResolvedIds.length === 0
+					) {
+						// Throw only if no direct IDs and no keys resolved successfully
+						throw createApiError(
+							`Failed to resolve any provided space keys: ${error.message}`,
+							400,
+							error, // Pass the original error
+						);
 					}
-					// Otherwise continue with any directly provided IDs
+					// Otherwise log warning and continue
+					methodLogger.warn(
+						'Proceeding with directly provided IDs and any cached/resolved keys, despite resolution error.',
+					);
 				}
 			}
 
-			// Combine resolved IDs with any directly provided IDs
-			if (resolvedIds.length > 0) {
-				spaceId = [...spaceId, ...resolvedIds];
-			}
+			// Combine resolved IDs (from this call) with any directly provided IDs
+			resolvedSpaceIds = [
+				...new Set([...resolvedSpaceIds, ...currentResolvedIds]),
+			];
+		}
+
+		// Final check: If keys/IDs were provided but none resolved, return empty.
+		if (
+			(mergedOptions.spaceKey || mergedOptions.spaceId) &&
+			resolvedSpaceIds.length === 0
+		) {
+			methodLogger.warn(
+				'No valid space IDs found to query. Returning empty.',
+			);
+			return {
+				content:
+					'No pages found. Specified space keys/IDs are invalid or inaccessible.',
+				pagination: { hasMore: false, count: 0 },
+			};
 		}
 
 		// Map controller options to service parameters
 		const params: ListPagesParams = {
-			...(spaceId.length > 0 && { spaceId }),
+			...(resolvedSpaceIds.length > 0 && { spaceId: resolvedSpaceIds }),
 			...(mergedOptions.query && { query: mergedOptions.query }),
 			...(mergedOptions.status && { status: mergedOptions.status }),
 			...(mergedOptions.sort && { sort: mergedOptions.sort }),
-			// Additional parameters with defaults
 			limit: mergedOptions.limit,
 			cursor: mergedOptions.cursor,
-			bodyFormat: 'storage',
+			bodyFormat: 'storage', // Keep storage format for now
 		};
 
 		methodLogger.debug('Using service params:', params);
 
-		// Get pages data from the API
 		const pagesData = await atlassianPagesService.list(params);
 
-		// Log only summary information instead of the entire response
 		methodLogger.debug(
 			`Retrieved ${pagesData.results.length} pages. Has more: ${pagesData._links?.next ? 'yes' : 'no'}`,
 		);
 
-		// The formatPagesList function expects a pagesData parameter with results
-		// Extract the nextCursor from the links
 		const pagination = extractPaginationInfo(
 			pagesData,
 			PaginationType.CURSOR,
@@ -249,7 +212,6 @@ async function list(
 			pagination,
 		};
 	} catch (error) {
-		// Use the standardized error handler
 		return handleControllerError(error, {
 			entityType: 'Pages',
 			operation: 'listing',

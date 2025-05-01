@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Logger } from '../utils/logger.util.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
+import { ListPagesOptions } from '../controllers/atlassian.pages.types.js';
 import {
 	ListPagesToolArgsType,
 	ListPagesToolArgs,
@@ -28,7 +29,7 @@ async function listPages(args: ListPagesToolArgsType) {
 
 	try {
 		// Map the tool args to controller options
-		const options: Record<string, unknown> = {};
+		const options: ListPagesOptions = {};
 
 		if (args.spaceId) {
 			options.spaceId = args.spaceId;
@@ -54,12 +55,10 @@ async function listPages(args: ListPagesToolArgsType) {
 
 		methodLogger.debug('Calling controller with options:', options);
 
-		// Call the controller to list pages with the provided options
 		const result = await atlassianPagesController.list(options);
 
 		methodLogger.debug('Successfully retrieved pages list');
 
-		// Create proper MCP response with correct types
 		const response = {
 			content: [
 				{
@@ -67,20 +66,13 @@ async function listPages(args: ListPagesToolArgsType) {
 					text: result.content,
 				},
 			],
+			...(result.pagination && { pagination: result.pagination }),
+			...(result.metadata && { metadata: result.metadata }),
 		};
-
-		// Include metadata if present
-		if (result.metadata) {
-			return {
-				...response,
-				metadata: result.metadata,
-			};
-		}
 
 		return response;
 	} catch (error) {
 		methodLogger.error('Error listing pages:', error);
-		// Format the error for MCP tools
 		return formatErrorForMcpTool(error);
 	}
 }
