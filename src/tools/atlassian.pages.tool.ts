@@ -31,7 +31,10 @@ async function listPages(args: ListPagesToolArgsType) {
 		const options: Record<string, unknown> = {};
 
 		if (args.spaceId) {
-			options.containerId = args.spaceId;
+			options.spaceId = args.spaceId;
+		}
+		if (args.spaceKey) {
+			options.spaceKey = args.spaceKey;
 		}
 		if (args.query) {
 			options.query = args.query;
@@ -56,8 +59,8 @@ async function listPages(args: ListPagesToolArgsType) {
 
 		methodLogger.debug('Successfully retrieved pages list');
 
-		// Convert the string content to an MCP text resource with the correct type
-		return {
+		// Create proper MCP response with correct types
+		const response = {
 			content: [
 				{
 					type: 'text' as const,
@@ -65,6 +68,16 @@ async function listPages(args: ListPagesToolArgsType) {
 				},
 			],
 		};
+
+		// Include metadata if present
+		if (result.metadata) {
+			return {
+				...response,
+				metadata: result.metadata,
+			};
+		}
+
+		return response;
 	} catch (error) {
 		methodLogger.error('Error listing pages:', error);
 		// Format the error for MCP tools
@@ -131,7 +144,7 @@ function registerTools(server: McpServer) {
 	// Register the list pages tool
 	server.tool(
 		'conf_ls_pages',
-		`Lists Confluence pages, optionally filtering by space ID(s) (\`spaceId\`), status (\`status\`), title/label query (\`query\`), or sorting (\`sort\`).\n- Use this to discover pages within spaces and find page IDs needed for \`confluence_get_page\`.\n- Simple text search (\`query\`) matches titles/labels, not full content. Use \`confluence_search\` for full content search.\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns a formatted list of pages including ID, title, space ID, status, author, and dates.\n**Note:** Requires numeric \`spaceId\`(s). Use \`confluence_list_spaces\` or \`confluence_get_space\` if you only have the space key. Default sort is by last modified date.`,
+		`Lists Confluence pages, optionally filtering by space key(s) (\`spaceKey\`), space ID(s) (\`spaceId\`), status (\`status\`), title/label query (\`query\`), or sorting (\`sort\`).\n- Use this to discover pages within spaces and find page IDs needed for \`confluence_get_page\`.\n- Simple text search (\`query\`) matches titles/labels, not full content. Use \`confluence_search\` for full content search.\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns a formatted list of pages including ID, title, space ID, status, author, and dates.\n**Note:** You can use \`spaceKey\` (e.g., "DEV", "HR") which is more user-friendly than numeric \`spaceId\`. Default sort is by last modified date.`,
 		ListPagesToolArgs.shape,
 		listPages,
 	);

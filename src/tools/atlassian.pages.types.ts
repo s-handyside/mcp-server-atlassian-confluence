@@ -31,7 +31,14 @@ const ListPagesToolArgs = z.object({
 		.array(z.string())
 		.optional()
 		.describe(
-			'Filter pages by space IDs. Provide an array of space IDs (e.g., ["123456", "789012"]) to only show pages from specific spaces. Useful when you want to focus on content from particular projects or teams.',
+			'Filter pages by space IDs. Provide an array of space IDs (e.g., ["123456", "789012"]) to only show pages from specific spaces. Use either this or spaceKey.',
+		),
+
+	spaceKey: z
+		.array(z.string())
+		.optional()
+		.describe(
+			'Filter pages by space keys. Provide an array of space keys (e.g., ["DEV", "HR", "MARKETING"]) to only show pages from specific spaces. More user-friendly than spaceId. Use either this or spaceId.',
 		),
 
 	query: z

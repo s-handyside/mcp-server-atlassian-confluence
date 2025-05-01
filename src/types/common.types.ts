@@ -76,4 +76,10 @@ export interface ControllerResponse {
 	 * If present, indicates that more results are available.
 	 */
 	pagination?: ResponsePagination;
+
+	/**
+	 * Optional metadata for additional context or debugging information.
+	 * Can include warnings, errors, or other useful data.
+	 */
+	metadata?: Record<string, unknown>;
 }

@@ -54,7 +54,11 @@ function registerListPagesCommand(program: Command): void {
 		)
 		.option(
 			'-s, --space-id <ids...>',
-			'Filter pages by space IDs. Provide an array of space IDs (e.g., ["123456", "789012"]) to only show pages from specific spaces. Useful when you want to focus on content from particular projects or teams.',
+			'Filter pages by space IDs. Provide space IDs (e.g., "123456" "789012") to only show pages from specific spaces. Use either this or --space-key.',
+		)
+		.option(
+			'-k, --space-key <keys...>',
+			'Filter pages by space keys. Provide space keys (e.g., "DEV" "HR" "MARKETING") to only show pages from specific spaces. More user-friendly than space IDs.',
 		)
 		.option(
 			'-S, --status <status>',
@@ -95,8 +99,10 @@ function registerListPagesCommand(program: Command): void {
 
 				// Create filter options for controller
 				const filterOptions: ListPagesOptions = {
-					// Map from CLI --space-id flag to the controller's standardized containerId parameter
-					...(options.spaceId && { containerId: options.spaceId }),
+					// Map directly to spaceId
+					...(options.spaceId && { spaceId: options.spaceId }),
+					// Add space key support
+					...(options.spaceKey && { spaceKey: options.spaceKey }),
 					...(options.status && { status: [options.status] }),
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
@@ -119,6 +125,12 @@ function registerListPagesCommand(program: Command): void {
 				// Print the main content
 				console.log(formatHeading('Pages', 2));
 				console.log(result.content);
+
+				// Print warnings if any
+				if (result.metadata?.warnings) {
+					const warnings = result.metadata.warnings as string[];
+					console.log('\n⚠️  ' + warnings.join('\n⚠️  '));
+				}
 
 				// Print pagination information if available
 				if (result.pagination) {

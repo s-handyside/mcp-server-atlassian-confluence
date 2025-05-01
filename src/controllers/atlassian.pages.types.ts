@@ -29,11 +29,11 @@ export interface ListPagesOptions extends PaginationOptions {
 	spaceId?: string[];
 
 	/**
-	 * Standardized alternative to spaceId for consistency across services.
-	 * Has the same functionality as spaceId but provides a consistent parameter
-	 * name across different Atlassian services.
+	 * Filter pages by space key.
+	 * More user-friendly alternative to spaceId that uses readable space keys
+	 * like "DEV" or "HR" instead of numeric IDs.
 	 */
-	containerId?: string[];
+	spaceKey?: string[];
 
 	/**
 	 * Filter pages by status.
