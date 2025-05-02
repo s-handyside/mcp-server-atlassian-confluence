@@ -114,7 +114,12 @@ function registerTools(server: McpServer) {
 	// Register the list spaces tool
 	server.tool(
 		'conf_ls_spaces',
-		`Lists Confluence spaces accessible to the user, with optional filtering by \`type\` (global, personal), or \`status\` (current, archived). Use this to discover spaces and find their keys needed for other tools. Supports pagination via \`limit\` and \`cursor\`. Returns a formatted list of spaces including ID, key, name, type, status, and URL. Default sort is by name descending.`,
+		`Lists Confluence spaces accessible to the user, with optional filtering by \`type\` (global, personal), or \`status\` (current, archived).
+- Use this to discover spaces and find their keys needed for other tools.
+- Supports pagination via \`limit\` and \`cursor\`.
+- **Note:** Filtering by \`type\` alone does not filter by status; the \`status\` parameter defaults to returning spaces with *all* statuses (current and archived) unless explicitly set to \`current\` or \`archived\`.
+- Returns a formatted list of spaces including ID, key, name, type, status, and URL.
+- Default sort is by name descending.`,
 		ListSpacesToolArgs.shape,
 		listSpaces,
 	);

@@ -121,6 +121,7 @@ function registerTools(server: McpServer) {
 - The \`query\` parameter searches text in title, body, and comments (equivalent to \`text ~ "<query>"\`).
 - If \`cql\` is provided, it takes precedence over \`query\`. Explicit \`cql\` is combined with specific filters (title, spaceKey, etc.) using AND.
 - If only \`query\` and specific filters are provided, the \`query\` (as \`text ~ "<query>"\`) is combined with the filters using AND.
+- Use the \`contentType\` filter (e.g., \`contentType='page'\`) to limit results to specific types, especially when using general filters like \`spaceKey\` without \`cql\` or \`query\`.
 - **When using \`cql\` directly, ensure values that are also CQL keywords (like IN, OR, AND, etc.) are enclosed in double quotes (e.g., \`space = "IN"\`).**
 - Supports pagination via \`limit\` and \`cursor\`.
 - Returns a formatted Markdown list of search results including type, title, excerpt, space information, URL, and content ID.`,
