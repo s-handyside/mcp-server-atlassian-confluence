@@ -49,10 +49,6 @@ function registerListSpacesCommand(program: Command): void {
 			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
 		)
 		.option(
-			'-q, --query <text>',
-			'Search filter to find spaces matching specific text in their name, key, or description (text search).',
-		)
-		.option(
 			'-t, --type <type>',
 			'Filter spaces by type. Options include: "global" (team spaces), "personal" (user spaces), or "archived" (archived spaces). If omitted, returns all types.',
 			'global',
@@ -107,7 +103,6 @@ function registerListSpacesCommand(program: Command): void {
 						limit: parseInt(options.limit, 10),
 					}),
 					...(options.cursor && { cursor: options.cursor }),
-					...(options.query && { query: options.query }),
 				};
 
 				actionLogger.debug(
