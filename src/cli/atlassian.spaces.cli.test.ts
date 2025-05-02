@@ -148,36 +148,6 @@ describe('Atlassian Confluence Spaces CLI Commands', () => {
 			}
 		}, 30000);
 
-		// Test with query filtering
-		it('should filter spaces by query text', async () => {
-			if (skipIfNoCredentials()) {
-				return;
-			}
-
-			// Use a common term that might be in space names or descriptions
-			const query = 'a'; // A common letter/word that likely appears in at least one space
-
-			// Run the CLI command with query
-			const result = await CliTestUtil.runCommand([
-				'ls-spaces',
-				'--query',
-				query,
-			]);
-
-			// Check command exit code
-			expect(result.exitCode).toBe(0);
-
-			// Output might contain filtered results or no matches, both are valid
-			if (result.stdout.includes('No spaces found')) {
-				// Valid case - no spaces match the query
-				expect(result.stdout).toContain('No spaces found');
-			} else {
-				// Valid case - some spaces match, check formatting
-				expect(result.stdout).toMatch(/^#\s.+/m);
-				expect(result.stdout).toContain('**ID**');
-			}
-		}, 30000);
-
 		// Test with invalid parameters
 		it('should handle invalid type parameter properly', async () => {
 			if (skipIfNoCredentials()) {

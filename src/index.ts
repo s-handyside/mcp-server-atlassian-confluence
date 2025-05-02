@@ -121,9 +121,3 @@ if (require.main === module) {
 		process.exit(1);
 	});
 }
-
-// Export key utilities for library users
-export { Logger } from './utils/logger.util.js';
-export { config };
-export * from './utils/error.util.js';
-export { VERSION, PACKAGE_NAME, CLI_NAME } from './utils/constants.util.js';
