@@ -1,3 +1,10 @@
+## [1.20.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.1...v1.20.2) (2025-05-02)
+
+
+### Bug Fixes
+
+* align confluence ls-spaces CLI/tool with API capability (remove query) ([4f70107](https://github.com/aashari/mcp-server-atlassian-confluence/commit/4f70107ea8225eebde1b6dde31c3bc66500948b2))
+
 ## [1.20.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.0...v1.20.1) (2025-05-02)
 
 
