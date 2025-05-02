@@ -77,26 +77,6 @@ function registerListPagesCommand(program: Command): void {
 			try {
 				actionLogger.debug('Processing command options:', options);
 
-				// Validate status if provided
-				if (
-					options.status &&
-					!['current', 'archived'].includes(options.status)
-				) {
-					throw new Error(
-						'Status must be either "current" or "archived"',
-					);
-				}
-
-				// Validate limit if provided
-				if (options.limit) {
-					const limit = parseInt(options.limit, 10);
-					if (isNaN(limit) || limit <= 0) {
-						throw new Error(
-							'Invalid --limit value: Must be a positive integer.',
-						);
-					}
-				}
-
 				// Create filter options for controller
 				const filterOptions: ListPagesOptions = {
 					// Map directly to spaceIds (plural)
