@@ -1,3 +1,10 @@
+## [1.20.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.2...v1.20.3) (2025-05-02)
+
+
+### Bug Fixes
+
+* Remove re-exports and invalid test ([19c254a](https://github.com/aashari/mcp-server-atlassian-confluence/commit/19c254a8c82f56b659a5003964eb174ff0b3348a))
+
 ## [1.20.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.1...v1.20.2) (2025-05-02)
 
 
