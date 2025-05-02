@@ -1,3 +1,11 @@
+## [1.20.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.0...v1.20.1) (2025-05-02)
+
+
+### Bug Fixes
+
+* **confluence:** remove incorrect status validation from ls-pages CLI ([4a205e6](https://github.com/aashari/mcp-server-atlassian-confluence/commit/4a205e656612a04629c68b55298a28a7b359b3ea))
+* **confluence:** remove invalid 'draft' status from conf_ls_pages filter enum ([45a6e39](https://github.com/aashari/mcp-server-atlassian-confluence/commit/45a6e39878976c2d6cc7105c0c676ac699d0cd7f))
+
 # [1.20.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.19.2...v1.20.0) (2025-05-02)
 
 
