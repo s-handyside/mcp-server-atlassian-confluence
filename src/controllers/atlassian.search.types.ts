@@ -45,4 +45,9 @@ export interface SearchOptions extends PaginationOptions {
 	 * Filter results by specific content type.
 	 */
 	contentType?: 'page' | 'blogpost';
+
+	/**
+	 * Convenience free-text search string; translated to CQL `text ~ "<query>"`.
+	 */
+	query?: string;
 }

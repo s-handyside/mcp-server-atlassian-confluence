@@ -50,6 +50,9 @@ function buildCqlQuery(options: SearchOptions): string {
 	if (options.contentType) {
 		cqlParts.push(`type = ${options.contentType}`);
 	}
+	if (options.query) {
+		cqlParts.push(`text ~ "${escapeCqlValue(options.query)}"`);
+	}
 
 	const generatedCql = cqlParts.join(' AND ');
 

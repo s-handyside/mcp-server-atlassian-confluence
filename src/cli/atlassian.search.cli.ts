@@ -73,6 +73,10 @@ function registerSearchCommand(program: Command): void {
 				return value;
 			},
 		)
+		.option(
+			'-s, --query <text>',
+			'Optional: Simple free-text search (maps to CQL text ~ "<text>").',
+		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
 				'cli/atlassian.search.cli.ts',
@@ -103,6 +107,7 @@ function registerSearchCommand(program: Command): void {
 						limit: parseInt(options.limit, 10),
 					}),
 					...(options.cursor && { cursor: options.cursor }),
+					...(options.query && { query: options.query }),
 				};
 
 				actionLogger.debug(

@@ -55,6 +55,12 @@ const SearchToolArgs = z.object({
 		.describe(
 			'Optional: Filter results by content type. Choose either "page" or "blogpost".',
 		),
+	query: z
+		.string()
+		.optional()
+		.describe(
+			'Optional: Simple text search query. This will search for the given text within the content body, title, and comments. Equivalent to using cql: `text ~ "<query>"`. If both `query` and `cql` are provided, `cql` takes precedence.',
+		),
 	...PaginationArgs,
 });
 
