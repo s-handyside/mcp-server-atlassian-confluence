@@ -1,3 +1,15 @@
+# [1.20.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.19.2...v1.20.0) (2025-05-02)
+
+
+### Features
+
+* **confluence:** add query parameter to conf_search for simple text search ([c43545f](https://github.com/aashari/mcp-server-atlassian-confluence/commit/c43545f754e4d807f0ac2c71d670d38c22baeece))
+
+
+### Performance Improvements
+
+* Update dependencies ([c333bf7](https://github.com/aashari/mcp-server-atlassian-confluence/commit/c333bf748a3a1648680984943a3d55ef13892aa2))
+
 ## [1.19.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.19.1...v1.19.2) (2025-05-01)
 
 
