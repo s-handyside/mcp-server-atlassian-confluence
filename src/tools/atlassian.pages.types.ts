@@ -50,18 +50,11 @@ const ListPagesToolArgs = z.object({
 
 	status: z
 		.array(
-			z.enum([
-				'current',
-				'trashed',
-				'deleted',
-				'draft',
-				'archived',
-				'historical',
-			]),
+			z.enum(['current', 'trashed', 'deleted', 'archived', 'historical']),
 		)
 		.optional()
 		.describe(
-			'Filter pages by status. Options include: "current" (published pages), "trashed" (pages in trash), "deleted" (permanently deleted), "draft" (unpublished drafts), "archived" (archived pages), or "historical" (previous versions). Defaults to "current" if not specified. Provide as an array to include multiple statuses.',
+			'Filter pages by status. Options include: "current" (published pages), "trashed" (pages in trash), "deleted" (permanently deleted), "archived" (archived pages), or "historical" (previous versions). Defaults to "current" if not specified. Provide as an array to include multiple statuses.',
 		),
 
 	...PaginationArgs,

@@ -136,7 +136,7 @@ function registerTools(server: McpServer) {
 	// Register the list pages tool
 	server.tool(
 		'conf_ls_pages',
-		`Lists Confluence pages, optionally filtering by space key(s) (\`spaceKey\`), space ID(s) (\`spaceId\`), status (\`status\`), title/label query (\`query\`), or sorting (\`sort\`).\n- Use this to discover pages within spaces and find page IDs needed for \`confluence_get_page\`.\n- Simple text search (\`query\`) matches titles/labels, not full content. Use \`confluence_search\` for full content search.\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns a formatted list of pages including ID, title, space ID, status, author, and dates.\n**Note:** You can use \`spaceKey\` (e.g., "DEV", "HR") which is more user-friendly than numeric \`spaceId\`. Default sort is by last modified date.`,
+		`Lists Confluence pages, optionally filtering by space key(s) (\`spaceKey\`), space ID(s) (\`spaceId\`), status (\`status\`), title/label query (\`query\`), or sorting (\`sort\`).\n- Use this to discover pages within spaces and find page IDs needed for \`confluence_get_page\`.\n- Valid statuses for filtering: \`current\`, \`trashed\`, \`deleted\`, \`archived\`, \`historical\`. (Defaults to \`current\` if omitted.)\n- Simple text search (\`query\`) matches titles/labels, not full content. Use \`confluence_search\` for full content search.\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns a formatted list of pages including ID, title, space ID, status, author, and dates.\n**Note:** You can use \`spaceKey\` (e.g., "DEV", "HR") which is more user-friendly than numeric \`spaceId\`. Default sort is by last modified date.`,
 		ListPagesToolArgs.shape,
 		listPages,
 	);
