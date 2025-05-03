@@ -62,7 +62,7 @@ function registerListPagesCommand(program: Command): void {
 		)
 		.option(
 			'-S, --status <status>',
-			'Filter pages by status. Options include: "current" (published pages), "trashed" (pages in trash), "deleted" (permanently deleted), "draft" (unpublished drafts), "archived" (archived pages), or "historical" (previous versions). Defaults to "current" if not specified. Provide as an array to include multiple statuses.',
+			'Filter pages by status. Options include: "current" (published pages), "archived" (archived pages), "trashed" (pages in trash), or "deleted" (permanently deleted). Defaults to "current" if not specified. Provide as an array to include multiple statuses.',
 			'current',
 		)
 		.option(

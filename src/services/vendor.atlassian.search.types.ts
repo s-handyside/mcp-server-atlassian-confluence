@@ -44,7 +44,7 @@ export interface SearchResultContent {
 }
 
 export interface SearchResult {
-	content: SearchResultContent;
+	content?: SearchResultContent;
 	title: string;
 	excerpt?: string;
 	url?: string;
@@ -56,6 +56,13 @@ export interface SearchResult {
 	resultGlobalContainer?: {
 		title: string;
 		displayUrl?: string;
+	};
+	space?: {
+		id?: string;
+		key: string;
+		name: string;
+		type: string;
+		status: string;
 	};
 	breadcrumbs?: unknown[];
 }
