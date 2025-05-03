@@ -1,3 +1,10 @@
+## [1.20.5](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.4...v1.20.5) (2025-05-03)
+
+
+### Bug Fixes
+
+* handle various result types in search formatter and update ls-pages status description ([2973719](https://github.com/aashari/mcp-server-atlassian-confluence/commit/29737196579cf780dee3bcd0889987cd145ac6bf))
+
 ## [1.20.4](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.3...v1.20.4) (2025-05-02)
 
 
