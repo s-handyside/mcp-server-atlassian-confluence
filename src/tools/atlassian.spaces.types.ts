@@ -45,6 +45,11 @@ const ListSpacesToolArgs = z.object({
 
 type ListSpacesToolArgsType = z.infer<typeof ListSpacesToolArgs>;
 
+// Extended type for internal controller use, including the keys filter
+export type ListSpacesOptions = ListSpacesToolArgsType & {
+	keys?: string[];
+};
+
 /**
  * Arguments for getting a specific Confluence space
  * Matches the controller's get function signature

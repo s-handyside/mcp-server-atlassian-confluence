@@ -56,71 +56,40 @@ describe('Atlassian Spaces Controller', () => {
 		it('should handle pagination options (limit/cursor)', async () => {
 			if (skipIfNoCredentials()) return;
 
-			// Mock the service's list method to return a valid response for the second call
-			const originalList = Object.getOwnPropertyDescriptor(
-				atlassianSpacesController,
-				'list',
-			);
+			// Get first page with small limit
+			const result1 = await atlassianSpacesController.list({
+				limit: 1,
+			});
+			expect(result1.pagination?.count).toBeLessThanOrEqual(1);
 
-			// Use a mock method only for this test
-			if (originalList) {
-				// Save original implementation
-				const originalMethod = originalList.value;
+			// Verify pagination properties
+			expect(result1.pagination).toHaveProperty('count');
+			expect(result1.pagination).toHaveProperty('hasMore');
 
-				// Replace with mock implementation for this test only
-				Object.defineProperty(atlassianSpacesController, 'list', {
-					value: jest.fn().mockImplementation(async (options) => {
-						// For the first call, return actual data
-						if (!options.cursor) {
-							return originalMethod.call(
-								atlassianSpacesController,
-								options,
-							);
-						}
-
-						// For any call with a cursor, return a mock response to avoid cursor format issues
-						return {
-							content:
-								'# Confluence Spaces (Page 2)\n\n1. ## Test Space\n- **ID**: 123456\n- **Key**: TEST\n- **Type**: global\n- **Status**: current',
-							pagination: {
-								count: 1,
-								hasMore: false,
-							},
-						};
-					}),
-					configurable: true,
-					writable: true,
-				});
-
-				// Get first page with small limit
-				const result1 = await atlassianSpacesController.list({
+			// Fetch the next page using the live cursor if available
+			if (result1.pagination?.hasMore && result1.pagination.nextCursor) {
+				console.log(
+					`Pagination test: Fetching next page with cursor: ${result1.pagination.nextCursor}`,
+				);
+				const result2 = await atlassianSpacesController.list({
 					limit: 1,
+					cursor: result1.pagination.nextCursor, // Use live cursor
 				});
-				expect(result1.pagination?.count).toBeLessThanOrEqual(1);
 
-				// Verify pagination properties
-				expect(result1.pagination).toHaveProperty('count');
-				expect(result1.pagination).toHaveProperty('hasMore');
-
-				// Simulate second page fetch with a valid cursor
-				if (result1.pagination?.hasMore) {
-					// Use any string as cursor, our mock handles it
-					const result2 = await atlassianSpacesController.list({
-						limit: 1,
-						cursor: 'mock-cursor',
-					});
-
-					expect(result2.pagination?.count).toBeLessThanOrEqual(1);
-					expect(result2.content).toContain(
-						'Confluence Spaces (Page 2)',
-					);
-				}
-
-				// Restore original implementation
-				Object.defineProperty(
-					atlassianSpacesController,
-					'list',
-					originalList,
+				// Verify the structure of the second response
+				expect(result2).toHaveProperty('content');
+				expect(typeof result2.content).toBe('string');
+				expect(result2.content).not.toBe(
+					'No Confluence spaces found matching your criteria.',
+				);
+				expect(result2.pagination?.count).toBeLessThanOrEqual(1);
+				expect(result2.pagination).toHaveProperty('hasMore'); // Check structure
+				console.log(
+					`Pagination test: Second page fetched successfully. Count: ${result2.pagination?.count}, HasMore: ${result2.pagination?.hasMore}`,
+				);
+			} else {
+				console.warn(
+					'Pagination test: Skipping second page fetch as no cursor was available or no more items exist.',
 				);
 			}
 		}, 30000);
@@ -192,62 +161,28 @@ describe('Atlassian Spaces Controller', () => {
 		it('should handle empty result scenario gracefully', async () => {
 			if (skipIfNoCredentials()) return;
 
-			// Mock the controller's list method to return a consistently empty result
-			const originalList = Object.getOwnPropertyDescriptor(
-				atlassianSpacesController,
-				'list',
+			// Use a highly unlikely space key to trigger an empty result via live API
+			const nonExistentKey = `NONEXISTENT${Date.now()}`;
+			console.log(
+				`Empty result test: Using non-existent key: ${nonExistentKey}`,
 			);
 
-			// Use a mock method only for this test
-			if (originalList) {
-				// Save original implementation
-				// const originalMethod = originalList.value; // <-- REMOVED
+			// Call the controller's list method with the non-existent key
+			const result = await atlassianSpacesController.list({
+				keys: [nonExistentKey],
+			});
 
-				// Replace with mock implementation for this test only
-				Object.defineProperty(atlassianSpacesController, 'list', {
-					value: jest
-						.fn()
-						.mockImplementation(async (/* options */) => {
-							// <-- Removed unused 'options'
-							// Use a specific condition unrelated to query to trigger empty result
-							// For example, check for a specific limit or status if needed,
-							// or just return empty always for this mock.
-							// Here, we just return empty for any call to this mock.
-							return {
-								content:
-									'No Confluence spaces found matching your criteria.',
-								pagination: {
-									count: 0,
-									hasMore: false,
-									nextCursor: undefined,
-								},
-							};
-						}),
-					configurable: true,
-					writable: true,
-				});
-
-				// Call with arbitrary options that should trigger the mock's empty response
-				const result = await atlassianSpacesController.list({
-					limit: 1, // Use limit=1 to trigger the mock as designed
-				});
-
-				// Check specific empty result message
-				expect(result.content).toBe(
-					'No Confluence spaces found matching your criteria.',
-				);
-				// Verify pagination properties for empty result
-				expect(result.pagination).toHaveProperty('count', 0);
-				expect(result.pagination).toHaveProperty('hasMore', false);
-				expect(result.pagination?.nextCursor).toBeUndefined();
-
-				// Restore original implementation
-				Object.defineProperty(
-					atlassianSpacesController,
-					'list',
-					originalList,
-				);
-			}
+			// Check specific empty result message
+			expect(result.content).toBe(
+				'No Confluence spaces found matching your criteria.',
+			);
+			// Verify pagination properties for empty result
+			expect(result.pagination).toHaveProperty('count', 0);
+			expect(result.pagination).toHaveProperty('hasMore', false);
+			expect(result.pagination?.nextCursor).toBe('');
+			console.log(
+				'Empty result test: Successfully verified empty result scenario.',
+			);
 		}, 30000);
 
 		it('should handle combined filtering criteria', async () => {

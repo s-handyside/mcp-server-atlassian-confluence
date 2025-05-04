@@ -23,6 +23,7 @@ import {
 import {
 	ListSpacesToolArgsType,
 	GetSpaceToolArgsType,
+	ListSpacesOptions,
 } from '../tools/atlassian.spaces.types.js';
 
 /**
@@ -41,7 +42,7 @@ import {
  * @throws Error if space listing fails
  */
 async function list(
-	options: ListSpacesToolArgsType = {},
+	options: ListSpacesOptions = {},
 ): Promise<ControllerResponse> {
 	const controllerLogger = Logger.forContext(
 		'controllers/atlassian.spaces.controller.ts',
@@ -51,18 +52,20 @@ async function list(
 
 	try {
 		// Create defaults object with proper typing
-		const defaults: Partial<ListSpacesToolArgsType> = {
+		const defaults: Partial<ListSpacesOptions> = {
 			limit: DEFAULT_PAGE_SIZE,
 		};
 
 		// Apply defaults
-		const mergedOptions = applyDefaults<ListSpacesToolArgsType>(
+		const mergedOptions = applyDefaults<ListSpacesOptions>(
 			options,
 			defaults,
 		);
 
 		// Map controller options to service parameters
 		const params: ListSpacesParams = {
+			// Pass keys if provided
+			keys: mergedOptions.keys,
 			// Convert 'archived' type to actual API parameters - the tool uses a simplified schema
 			type:
 				mergedOptions.type === 'archived'
