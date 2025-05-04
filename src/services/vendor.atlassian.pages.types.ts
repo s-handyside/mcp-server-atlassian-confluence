@@ -1,6 +1,7 @@
 /**
  * Types for Atlassian Confluence Pages API
  */
+import { z } from 'zod';
 import {
 	ContentProperty,
 	ContentRepresentation,
@@ -11,6 +12,15 @@ import {
 	PaginatedResponse,
 	Version,
 } from './vendor.atlassian.types.js';
+import {
+	LabelSchema,
+	OptionalCollectionSchema,
+	OperationSchema,
+} from './vendor.atlassian.spaces.types.js';
+
+/**
+ * Legacy type definitions - these will be replaced by inferred types from Zod schemas
+ */
 
 /**
  * Page status enum
@@ -141,32 +151,29 @@ export interface PageDetailed extends Page {
  * Parameters for listing pages
  */
 export interface ListPagesParams {
-	id?: string[];
 	spaceId?: string[];
-	parentId?: string;
-	sort?: PageSortOrder;
-	status?: ContentStatus[];
 	title?: string;
+	status?: ContentStatus[];
 	bodyFormat?: BodyFormat;
+	sort?: PageSortOrder;
+	query?: string;
 	cursor?: string;
 	limit?: number;
 }
 
 /**
- * Parameters for getting a page by ID
+ * Parameters for getting a specific page
  */
 export interface GetPageByIdParams {
 	bodyFormat?: BodyFormat;
 	getDraft?: boolean;
-	status?: ContentStatus[];
 	version?: number;
+	includeAncestors?: boolean;
+	includeBody?: boolean;
+	includeChildTypes?: boolean;
 	includeLabels?: boolean;
-	includeProperties?: boolean;
-	includeOperations?: boolean;
-	includeLikes?: boolean;
-	includeVersions?: boolean;
 	includeVersion?: boolean;
-	includeFavoritedByCurrentUserStatus?: boolean;
+	includeOperations?: boolean;
 	includeWebresources?: boolean;
 	includeCollaborators?: boolean;
 }
@@ -175,3 +182,171 @@ export interface GetPageByIdParams {
  * API response for listing pages
  */
 export type PagesResponse = PaginatedResponse<Page>;
+
+/**
+ * Zod schemas for Confluence API response types
+ */
+
+/**
+ * Content status enum schema
+ */
+export const ContentStatusSchema = z.enum([
+	'current',
+	'deleted',
+	'historical',
+	'trashed',
+	'archived',
+	'draft',
+]);
+
+/**
+ * Page sort order enum schema
+ */
+export const PageSortOrderSchema = z.enum([
+	'id',
+	'-id',
+	'created-date',
+	'-created-date',
+	'modified-date',
+	'-modified-date',
+	'title',
+	'-title',
+]);
+
+/**
+ * Body format enum schema
+ */
+export const BodyFormatSchema = z.enum([
+	'storage',
+	'view',
+	'export_view',
+	'styled_view',
+]);
+
+/**
+ * Content representation schema
+ */
+export const ContentRepresentationSchema = z.object({
+	representation: z.string(),
+	value: z.string(),
+});
+
+/**
+ * Version schema
+ */
+export const VersionSchema = z.object({
+	number: z.number(),
+	message: z.string().optional(),
+	minorEdit: z.boolean().optional(),
+	authorId: z.string().optional(),
+	createdAt: z.string().optional(),
+	contentTypeModifiedAt: z.string().optional(),
+});
+
+/**
+ * Body schema
+ */
+export const BodySchema = z.object({
+	storage: ContentRepresentationSchema.optional(),
+	view: ContentRepresentationSchema.optional(),
+	export_view: ContentRepresentationSchema.optional(),
+	styled_view: ContentRepresentationSchema.optional(),
+	atlas_doc_format: ContentRepresentationSchema.optional(),
+	wiki: ContentRepresentationSchema.optional(),
+	anonymous_export_view: ContentRepresentationSchema.optional(),
+});
+
+/**
+ * Page links schema
+ */
+export const PageLinksSchema = z.object({
+	webui: z.string(),
+	editui: z.string().optional(),
+	tinyui: z.string().optional(),
+	base: z.string().optional(),
+	next: z.string().optional(),
+});
+
+/**
+ * Web resource schema
+ */
+export const WebResourceSchema = z.object({
+	key: z.string(),
+	contexts: z.array(z.string()),
+	superbatch: z.string(),
+	uris: z.record(z.string()),
+	tags: z.array(z.string()),
+});
+
+/**
+ * Page collaborator schema
+ */
+export const PageCollaboratorSchema = z.object({
+	collaboratorId: z.string(),
+	businessObjectId: z.string(),
+	appearanceId: z.string(),
+});
+
+/**
+ * Page parent schema
+ */
+export const PageParentSchema = z.object({
+	id: z.string(),
+	type: z.string(),
+	status: z.string(),
+	title: z.string(),
+});
+
+/**
+ * Child types schema
+ */
+export const ChildTypesSchema = z.object({
+	attachment: z.boolean().optional(),
+	comment: z.boolean().optional(),
+	page: z.boolean().optional(),
+});
+
+/**
+ * Base page schema (common fields)
+ */
+export const PageSchema = z.object({
+	id: z.string(),
+	status: ContentStatusSchema,
+	title: z.string(),
+	spaceId: z.string(),
+	parentId: z.string().optional(),
+	parentType: z.string().optional(),
+	authorId: z.string().optional(),
+	createdAt: z.string(),
+	position: z.number().optional(),
+	version: VersionSchema,
+	_links: PageLinksSchema,
+	body: BodySchema.optional(),
+});
+
+/**
+ * Detailed page schema
+ */
+export const PageDetailedSchema = PageSchema.extend({
+	parent: PageParentSchema.optional(),
+	childTypes: ChildTypesSchema.optional(),
+	labels: OptionalCollectionSchema(LabelSchema).optional(),
+	operations: OptionalCollectionSchema(OperationSchema).optional(),
+	collaborators: OptionalCollectionSchema(PageCollaboratorSchema).optional(),
+	webResources: OptionalCollectionSchema(WebResourceSchema).optional(),
+});
+
+/**
+ * Pages response schema
+ */
+export const PagesResponseSchema = z.object({
+	results: z.array(PageSchema),
+	_links: PageLinksSchema.optional(),
+});
+
+/**
+ * Inferred types from Zod schemas
+ */
+export type PageSchemaType = z.infer<typeof PageSchema>;
+export type PageDetailedSchemaType = z.infer<typeof PageDetailedSchema>;
+export type PagesResponseType = z.infer<typeof PagesResponseSchema>;
