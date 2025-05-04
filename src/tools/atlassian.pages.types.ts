@@ -7,18 +7,20 @@ import type { PageSortOrder } from '../services/vendor.atlassian.pages.types.js'
 const PaginationArgs = {
 	limit: z
 		.number()
+		.int()
+		.positive()
 		.min(1)
 		.max(250)
 		.optional()
 		.describe(
-			'Maximum number of items to return (1-250). Use this to control the response size. Useful for pagination or when you only need a few results. The Confluence API caps results at 250 items per request.',
+			'Maximum number of items to return (1-250). Controls the response size. Defaults to 25 if omitted. The Confluence API caps results at 250 items per request.',
 		),
 
 	cursor: z
 		.string()
 		.optional()
 		.describe(
-			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
+			'Pagination cursor for retrieving the next set of results. Obtain this opaque string from the metadata of a previous response when more results are available.',
 		),
 };
 
@@ -54,7 +56,7 @@ const ListPagesToolArgs = z.object({
 		)
 		.optional()
 		.describe(
-			'Filter pages by status. Options include: "current" (published pages), "trashed" (pages in trash), "deleted" (permanently deleted), "archived" (archived pages), or "historical" (previous versions). Defaults to "current" if not specified. Provide as an array to include multiple statuses.',
+			'Optional: Filter pages by status. Options: "current" (published), "trashed", "deleted", "archived", "historical" (previous versions). Defaults to ["current"] if not specified. Provide as an array to include multiple statuses.',
 		),
 
 	...PaginationArgs,
@@ -72,7 +74,7 @@ const ListPagesToolArgs = z.object({
 		] as [PageSortOrder, ...PageSortOrder[]])
 		.optional()
 		.describe(
-			'Property to sort pages by. Default is "-modified-date" which displays the most recently modified pages first. The "-" prefix indicates descending order. Valid values: "id", "-id", "created-date", "-created-date", "modified-date", "-modified-date", "title", "-title".',
+			'Optional: Property to sort pages by. Default is "-modified-date" (most recently modified first). The "-" prefix indicates descending order. Valid values: "id", "-id", "created-date", "-created-date", "modified-date", "-modified-date", "title", "-title".',
 		),
 });
 

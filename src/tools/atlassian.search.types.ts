@@ -6,18 +6,20 @@ import { z } from 'zod';
 const PaginationArgs = {
 	limit: z
 		.number()
+		.int()
+		.positive()
 		.min(1)
 		.max(100)
 		.optional()
 		.describe(
-			'Maximum number of items to return (1-100). Use this to control the response size. Useful for pagination or when you only need a few results. The Confluence search API caps results at 100 items per request.',
+			'Maximum number of search results to return (1-100). Controls the response size. Defaults to 25 if omitted. The Confluence search API caps results at 100 items per request.',
 		),
 
 	cursor: z
 		.string()
 		.optional()
 		.describe(
-			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
+			'Pagination cursor for retrieving the next set of results. Obtain this opaque string from the metadata of a previous response when more results are available.',
 		),
 };
 
