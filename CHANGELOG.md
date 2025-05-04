@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.21.0...v1.22.0) (2025-05-04)
+
+
+### Features
+
+* **format:** standardize CLI and Tool output formatting ([e9f784c](https://github.com/aashari/mcp-server-atlassian-confluence/commit/e9f784c0d3caa126887b9868eea3cb163f325786))
+
 # [1.21.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.6...v1.21.0) (2025-05-04)
 
 
