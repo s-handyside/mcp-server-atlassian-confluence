@@ -11,16 +11,19 @@ import {
 	formatSeparator,
 	formatNumberedList,
 } from '../utils/formatter.util.js';
+import { ResponsePagination } from '../types/common.types.js';
 
 /**
  * Format a list of pages for display
  * @param pagesData - Raw pages data from the API
  * @param baseUrl - Base URL for constructing page links
+ * @param pagination - Pagination info for footer hints
  * @returns Formatted string with pages information in markdown format
  */
 export function formatPagesList(
 	pagesData: PageSchemaType[],
 	baseUrl: string = '',
+	pagination?: ResponsePagination,
 ): string {
 	if (!pagesData || pagesData.length === 0) {
 		return 'No Confluence pages found matching your criteria.';
@@ -29,7 +32,7 @@ export function formatPagesList(
 	const lines: string[] = [formatHeading('Confluence Pages', 1), ''];
 
 	// Format each page with its details
-	const formattedList = formatNumberedList(pagesData, (page, index) => {
+	const formattedList = formatNumberedList(pagesData, (page, _index) => {
 		const itemLines: string[] = [];
 
 		// Basic information
@@ -44,7 +47,7 @@ export function formatPagesList(
 			'Space ID': page.spaceId || 'N/A',
 			Title: page.title,
 			Created: page.createdAt
-				? formatDate(new Date(page.createdAt))
+				? new Date(page.createdAt).toLocaleString()
 				: 'Not available',
 			Author: page.authorId || 'Unknown',
 			Version: page.version?.number || 'N/A',
@@ -54,20 +57,35 @@ export function formatPagesList(
 		// Format as a bullet list
 		itemLines.push(formatBulletList(properties, (key) => key));
 
-		// Add separator between pages except for the last one
-		if (index < pagesData.length - 1) {
-			itemLines.push('');
-			itemLines.push(formatSeparator());
-		}
-
 		return itemLines.join('\n');
 	});
 
 	lines.push(formattedList);
 
-	// Add timestamp for when this information was retrieved
-	lines.push('');
-	lines.push(`*Page information retrieved at ${formatDate(new Date())}*`);
+	// --- Footer ---
+	const footerLines: string[] = [];
+	footerLines.push('---');
+
+	const displayedCount = pagination?.count ?? pagesData.length;
+
+	if (pagination?.hasMore) {
+		footerLines.push(
+			`*Showing ${displayedCount} pages. More results are available.*`,
+		);
+		if (pagination.nextCursor) {
+			footerLines.push(
+				`*Use --cursor "${pagination.nextCursor}" to view more.*`,
+			);
+		}
+	} else {
+		footerLines.push(`*Showing ${displayedCount} pages.*`);
+	}
+
+	footerLines.push(
+		`*Information retrieved at: ${new Date().toLocaleString()}*`,
+	);
+
+	lines.push(...footerLines);
 
 	return lines.join('\n');
 }
@@ -142,7 +160,9 @@ export function formatPageDetails(pageData: PageDetailedSchemaType): string {
 	// Footer
 	lines.push('');
 	lines.push(formatSeparator());
-	lines.push(`*Page information retrieved at ${formatDate(new Date())}*`);
+	lines.push(
+		`*Page information retrieved at ${new Date().toLocaleString()}*`,
+	);
 	lines.push(`*To view this page in Confluence, visit: ${fullUrl}*`);
 
 	return lines.join('\n');

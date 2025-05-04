@@ -4,13 +4,18 @@ import {
 	formatBulletList,
 	formatNumberedList,
 } from '../utils/formatter.util.js';
+import { ResponsePagination } from '../types/common.types.js';
 
 /**
  * Format search results for display
  * @param searchData - Raw search results from the API
+ * @param pagination - Pagination info for footer hints
  * @returns Formatted string with search results in markdown format
  */
-export function formatSearchResults(searchData: SearchResultType[]): string {
+export function formatSearchResults(
+	searchData: SearchResultType[],
+	pagination?: ResponsePagination,
+): string {
 	if (searchData.length === 0) {
 		return 'No Confluence content found matching your query.';
 	}
@@ -84,6 +89,32 @@ export function formatSearchResults(searchData: SearchResultType[]): string {
 	});
 
 	lines.push(formattedList);
+
+	// --- Footer ---
+	const footerLines: string[] = [];
+	footerLines.push('---');
+
+	const displayedCount = pagination?.count ?? searchData.length;
+	// Confluence cursor pagination doesn't easily provide total count
+
+	if (pagination?.hasMore) {
+		footerLines.push(
+			`*Showing ${displayedCount} results. More results are available.*`,
+		);
+		if (pagination.nextCursor) {
+			footerLines.push(
+				`*Use --cursor "${pagination.nextCursor}" to view more.*`,
+			);
+		}
+	} else {
+		footerLines.push(`*Showing ${displayedCount} results.*`);
+	}
+
+	footerLines.push(
+		`*Information retrieved at: ${new Date().toLocaleString()}*`,
+	);
+
+	lines.push(...footerLines);
 
 	return lines.join('\n');
 }

@@ -152,3 +152,15 @@ export function formatNumberedList<T>(
 		})
 		.join('\n\n');
 }
+
+/**
+ * Format text as a Markdown code block
+ * @param text Text content
+ * @param language Optional language identifier
+ * @returns Formatted code block string
+ */
+export function formatCodeBlock(text: string, language: string = ''): string {
+	// Trim trailing newline if present to avoid extra line in block
+	const trimmedText = text.replace(/$\n/, '');
+	return `\`\`\`${language}\n${trimmedText}\n\`\`\``;
+}

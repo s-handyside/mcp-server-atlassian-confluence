@@ -125,8 +125,11 @@ async function search(
 			PaginationType.CURSOR,
 		);
 
-		// Pass search results directly to the formatter
-		const formattedResults = formatSearchResults(searchData.results);
+		// Pass search results and pagination info to formatter
+		const formattedResults = formatSearchResults(
+			searchData.results,
+			pagination,
+		);
 
 		return {
 			content: formattedResults,

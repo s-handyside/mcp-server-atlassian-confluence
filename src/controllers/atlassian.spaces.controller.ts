@@ -6,7 +6,10 @@ import {
 	formatSpacesList,
 	formatSpaceDetails,
 } from '../controllers/atlassian.spaces.formatter.js';
-import { ControllerResponse } from '../types/common.types.js';
+import {
+	ControllerResponse,
+	ResponsePagination,
+} from '../types/common.types.js';
 import atlassianPagesController from './atlassian.pages.controller.js';
 import {
 	DEFAULT_PAGE_SIZE,
@@ -84,20 +87,22 @@ async function list(
 			`Retrieved ${spacesData.results.length} spaces. Has more: ${spacesData._links?.next ? 'yes' : 'no'}`,
 		);
 
-		// The formatSpacesList function expects a spacesData parameter
+		// The formatSpacesList function expects a spacesData parameter and pagination info
 		// Extract the nextCursor from the links
 		const nextCursor = spacesData._links?.next?.split('cursor=')[1] || '';
+		const currentPagination: ResponsePagination = {
+			count: spacesData.results.length,
+			hasMore: !!spacesData._links?.next,
+			nextCursor: nextCursor,
+			// total is not available from this endpoint
+		};
 
 		// Format the spaces data directly using the Zod-inferred type
-		const formattedSpaces = formatSpacesList(spacesData);
+		const formattedSpaces = formatSpacesList(spacesData, currentPagination);
 
 		return {
 			content: formattedSpaces,
-			pagination: {
-				count: spacesData.results.length,
-				hasMore: !!spacesData._links?.next,
-				nextCursor: nextCursor,
-			},
+			pagination: currentPagination, // Return the constructed pagination object
 		};
 	} catch (error) {
 		// Use the standardized error handler

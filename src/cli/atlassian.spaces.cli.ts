@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianSpacesController from '../controllers/atlassian.spaces.controller.js';
-import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 import { ListSpacesToolArgsType } from '../tools/atlassian.spaces.types.js';
 
 /**
@@ -122,21 +121,8 @@ function registerListSpacesCommand(program: Command): void {
 
 				actionLogger.debug('Successfully retrieved spaces');
 
-				// Print the main content
-				console.log(formatHeading('Spaces', 2));
+				// Print the main content (now includes footer)
 				console.log(result.content);
-
-				// Print pagination information if available
-				if (result.pagination) {
-					console.log(
-						'\n' +
-							formatPagination(
-								result.pagination.count ?? 0,
-								result.pagination.hasMore,
-								result.pagination.nextCursor,
-							),
-					);
-				}
 			} catch (error) {
 				actionLogger.error('Operation failed:', error);
 				handleCliError(error);

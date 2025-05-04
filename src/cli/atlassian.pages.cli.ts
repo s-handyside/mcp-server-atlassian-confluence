@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
-import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 import { ListPagesToolArgsType } from '../tools/atlassian.pages.types.js';
 
 /**
@@ -102,27 +101,12 @@ function registerListPagesCommand(program: Command): void {
 
 				actionLogger.debug('Successfully retrieved pages');
 
-				// Print the main content
-				console.log(formatHeading('Pages', 2));
+				// Print the main content (now includes footer)
 				console.log(result.content);
 
-				// Print warnings if any
-				if (result.metadata?.warnings) {
-					const warnings = result.metadata.warnings as string[];
-					console.log('\n⚠️  ' + warnings.join('\n⚠️  '));
-				}
+				// REMOVED warnings logic (can be integrated into formatter if needed)
 
-				// Print pagination information if available
-				if (result.pagination) {
-					console.log(
-						'\n' +
-							formatPagination(
-								result.pagination.count ?? 0,
-								result.pagination.hasMore,
-								result.pagination.nextCursor,
-							),
-					);
-				}
+				// REMOVED pagination formatting logic
 			} catch (error) {
 				actionLogger.error('Operation failed:', error);
 				handleCliError(error);

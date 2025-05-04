@@ -231,8 +231,13 @@ async function list(
 			PaginationType.CURSOR,
 		);
 
-		// Pass the results array directly to the formatter
-		const formattedPages = formatPagesList(pagesData.results);
+		// Pass the results array, baseUrl, and pagination info to the formatter
+		const baseUrl = pagesData._links?.base || ''; // Extract base URL
+		const formattedPages = formatPagesList(
+			pagesData.results,
+			baseUrl,
+			pagination,
+		);
 
 		return {
 			content: formattedPages,

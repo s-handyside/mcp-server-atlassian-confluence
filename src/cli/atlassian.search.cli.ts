@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
-import { formatHeading, formatPagination } from '../utils/formatter.util.js';
+import { formatHeading } from '../utils/formatter.util.js';
 import { SearchToolArgsType } from '../tools/atlassian.search.types.js';
 
 /**
@@ -128,18 +128,6 @@ function registerSearchCommand(program: Command): void {
 
 				console.log(formatHeading('Search Results', 2));
 				console.log(result.content);
-
-				// Print pagination information if available
-				if (result.pagination) {
-					console.log(
-						'\n' +
-							formatPagination(
-								result.pagination.count ?? 0,
-								result.pagination.hasMore,
-								result.pagination.nextCursor,
-							),
-					);
-				}
 			} catch (error) {
 				actionLogger.error('Operation failed:', error);
 				handleCliError(error);

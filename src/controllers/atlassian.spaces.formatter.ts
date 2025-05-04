@@ -11,14 +11,17 @@ import {
 	formatSeparator,
 	formatNumberedList,
 } from '../utils/formatter.util.js';
+import { ResponsePagination } from '../types/common.types.js';
 
 /**
  * Format a list of spaces for display
  * @param spacesData - Raw spaces data from the API
+ * @param pagination - Pagination info for footer hints
  * @returns Formatted string with spaces information in markdown format
  */
 export function formatSpacesList(
 	spacesData: z.infer<typeof SpacesResponseSchema>,
+	pagination: ResponsePagination,
 ): string {
 	if (!spacesData.results || spacesData.results.length === 0) {
 		return 'No Confluence spaces found matching your criteria.';
@@ -29,7 +32,7 @@ export function formatSpacesList(
 	// Use the numbered list formatter for consistent formatting
 	const formattedList = formatNumberedList(
 		spacesData.results,
-		(space, index) => {
+		(space, _index) => {
 			// Ensure space has the correct inferred type, or use any if complex
 			const typedSpace = space as z.infer<
 				typeof SpacesResponseSchema
@@ -44,7 +47,7 @@ export function formatSpacesList(
 				Type: typedSpace.type,
 				Status: typedSpace.status,
 				Created: typedSpace.createdAt
-					? formatDate(new Date(typedSpace.createdAt))
+					? new Date(typedSpace.createdAt).toLocaleString()
 					: 'Not available',
 				'Homepage ID': typedSpace.homepageId || 'Not set',
 				Description:
@@ -65,21 +68,36 @@ export function formatSpacesList(
 			// Format as a bullet list with proper formatting for each value type
 			itemLines.push(formatBulletList(properties, (key) => key));
 
-			// Add separator between spaces except for the last one
-			if (index < spacesData.results.length - 1) {
-				itemLines.push('');
-				itemLines.push(formatSeparator());
-			}
-
 			return itemLines.join('\n');
 		},
 	);
 
 	lines.push(formattedList);
 
-	// Add timestamp for when this information was retrieved
-	lines.push('');
-	lines.push(`*Space information retrieved at ${formatDate(new Date())}*`);
+	// --- Footer ---
+	const footerLines: string[] = [];
+	footerLines.push('--');
+
+	const displayedCount = pagination.count ?? spacesData.results.length;
+
+	if (pagination.hasMore) {
+		footerLines.push(
+			`*Showing ${displayedCount} spaces. More results are available.*`,
+		);
+		if (pagination.nextCursor) {
+			footerLines.push(
+				`*Use --cursor "${pagination.nextCursor}" to view more.*`,
+			);
+		}
+	} else {
+		footerLines.push(`*Showing ${displayedCount} spaces.*`);
+	}
+
+	footerLines.push(
+		`*Information retrieved at: ${new Date().toLocaleString()}*`,
+	);
+
+	lines.push(...footerLines);
 
 	return lines.join('\n');
 }
@@ -202,7 +220,9 @@ export function formatSpaceDetails(
 	// Footer
 	lines.push('');
 	lines.push(formatSeparator());
-	lines.push(`*Space information retrieved at ${formatDate(new Date())}*`);
+	lines.push(
+		`*Space information retrieved at ${new Date().toLocaleString()}*`,
+	);
 	lines.push(`*To view this space in Confluence, visit: ${fullUrl}*`);
 
 	return lines.join('\n');
