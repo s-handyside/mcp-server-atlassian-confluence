@@ -152,13 +152,3 @@ export function formatNumberedList<T>(
 		})
 		.join('\n\n');
 }
-
-export default {
-	formatDate,
-	formatHeading,
-	formatPagination,
-	formatUrl,
-	formatSeparator,
-	formatBulletList,
-	formatNumberedList,
-};

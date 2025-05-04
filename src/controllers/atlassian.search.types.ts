@@ -1,16 +1,4 @@
-import { PaginationOptions, EntityIdentifier } from '../types/common.types.js';
-
-/**
- * Search identifier for retrieving specific search results
- * Note: Search operations don't typically use identifiers, but this is included
- * for consistency with other controllers
- */
-export interface SearchIdentifier extends EntityIdentifier {
-	/**
-	 * The CQL query to use for searching
-	 */
-	cql: string;
-}
+import { PaginationOptions } from '../types/common.types.js';
 
 /**
  * Options for the Confluence search controller.
