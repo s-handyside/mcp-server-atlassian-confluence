@@ -21,7 +21,7 @@ import {
 	SpaceType,
 } from '../services/vendor.atlassian.spaces.types.js';
 import {
-	ListSpacesToolArgsType,
+	// ListSpacesToolArgsType, // Removed unused import
 	GetSpaceToolArgsType,
 	ListSpacesOptions,
 } from '../tools/atlassian.spaces.types.js';
