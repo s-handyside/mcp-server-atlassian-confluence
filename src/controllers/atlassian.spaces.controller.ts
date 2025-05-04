@@ -1,5 +1,4 @@
 import { Logger } from '../utils/logger.util.js';
-import { ListSpacesOptions } from './atlassian.spaces.types.js';
 import { createApiError } from '../utils/error.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
 import atlassianSpacesService from '../services/vendor.atlassian.spaces.service.js';
@@ -14,7 +13,14 @@ import {
 	SPACE_DEFAULTS,
 	applyDefaults,
 } from '../utils/defaults.util.js';
-import { ListSpacesParams } from '../services/vendor.atlassian.spaces.types.js';
+import {
+	ListSpacesParams,
+	SpaceType,
+} from '../services/vendor.atlassian.spaces.types.js';
+import {
+	ListSpacesToolArgsType,
+	GetSpaceToolArgsType,
+} from '../tools/atlassian.spaces.types.js';
 
 /**
  * Controller for managing Confluence spaces.
@@ -32,7 +38,7 @@ import { ListSpacesParams } from '../services/vendor.atlassian.spaces.types.js';
  * @throws Error if space listing fails
  */
 async function list(
-	options: ListSpacesOptions = {},
+	options: ListSpacesToolArgsType = {},
 ): Promise<ControllerResponse> {
 	const controllerLogger = Logger.forContext(
 		'controllers/atlassian.spaces.controller.ts',
@@ -42,27 +48,31 @@ async function list(
 
 	try {
 		// Create defaults object with proper typing
-		const defaults: Partial<ListSpacesOptions> = {
+		const defaults: Partial<ListSpacesToolArgsType> = {
 			limit: DEFAULT_PAGE_SIZE,
-			sort: '-name',
 		};
 
 		// Apply defaults
-		const mergedOptions = applyDefaults<ListSpacesOptions>(
+		const mergedOptions = applyDefaults<ListSpacesToolArgsType>(
 			options,
 			defaults,
 		);
 
 		// Map controller options to service parameters
 		const params: ListSpacesParams = {
-			type: mergedOptions.type,
+			// Convert 'archived' type to actual API parameters - the tool uses a simplified schema
+			type:
+				mergedOptions.type === 'archived'
+					? 'global'
+					: (mergedOptions.type as SpaceType | undefined),
 			status: mergedOptions.status,
 			limit: mergedOptions.limit,
 			cursor: mergedOptions.cursor,
 			// Additional parameters
-			sort: mergedOptions.sort, // Already typed correctly through ListSpacesParams
 			descriptionFormat: 'view',
 			includeIcon: true, // Include space icons in response
+			// Add sort parameter for the service
+			sort: '-name', // Default sort order
 		};
 
 		controllerLogger.debug('Using params:', params);
@@ -77,6 +87,8 @@ async function list(
 		// The formatSpacesList function expects a spacesData parameter
 		// Extract the nextCursor from the links
 		const nextCursor = spacesData._links?.next?.split('cursor=')[1] || '';
+
+		// Format the spaces data directly using the Zod-inferred type
 		const formattedSpaces = formatSpacesList(spacesData);
 
 		return {
@@ -104,7 +116,7 @@ async function list(
  * @returns Promise with formatted space details content
  * @throws Error if space retrieval fails
  */
-async function get(args: { spaceKey: string }): Promise<ControllerResponse> {
+async function get(args: GetSpaceToolArgsType): Promise<ControllerResponse> {
 	const { spaceKey } = args;
 	const controllerLogger = Logger.forContext(
 		'controllers/atlassian.spaces.controller.ts',
@@ -207,6 +219,7 @@ async function get(args: { spaceKey: string }): Promise<ControllerResponse> {
 		}
 
 		// Format the space data for display with homepage content using the formatter
+		// Pass the Zod-validated space data directly to the formatter
 		const formattedSpace = formatSpaceDetails(spaceData, homepageContent);
 
 		return {

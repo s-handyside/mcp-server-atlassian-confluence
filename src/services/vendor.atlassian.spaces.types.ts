@@ -218,24 +218,28 @@ export const ContentRepresentationSchema = z.object({
 /**
  * Space description schema
  */
-export const SpaceDescriptionSchema = z.object({
-	plain: ContentRepresentationSchema.optional(),
-	view: ContentRepresentationSchema.optional(),
-});
+export const SpaceDescriptionSchema = z
+	.object({
+		plain: ContentRepresentationSchema.optional(),
+		view: ContentRepresentationSchema.optional(),
+	})
+	.nullable();
 
 /**
  * Space icon schema
  */
-export const SpaceIconSchema = z.object({
-	path: z.string().optional(),
-	apiDownloadLink: z.string().optional(),
-});
+export const SpaceIconSchema = z
+	.object({
+		path: z.string().optional(),
+		apiDownloadLink: z.string().optional(),
+	})
+	.nullable();
 
 /**
  * Space links schema
  */
 export const SpaceLinksSchema = z.object({
-	webui: z.string(),
+	webui: z.string().optional(),
 	base: z.string().optional(),
 	next: z.string().optional(),
 });
@@ -267,8 +271,8 @@ export const OptionalFieldLinksSchema = z.object({
  * Operation schema (for permissions)
  */
 export const OperationSchema = z.object({
-	key: z.string(),
-	target: z.string(),
+	key: z.string().optional(),
+	target: z.string().optional(),
 	targetType: z.string(),
 });
 
@@ -327,7 +331,7 @@ export const SpaceSchema = z.object({
 	status: SpaceStatusSchema,
 	authorId: z.string(),
 	createdAt: z.string(),
-	homepageId: z.string(),
+	homepageId: z.string().nullable(),
 	description: SpaceDescriptionSchema.optional(),
 	icon: SpaceIconSchema.optional(),
 	_links: SpaceLinksSchema,
@@ -371,8 +375,6 @@ export const SpacesResponseSchema = z.object({
 });
 
 /**
- * Inferred TypeScript types from Zod schemas
+ * Inferred types from Zod schemas
  */
-export type SpaceSchemaType = z.infer<typeof SpaceSchema>;
 export type SpaceDetailedSchemaType = z.infer<typeof SpaceDetailedSchema>;
-export type SpacesResponseType = z.infer<typeof SpacesResponseSchema>;

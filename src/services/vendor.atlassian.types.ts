@@ -83,13 +83,3 @@ export interface ContentRepresentation {
 	value: string;
 	representation: string;
 }
-
-/**
- * Common search excerpt strategy
- */
-export type ExcerptStrategy =
-	| 'highlight'
-	| 'indexed'
-	| 'none'
-	| 'highlight_unescaped'
-	| 'indexed_unescaped';

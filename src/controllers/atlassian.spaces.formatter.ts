@@ -1,6 +1,7 @@
+import { z } from 'zod';
 import {
-	SpaceDetailed,
-	SpacesResponse,
+	SpacesResponseSchema,
+	SpaceDetailedSchemaType,
 } from '../services/vendor.atlassian.spaces.types.js';
 import {
 	formatUrl,
@@ -16,7 +17,9 @@ import {
  * @param spacesData - Raw spaces data from the API
  * @returns Formatted string with spaces information in markdown format
  */
-export function formatSpacesList(spacesData: SpacesResponse): string {
+export function formatSpacesList(
+	spacesData: z.infer<typeof SpacesResponseSchema>,
+): string {
 	if (!spacesData.results || spacesData.results.length === 0) {
 		return 'No Confluence spaces found matching your criteria.';
 	}
@@ -27,28 +30,36 @@ export function formatSpacesList(spacesData: SpacesResponse): string {
 	const formattedList = formatNumberedList(
 		spacesData.results,
 		(space, index) => {
+			// Ensure space has the correct inferred type, or use any if complex
+			const typedSpace = space as z.infer<
+				typeof SpacesResponseSchema
+			>['results'][number];
 			const itemLines: string[] = [];
-			itemLines.push(formatHeading(space.name, 2));
+			itemLines.push(formatHeading(typedSpace.name, 2));
 
 			// Basic properties
 			const properties: Record<string, unknown> = {
-				ID: space.id,
-				Key: space.key,
-				Type: space.type,
-				Status: space.status,
-				Created: space.createdAt
-					? formatDate(new Date(space.createdAt))
+				ID: typedSpace.id,
+				Key: typedSpace.key,
+				Type: typedSpace.type,
+				Status: typedSpace.status,
+				Created: typedSpace.createdAt
+					? formatDate(new Date(typedSpace.createdAt))
 					: 'Not available',
-				'Homepage ID': space.homepageId || 'Not set',
-				Description: space.description?.view?.value || 'Not available',
+				'Homepage ID': typedSpace.homepageId || 'Not set',
+				Description:
+					typedSpace.description?.view?.value || 'Not available',
 				URL: formatUrl(
-					`${spacesData._links.base}/spaces/${space.key}`,
-					space.key,
+					// Handle potentially missing base link
+					spacesData._links?.base
+						? `${spacesData._links.base}/spaces/${typedSpace.key}`
+						: `/spaces/${typedSpace.key}`,
+					typedSpace.key,
 				),
 			};
 
-			if (space.currentActiveAlias) {
-				properties['Alias'] = space.currentActiveAlias;
+			if (typedSpace.currentActiveAlias) {
+				properties['Alias'] = typedSpace.currentActiveAlias;
 			}
 
 			// Format as a bullet list with proper formatting for each value type
@@ -80,7 +91,7 @@ export function formatSpacesList(spacesData: SpacesResponse): string {
  * @returns Formatted string with space details in markdown format
  */
 export function formatSpaceDetails(
-	spaceData: SpaceDetailed,
+	spaceData: SpaceDetailedSchemaType,
 	homepageContent?: string,
 ): string {
 	// Create URL
@@ -161,7 +172,12 @@ export function formatSpaceDetails(
 
 			lines.push(labelLines.join('\n'));
 
-			if (spaceData.labels.meta?.hasMore) {
+			// The meta property might not have hasMore in the Zod schema
+			if (
+				spaceData.labels.meta?.count &&
+				spaceData.labels.results.length <
+					(spaceData.labels.meta.count || 0)
+			) {
 				lines.push('');
 				lines.push('*More labels are available but not shown*');
 			}

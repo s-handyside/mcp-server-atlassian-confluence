@@ -48,9 +48,9 @@ describe('Vendor Atlassian Spaces Service', () => {
 
 			expect(result1.results.length).toBeLessThanOrEqual(1);
 
-			// If there's a next page, fetch it using the cursor
-			if (result1._links.next) {
-				// Extract cursor from the next link
+			// If pagination is available and there are more pages
+			if (result1._links && result1._links.next) {
+				// Test cursor-based pagination
 				const nextLink = result1._links.next;
 				const cursorMatch = nextLink.match(/cursor=([^&]+)/);
 				const nextCursor = cursorMatch
@@ -127,7 +127,9 @@ describe('Vendor Atlassian Spaces Service', () => {
 			}
 
 			// Get the keys from the first spaces
-			const spaceKeys = initialSpaces.results.map((space) => space.key);
+			const spaceKeys = initialSpaces.results.map(
+				(space: { key: string }) => space.key,
+			);
 
 			// Filter by those keys
 			const result = await atlassianSpacesService.list({
@@ -136,7 +138,7 @@ describe('Vendor Atlassian Spaces Service', () => {
 			});
 
 			expect(result.results.length).toBeLessThanOrEqual(spaceKeys.length);
-			result.results.forEach((space) => {
+			result.results.forEach((space: { key: string }) => {
 				expect(spaceKeys).toContain(space.key);
 			});
 		}, 30000);
@@ -184,8 +186,12 @@ describe('Vendor Atlassian Spaces Service', () => {
 			) {
 				// Instead of comparing string order (which can be unpredictable),
 				// just verify that different sort orders produce different results
-				const ascNames = ascResult.results.map((space) => space.name);
-				const descNames = descResult.results.map((space) => space.name);
+				const ascNames = ascResult.results.map(
+					(space: { name: string }) => space.name,
+				);
+				const descNames = descResult.results.map(
+					(space: { name: string }) => space.name,
+				);
 
 				expect(JSON.stringify(ascNames)).not.toEqual(
 					JSON.stringify(descNames),

@@ -5,12 +5,10 @@ import {
 	getAtlassianCredentials,
 } from '../utils/transport.util.js';
 import {
+	SpacesResponseSchema,
+	SpaceDetailedSchema,
 	ListSpacesParams,
 	GetSpaceByIdParams,
-	SpacesResponseSchema,
-	SpacesResponseType,
-	SpaceDetailedSchema,
-	SpaceDetailedSchemaType,
 } from './vendor.atlassian.spaces.types.js';
 import { z } from 'zod';
 
@@ -62,7 +60,7 @@ const API_PATH = '/wiki/api/v2';
  */
 async function list(
 	params: ListSpacesParams = {},
-): Promise<SpacesResponseType> {
+): Promise<z.infer<typeof SpacesResponseSchema>> {
 	const serviceLogger = Logger.forContext(
 		'services/vendor.atlassian.spaces.service.ts',
 		'list',
@@ -140,7 +138,7 @@ async function list(
 		try {
 			const validatedData = SpacesResponseSchema.parse(rawData);
 			serviceLogger.debug(
-				`Successfully validated response data for ${validatedData.results.length} spaces`,
+				`Successfully validated spaces list for ${validatedData.results.length} items`,
 			);
 			return validatedData;
 		} catch (validationError) {
@@ -192,15 +190,15 @@ async function list(
  * });
  */
 async function get(
-	id: string,
+	spaceId: string,
 	params: GetSpaceByIdParams = {},
-): Promise<SpaceDetailedSchemaType> {
+): Promise<z.infer<typeof SpaceDetailedSchema>> {
 	const serviceLogger = Logger.forContext(
 		'services/vendor.atlassian.spaces.service.ts',
 		'get',
 	);
 	serviceLogger.debug(
-		`Getting Confluence space with ID: ${id}, params:`,
+		`Getting Confluence space with ID: ${spaceId}, params:`,
 		params,
 	);
 
@@ -254,7 +252,7 @@ async function get(
 	const queryString = queryParams.toString()
 		? `?${queryParams.toString()}`
 		: '';
-	const path = `${API_PATH}/spaces/${id}${queryString}`;
+	const path = `${API_PATH}/spaces/${spaceId}${queryString}`;
 
 	serviceLogger.debug(`Sending request to: ${path}`);
 
@@ -266,7 +264,7 @@ async function get(
 		try {
 			const validatedData = SpaceDetailedSchema.parse(rawData);
 			serviceLogger.debug(
-				`Successfully validated detailed space data for ID: ${validatedData.id}`,
+				`Successfully validated space details for ID: ${spaceId}`,
 			);
 			return validatedData;
 		} catch (validationError) {

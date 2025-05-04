@@ -21,36 +21,63 @@ export function formatSearchResults(searchData: SearchResultType[]): string {
 	const formattedList = formatNumberedList(searchData, (result) => {
 		const itemLines: string[] = [];
 
-		// Extract data from the new structure
-		const content = result.content;
-		const space = result.space;
+		// Handle both v1 and v2 API result formats
+		// For v1 API, result.title is directly available
+		// For v2 API, title is in content object
 
-		// Determine title, ID, and status
-		const title = content.title || 'Untitled Result';
-		const id = content.id || 'N/A';
-		const status = content.status || 'N/A';
-		const spaceTitle = space.name || 'N/A';
+		// Get title from either direct property or content object
+		const title =
+			result.title || result.content?.title || 'Untitled Result';
 
-		itemLines.push(formatHeading(title, 2));
-
-		// Create an object with properties
+		// Create an object with properties, handling optional fields
 		const properties: Record<string, unknown> = {
-			ID: id,
-			Type: content.type,
-			Status: status,
-			Space: spaceTitle,
-			'Space ID': space.id,
-			URL: content._links.webui
-				? {
-						url: content._links.webui,
-						title: 'View in Confluence',
-					}
-				: undefined,
-			Excerpt: content.excerpt ? content.excerpt.content : undefined,
-			Modified: content.lastModified,
+			// Use optional chaining and fallbacks for all fields
+			ID: result.content?.id || result.id || 'N/A',
+			Type: result.content?.type || result.entityType || 'N/A',
+			Status: result.content?.status || 'N/A',
+			Space:
+				result.space?.name ||
+				result.resultGlobalContainer?.title ||
+				'N/A',
 		};
 
-		// Format as a bullet list with proper formatting for each value type
+		// Add Space ID only if available
+		if (result.space?.id) {
+			properties['Space ID'] = result.space.id;
+		}
+
+		// Add URL with proper handling of optional fields
+		const url =
+			result.url ||
+			result.content?._links?.webui ||
+			result.resultGlobalContainer?.displayUrl;
+
+		if (url) {
+			properties['URL'] = {
+				url: url,
+				title: 'View in Confluence',
+			};
+		}
+
+		// Add excerpt if available, with proper handling of both API formats
+		const excerpt = result.excerpt || result.content?.excerpt?.content;
+
+		if (excerpt) {
+			properties['Excerpt'] = excerpt;
+		}
+
+		// Add modification date if available
+		const modified =
+			result.lastModified ||
+			result.content?.lastModified ||
+			result.friendlyLastModified;
+
+		if (modified) {
+			properties['Modified'] = modified;
+		}
+
+		// Create the formatted output
+		itemLines.push(formatHeading(title, 2));
 		itemLines.push(formatBulletList(properties, (key) => key));
 
 		return itemLines.join('\n');

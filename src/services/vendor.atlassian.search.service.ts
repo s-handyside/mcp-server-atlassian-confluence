@@ -1,9 +1,6 @@
 import { createApiError, createAuthMissingError } from '../utils/error.util.js';
 import { Logger } from '../utils/logger.util.js';
-import {
-	fetchAtlassian,
-	getAtlassianCredentials,
-} from '../utils/transport.util.js';
+import { getAtlassianCredentials } from '../utils/transport.util.js';
 import {
 	SearchParams,
 	SearchResponseSchema,
@@ -12,11 +9,66 @@ import {
 import { z } from 'zod';
 
 /**
- * Base API path for Confluence REST API v2
- * @see https://developer.atlassian.com/cloud/confluence/rest/v2/intro/
+ * Base API path for Confluence REST API v1 (using v1 instead of v2 to bypass the generic-content-type bug)
+ * @see https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-search/
  * @constant {string}
  */
-const API_PATH = '/wiki/api/v2';
+const API_PATH = '/wiki/rest/api';
+
+/**
+ * Interface for Confluence V1 API search response
+ */
+interface V1SearchResult {
+	content?: {
+		id?: string;
+		type?: string;
+		status?: string;
+		title?: string;
+		[key: string]: unknown;
+	};
+	space?: {
+		id?: number;
+		key?: string;
+		name?: string;
+		[key: string]: unknown;
+	};
+	title?: string;
+	excerpt?: string;
+	url?: string;
+	resultGlobalContainer?: {
+		title?: string;
+		displayUrl?: string;
+		[key: string]: unknown;
+	};
+	breadcrumbs?: Array<unknown>;
+	entityType?: string;
+	iconCssClass?: string;
+	lastModified?: string;
+	friendlyLastModified?: string;
+	score?: number;
+	[key: string]: unknown;
+}
+
+/**
+ * Interface for Confluence V1 API search response
+ */
+interface V1SearchResponse {
+	results?: V1SearchResult[];
+	start?: number;
+	limit?: number;
+	size?: number;
+	totalSize?: number;
+	cqlQuery?: string;
+	searchDuration?: number;
+	_links?: {
+		base?: string;
+		context?: string;
+		next?: string;
+		self?: string;
+		[key: string]: unknown;
+	};
+	[key: string]: unknown;
+}
 
 /**
  * Search Confluence content using CQL
@@ -39,51 +91,106 @@ async function search(params: SearchParams): Promise<SearchResponseType> {
 		);
 	}
 
-	// Build query parameters
-	const queryParams = new URLSearchParams();
+	// Build request parameters
+	const queryParams: Record<string, string> = {};
 
 	// Required CQL query
-	queryParams.set('cql', params.cql);
+	queryParams.cql = params.cql;
 
 	// Pagination
-	if (params.cursor) {
-		queryParams.set('cursor', params.cursor);
-	}
+	// v1 API uses start/limit instead of cursor
 	if (params.limit) {
-		queryParams.set('limit', params.limit.toString());
+		queryParams.limit = params.limit.toString();
 	}
 
-	// Additional options
-	if (params.excerpt) {
-		queryParams.set('excerpt', params.excerpt);
-	}
+	// The v1 API parameters are slightly different, but we can map most of them
 	if (params.includeTotalSize !== undefined) {
-		queryParams.set(
-			'include-total-size',
-			params.includeTotalSize.toString(),
-		);
+		// v1 API always includes total size, no need for this parameter
 	}
 	if (params.includeArchivedSpaces !== undefined) {
-		queryParams.set(
-			'include-archived-spaces',
-			params.includeArchivedSpaces.toString(),
-		);
+		// No direct equivalent in v1 API
+	}
+	if (params.excerpt) {
+		queryParams.excerpt = params.excerpt;
 	}
 
-	const queryString = queryParams.toString()
-		? `?${queryParams.toString()}`
-		: '';
-	const path = `${API_PATH}/search${queryString}`;
-
-	serviceLogger.debug(`Sending request to: ${path}`);
+	// Manually build query string to avoid URLSearchParams handling
+	const queryString = Object.entries(queryParams)
+		.map(
+			([key, value]) =>
+				`${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+		)
+		.join('&');
 
 	try {
-		// Get the raw response data from the API
-		const rawData = await fetchAtlassian<unknown>(credentials, path);
+		// Construct the full URL for the API call using the v1 search endpoint
+		const baseUrl = `https://${credentials.siteName}.atlassian.net`;
+		const url = `${baseUrl}${API_PATH}/search${queryString ? `?${queryString}` : ''}`;
 
-		// Validate the response data using the Zod schema
+		// For debugging
+		serviceLogger.debug(`Making direct fetch to v1 API endpoint: ${url}`);
+
+		// Construct Auth header
+		const authHeader = `Basic ${Buffer.from(
+			`${credentials.userEmail}:${credentials.apiToken}`,
+		).toString('base64')}`;
+
+		// Make direct fetch call
+		const response = await fetch(url, {
+			method: 'GET',
+			headers: {
+				Authorization: authHeader,
+				Accept: 'application/json',
+				'Content-Type': 'application/json',
+			},
+		});
+
+		// Log the response status for debugging
+		serviceLogger.debug(`API response status: ${response.status}`);
+
+		// Check for error response
+		if (!response.ok) {
+			const errorText = await response.text();
+			serviceLogger.error(`API error response: ${errorText}`);
+			throw createApiError(
+				`API request failed with status ${response.status}`,
+				response.status,
+				errorText,
+			);
+		}
+
+		// Parse the JSON response
+		const v1Data = (await response.json()) as V1SearchResponse;
+
+		serviceLogger.debug(
+			`Successfully retrieved ${v1Data.results?.length || 0} search results from v1 API`,
+		);
+
+		// The v1 API has a slightly different format, transform it to match the expected type
+		const transformedData = {
+			results: (v1Data.results || []).map((result: V1SearchResult) => {
+				return {
+					content: result.content || {},
+					space: result.space || {},
+					title: result.title || '',
+					excerpt: result.excerpt || '',
+					url: result.url || '',
+					resultGlobalContainer: result.resultGlobalContainer || {},
+					breadcrumbs: result.breadcrumbs || [],
+					entityType: result.entityType || '',
+					iconCssClass: result.iconCssClass || '',
+					lastModified: result.lastModified || '',
+					friendlyLastModified: result.friendlyLastModified || '',
+					score: result.score || 0,
+				};
+			}),
+			_links: v1Data._links || {},
+			total: v1Data.totalSize,
+		};
+
+		// Validate the transformed data using our schema
 		try {
-			const validatedData = SearchResponseSchema.parse(rawData);
+			const validatedData = SearchResponseSchema.parse(transformedData);
 			serviceLogger.debug(
 				`Successfully validated search results for ${validatedData.results.length} items`,
 			);
@@ -94,6 +201,16 @@ async function search(params: SearchParams): Promise<SearchResponseType> {
 					'API response validation failed:',
 					validationError.format(),
 				);
+
+				// Log the data structure for debugging
+				serviceLogger.debug(
+					'Transformed data structure:',
+					JSON.stringify(transformedData, null, 2).substring(
+						0,
+						1000,
+					) + '...',
+				);
+
 				throw createApiError(
 					`API response validation failed: ${validationError.message}`,
 					500,

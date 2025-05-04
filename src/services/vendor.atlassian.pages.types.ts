@@ -260,7 +260,7 @@ export const BodySchema = z.object({
  * Page links schema
  */
 export const PageLinksSchema = z.object({
-	webui: z.string(),
+	webui: z.string().optional(),
 	editui: z.string().optional(),
 	tinyui: z.string().optional(),
 	base: z.string().optional(),
@@ -314,12 +314,12 @@ export const PageSchema = z.object({
 	status: ContentStatusSchema,
 	title: z.string(),
 	spaceId: z.string(),
-	parentId: z.string().optional(),
-	parentType: z.string().optional(),
+	parentId: z.string().nullable().optional(),
+	parentType: z.string().nullable().optional(),
 	authorId: z.string().optional(),
 	createdAt: z.string(),
-	position: z.number().optional(),
-	version: VersionSchema,
+	position: z.number().nullable().optional(),
+	version: VersionSchema.optional(),
 	_links: PageLinksSchema,
 	body: BodySchema.optional(),
 });
@@ -332,8 +332,18 @@ export const PageDetailedSchema = PageSchema.extend({
 	childTypes: ChildTypesSchema.optional(),
 	labels: OptionalCollectionSchema(LabelSchema).optional(),
 	operations: OptionalCollectionSchema(OperationSchema).optional(),
-	collaborators: OptionalCollectionSchema(PageCollaboratorSchema).optional(),
-	webResources: OptionalCollectionSchema(WebResourceSchema).optional(),
+	collaborators: z
+		.union([
+			OptionalCollectionSchema(PageCollaboratorSchema),
+			z.array(z.any()),
+		])
+		.optional(),
+	webResources: z
+		.union([
+			OptionalCollectionSchema(WebResourceSchema),
+			z.object({}).passthrough(),
+		])
+		.optional(),
 });
 
 /**
@@ -349,4 +359,5 @@ export const PagesResponseSchema = z.object({
  */
 export type PageSchemaType = z.infer<typeof PageSchema>;
 export type PageDetailedSchemaType = z.infer<typeof PageDetailedSchema>;
-export type PagesResponseType = z.infer<typeof PagesResponseSchema>;
+
+// export type PagesResponseType = z.infer<typeof PagesResponseSchema>; // Keep this commented/removed

@@ -26,26 +26,37 @@ export interface ResponsePagination {
 	 * This helps clients track how many items they've received.
 	 */
 	count?: number;
+
+	/**
+	 * The start index of the current result set.
+	 * This helps clients track the starting point of their results.
+	 */
+	start?: number;
+
+	/**
+	 * The total number of items available.
+	 * This helps clients understand the total scope of their results.
+	 */
+	total?: number;
 }
 
-/**
- * Common pagination options for API requests.
- * These options control how many results are returned and which page is retrieved.
- */
+/*
+// Common pagination options for API requests.
+// These options control how many results are returned and which page is retrieved.
 export interface PaginationOptions {
-	/**
-	 * Maximum number of results to return per page.
-	 * Valid range: 1-100
-	 * If not specified, the default page size (typically 25) will be used.
-	 */
+	// Maximum number of results to return per page.
+	// Valid range: 1-100
+	// If not specified, the default page size (typically 25) will be used.
 	limit?: number;
 
-	/**
-	 * Pagination cursor for retrieving a specific page of results.
-	 * Obtain this value from the previous response's pagination information.
-	 */
+	// Pagination cursor for retrieving a specific page of results.
+	// Obtain this value from the previous response's pagination information.
 	cursor?: string;
+
+	// Starting index for pagination (often used with limit).
+	start?: number;
 }
+*/
 
 /**
  * Common response structure for controller operations.

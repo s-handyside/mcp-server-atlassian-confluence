@@ -1,7 +1,9 @@
 import { Logger } from './logger.util.js';
 
+const paginationLogger = Logger.forContext('utils/pagination.util.ts');
+
 /**
- * Types of pagination mechanisms used by different Atlassian APIs
+ * Available pagination types supported by the application
  */
 export enum PaginationType {
 	/**
@@ -24,143 +26,245 @@ export enum PaginationType {
 }
 
 /**
- * Structure for offset-based pagination data
+ * Generic interface for all paginated API response data that may include
+ * pagination information in different formats
  */
-export interface OffsetPaginationData {
+export interface PaginationData {
+	_links?: {
+		next?: string;
+	};
+}
+
+/**
+ * Response structure for offset-based pagination (start-at, max-results)
+ */
+export interface OffsetPaginationData extends PaginationData {
 	startAt?: number;
 	maxResults?: number;
 	total?: number;
-	nextPage?: string;
-	values?: unknown[];
+	isLast?: boolean;
 }
 
 /**
- * Structure for cursor-based pagination data (Confluence)
+ * Response structure for cursor-based pagination
  */
-export interface CursorPaginationData {
+export interface CursorPaginationData extends PaginationData {
 	_links: {
 		next?: string;
 	};
-	results?: unknown[];
 }
 
 /**
- * Structure for page-based pagination data (Bitbucket)
+ * Response structure for page-based pagination
  */
-export interface PagePaginationData {
-	next?: string;
-	values?: unknown[];
+export interface PagePaginationData extends PaginationData {
+	page?: number;
+	size?: number;
+	totalElements?: number;
+	totalPages?: number;
+	last?: boolean;
 }
 
 /**
- * Union type for all pagination data types
+ * Adapter function to convert Zod-validated API responses to pagination data
+ * @param data Any API response with potential pagination properties
+ * @returns A PaginationData compatible object
  */
-export type PaginationData =
-	| OffsetPaginationData
-	| CursorPaginationData
-	| PagePaginationData;
+export function adaptResponseForPagination(data: unknown): PaginationData {
+	// Create a basic pagination data structure
+	const paginationData: PaginationData = {};
+
+	// Handle _links for cursor-based pagination
+	if (data && typeof data === 'object' && '_links' in data) {
+		const typedData = data as { _links?: { next?: string } };
+		paginationData._links = { next: typedData._links?.next };
+	}
+
+	// For offset-based pagination
+	if (data && typeof data === 'object' && 'startAt' in data) {
+		(paginationData as OffsetPaginationData).startAt = (
+			data as { startAt?: number }
+		).startAt;
+	}
+	if (data && typeof data === 'object' && 'maxResults' in data) {
+		(paginationData as OffsetPaginationData).maxResults = (
+			data as { maxResults?: number }
+		).maxResults;
+	}
+	if (data && typeof data === 'object' && 'total' in data) {
+		(paginationData as OffsetPaginationData).total = (
+			data as { total?: number }
+		).total;
+	}
+	if (data && typeof data === 'object' && 'isLast' in data) {
+		(paginationData as OffsetPaginationData).isLast = (
+			data as { isLast?: boolean }
+		).isLast;
+	}
+
+	// For page-based pagination
+	if (data && typeof data === 'object' && 'page' in data) {
+		(paginationData as PagePaginationData).page = (
+			data as { page?: number }
+		).page;
+	}
+	if (data && typeof data === 'object' && 'size' in data) {
+		(paginationData as PagePaginationData).size = (
+			data as { size?: number }
+		).size;
+	}
+	if (data && typeof data === 'object' && 'totalElements' in data) {
+		(paginationData as PagePaginationData).totalElements = (
+			data as { totalElements?: number }
+		).totalElements;
+	}
+	if (data && typeof data === 'object' && 'totalPages' in data) {
+		(paginationData as PagePaginationData).totalPages = (
+			data as { totalPages?: number }
+		).totalPages;
+	}
+	if (data && typeof data === 'object' && 'last' in data) {
+		(paginationData as PagePaginationData).last = (
+			data as { last?: boolean }
+		).last;
+	}
+
+	return paginationData;
+}
 
 /**
- * Extract pagination information from API response
- * @param data The API response containing pagination information
- * @param paginationType The type of pagination mechanism used
- * @returns Object with nextCursor, hasMore, and count properties
+ * Standardized pagination format for controller responses
+ */
+export interface ResponsePagination {
+	/**
+	 * Number of items in the current response
+	 */
+	count: number;
+	/**
+	 * Whether more items are available
+	 */
+	hasMore: boolean;
+	/**
+	 * Cursor to use for the next page, if applicable
+	 */
+	nextCursor?: string;
+	/**
+	 * Total number of items, if available
+	 */
+	total?: number;
+}
+
+/**
+ * Extract pagination information from an API response and convert it to a standardized format
+ * @param data The API response data containing pagination information
+ * @param type The type of pagination used in the response
+ * @param entityType Optional entity type for logging
+ * @returns Standardized pagination object or undefined if no pagination info is available
  */
 export function extractPaginationInfo(
-	data: PaginationData,
-	paginationType: PaginationType,
-): { nextCursor?: string; hasMore: boolean; count?: number } {
-	const paginationLogger = Logger.forContext(
-		'utils/pagination.util.ts',
-		'extractPaginationInfo',
-	);
-	let nextCursor: string | undefined;
-	let count: number | undefined;
+	data: unknown,
+	type: PaginationType,
+	entityType?: string,
+): ResponsePagination | undefined {
+	// First adapt the response to ensure it has a compatible structure
+	const adaptedData = adaptResponseForPagination(data);
+
+	// Apply normal extraction logic to the adapted data
+	const logger = paginationLogger.forMethod('extractPaginationInfo');
+
+	// Extract the results array for counting items
+	let resultsArray: Array<unknown> = [];
+	if (
+		data &&
+		typeof data === 'object' &&
+		'results' in data &&
+		Array.isArray((data as { results: unknown[] }).results)
+	) {
+		resultsArray = (data as { results: unknown[] }).results;
+	} else if (data && Array.isArray(data)) {
+		resultsArray = data as unknown[];
+	}
+
+	// Count of items in the current response
+	const count = resultsArray.length;
+
+	// Default to undefined - will be populated based on pagination type
+	let hasMore = false;
+	let nextCursor: string | undefined = undefined;
+	let total: number | undefined = undefined;
 
 	try {
-		// Extract count from the appropriate data field based on pagination type
-		switch (paginationType) {
-			case PaginationType.OFFSET: {
-				const offsetData = data as OffsetPaginationData;
-				count = offsetData.values?.length;
+		switch (type) {
+			case PaginationType.CURSOR:
+				// Cursor-based pagination (Confluence API v2 style)
+				if (adaptedData._links?.next) {
+					hasMore = true;
+					// Extract cursor from next link if it exists
+					const cursorMatch =
+						adaptedData._links.next.match(/cursor=([^&]+)/);
+					if (cursorMatch && cursorMatch[1]) {
+						nextCursor = cursorMatch[1];
+					}
+				} else {
+					hasMore = false;
+				}
+				break;
 
-				// Handle Jira's offset-based pagination
+			case PaginationType.OFFSET: {
+				// Offset-based pagination (Jira API style)
+				const offsetData = adaptedData as OffsetPaginationData;
 				if (
 					offsetData.startAt !== undefined &&
 					offsetData.maxResults !== undefined &&
-					offsetData.total !== undefined &&
-					offsetData.startAt + offsetData.maxResults <
-						offsetData.total
+					offsetData.total !== undefined
 				) {
-					nextCursor = String(
-						offsetData.startAt + offsetData.maxResults,
-					);
-				} else if (offsetData.nextPage) {
-					nextCursor = offsetData.nextPage;
-				}
-				break;
-			}
-
-			case PaginationType.CURSOR: {
-				const cursorData = data as CursorPaginationData;
-				count = cursorData.results?.length;
-
-				// Handle Confluence's cursor-based pagination
-				if (cursorData._links && cursorData._links.next) {
-					const nextUrl = cursorData._links.next;
-					const cursorMatch = nextUrl.match(/cursor=([^&]+)/);
-					if (cursorMatch && cursorMatch[1]) {
-						nextCursor = decodeURIComponent(cursorMatch[1]);
-					}
+					const endAt = offsetData.startAt + count;
+					hasMore = endAt < offsetData.total;
+					nextCursor = hasMore ? endAt.toString() : undefined;
+					total = offsetData.total;
+				} else if (offsetData.isLast !== undefined) {
+					hasMore = !offsetData.isLast;
 				}
 				break;
 			}
 
 			case PaginationType.PAGE: {
-				const pageData = data as PagePaginationData;
-				count = pageData.values?.length;
-
-				// Handle Bitbucket's page-based pagination
-				if (pageData.next) {
-					try {
-						const nextUrl = new URL(pageData.next);
-						const nextPage = nextUrl.searchParams.get('page');
-						if (nextPage) {
-							nextCursor = nextPage;
-						}
-					} catch (error) {
-						paginationLogger.warn(
-							`Failed to parse next URL: ${pageData.next}`,
-							{ error },
-						);
+				// Page-based pagination
+				const pageData = adaptedData as PagePaginationData;
+				if (pageData.last !== undefined) {
+					hasMore = !pageData.last;
+					if (hasMore && pageData.page !== undefined) {
+						nextCursor = (pageData.page + 1).toString();
 					}
+				}
+				if (pageData.totalElements !== undefined) {
+					total = pageData.totalElements;
 				}
 				break;
 			}
 
 			default:
-				paginationLogger.warn(
-					`Unknown pagination type: ${paginationType}`,
+				logger.warn(
+					`Unknown pagination type: ${type} for ${entityType || 'entity'}`,
 				);
+				return undefined;
 		}
 
-		if (nextCursor) {
-			paginationLogger.debug(`Next cursor: ${nextCursor}`);
-		}
-
-		if (count !== undefined) {
-			paginationLogger.debug(`Count: ${count}`);
-		}
-
+		// Return the standardized pagination object
 		return {
-			nextCursor,
-			hasMore: !!nextCursor,
 			count,
+			hasMore,
+			...(nextCursor && { nextCursor }),
+			...(total !== undefined && { total }),
 		};
 	} catch (error) {
-		paginationLogger.warn(
-			`Error extracting pagination information: ${error instanceof Error ? error.message : String(error)}`,
+		logger.warn(
+			`Error extracting pagination info for ${entityType || 'entity'}: ${String(error)}`,
 		);
-		return { hasMore: false };
+		// If error occurred, return basic info without next cursor
+		return {
+			count,
+			hasMore: false,
+		};
 	}
 }

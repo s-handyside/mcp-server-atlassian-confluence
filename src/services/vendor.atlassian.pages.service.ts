@@ -6,9 +6,7 @@ import {
 } from '../utils/transport.util.js';
 import {
 	PageDetailedSchema,
-	PageDetailedSchemaType,
 	PagesResponseSchema,
-	PagesResponseType,
 	ListPagesParams,
 	GetPageByIdParams,
 } from './vendor.atlassian.pages.types.js';
@@ -47,7 +45,9 @@ const API_PATH = '/wiki/api/v2';
  *   limit: 25
  * });
  */
-async function list(params: ListPagesParams = {}): Promise<PagesResponseType> {
+async function list(
+	params: ListPagesParams,
+): Promise<z.infer<typeof PagesResponseSchema>> {
 	const serviceLogger = Logger.forContext(
 		'services/vendor.atlassian.pages.service.ts',
 		'list',
@@ -111,7 +111,7 @@ async function list(params: ListPagesParams = {}): Promise<PagesResponseType> {
 		try {
 			const validatedData = PagesResponseSchema.parse(rawData);
 			serviceLogger.debug(
-				`Successfully validated response data for ${validatedData.results.length} pages`,
+				`Successfully validated pages list for ${validatedData.results.length} items`,
 			);
 			return validatedData;
 		} catch (validationError) {
@@ -156,15 +156,15 @@ async function list(params: ListPagesParams = {}): Promise<PagesResponseType> {
  * });
  */
 async function get(
-	id: string,
+	pageId: string,
 	params: GetPageByIdParams = {},
-): Promise<PageDetailedSchemaType> {
+): Promise<z.infer<typeof PageDetailedSchema>> {
 	const serviceLogger = Logger.forContext(
 		'services/vendor.atlassian.pages.service.ts',
 		'get',
 	);
 	serviceLogger.debug(
-		`Getting Confluence page with ID: ${id}, params:`,
+		`Getting Confluence page with ID: ${pageId}, params:`,
 		params,
 	);
 
@@ -235,7 +235,7 @@ async function get(
 	const queryString = queryParams.toString()
 		? `?${queryParams.toString()}`
 		: '';
-	const path = `${API_PATH}/pages/${id}${queryString}`;
+	const path = `${API_PATH}/pages/${pageId}${queryString}`;
 
 	serviceLogger.debug(`Sending request to: ${path}`);
 
@@ -247,7 +247,7 @@ async function get(
 		try {
 			const validatedData = PageDetailedSchema.parse(rawData);
 			serviceLogger.debug(
-				`Successfully validated detailed page data for ID: ${validatedData.id}`,
+				`Successfully validated page details for ID: ${pageId}`,
 			);
 			return validatedData;
 		} catch (validationError) {

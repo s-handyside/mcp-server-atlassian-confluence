@@ -2,7 +2,6 @@ import { Logger } from '../utils/logger.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
 import { createApiError, ensureMcpError } from '../utils/error.util.js';
 import { ControllerResponse } from '../types/common.types.js';
-import { ListPagesOptions } from './atlassian.pages.types.js';
 import {
 	formatPageDetails,
 	formatPagesList,
@@ -23,6 +22,10 @@ import {
 	extractPaginationInfo,
 	PaginationType,
 } from '../utils/pagination.util.js';
+import {
+	ListPagesToolArgsType,
+	GetPageToolArgsType,
+} from '../tools/atlassian.pages.types.js';
 
 /**
  * Controller for managing Confluence pages.
@@ -55,7 +58,7 @@ const CACHE_TTL = 3600000; // 1 hour in milliseconds
  * @throws Error if page listing fails
  */
 async function list(
-	options: ListPagesOptions = {},
+	options: ListPagesToolArgsType = {},
 ): Promise<ControllerResponse> {
 	const methodLogger = Logger.forContext(
 		'controllers/atlassian.pages.controller.ts',
@@ -64,12 +67,12 @@ async function list(
 	methodLogger.debug('Listing Confluence pages with options:', options);
 
 	try {
-		const defaults: Partial<ListPagesOptions> = {
+		const defaults: Partial<ListPagesToolArgsType> = {
 			limit: DEFAULT_PAGE_SIZE,
 			sort: '-modified-date',
 			status: ['current'],
 		};
-		const mergedOptions = applyDefaults<ListPagesOptions>(
+		const mergedOptions = applyDefaults<ListPagesToolArgsType>(
 			options,
 			defaults,
 		);
@@ -118,16 +121,20 @@ async function list(
 						spacesResponse.results &&
 						spacesResponse.results.length > 0
 					) {
-						spacesResponse.results.forEach((space) => {
-							spaceKeyCache[space.key] = {
-								id: space.id,
-								timestamp: currentTime,
-							};
-							currentResolvedIds.push(space.id);
-						});
+						// Explicitly type 'space' parameter
+						spacesResponse.results.forEach(
+							(space: { key: string; id: string }) => {
+								spaceKeyCache[space.key] = {
+									id: space.id,
+									timestamp: currentTime,
+								};
+								currentResolvedIds.push(space.id);
+							},
+						);
 
+						// Explicitly type 'space' parameter
 						const resolvedKeys = spacesResponse.results.map(
-							(space) => space.key,
+							(space: { key: string }) => space.key,
 						);
 						const failedKeys = keysToResolve.filter(
 							(key) => !resolvedKeys.includes(key),
@@ -223,6 +230,8 @@ async function list(
 			pagesData,
 			PaginationType.CURSOR,
 		);
+
+		// Pass the results array directly to the formatter
 		const formattedPages = formatPagesList(pagesData.results);
 
 		return {
@@ -245,7 +254,7 @@ async function list(
  * @returns Promise with formatted page details content
  * @throws Error if page retrieval fails
  */
-async function get(args: { pageId: string }): Promise<ControllerResponse> {
+async function get(args: GetPageToolArgsType): Promise<ControllerResponse> {
 	const { pageId } = args;
 	const methodLogger = Logger.forContext(
 		'controllers/atlassian.pages.controller.ts',
@@ -258,7 +267,7 @@ async function get(args: { pageId: string }): Promise<ControllerResponse> {
 		const params: GetPageByIdParams = {
 			bodyFormat: PAGE_DEFAULTS.BODY_FORMAT as BodyFormat,
 			includeLabels: PAGE_DEFAULTS.INCLUDE_LABELS,
-			includeProperties: PAGE_DEFAULTS.INCLUDE_PROPERTIES,
+			includeOperations: PAGE_DEFAULTS.INCLUDE_PROPERTIES, // Changed to correct parameter
 			includeWebresources: PAGE_DEFAULTS.INCLUDE_WEBRESOURCES,
 			includeCollaborators: PAGE_DEFAULTS.INCLUDE_COLLABORATORS,
 			includeVersion: PAGE_DEFAULTS.INCLUDE_VERSION,
@@ -275,6 +284,7 @@ async function get(args: { pageId: string }): Promise<ControllerResponse> {
 		);
 
 		// Format the page data for display
+		// Pass page data directly to the formatter
 		const formattedPage = formatPageDetails(pageData);
 
 		return {

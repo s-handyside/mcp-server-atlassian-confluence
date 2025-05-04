@@ -1,7 +1,6 @@
 import { Logger } from '../utils/logger.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
 import { ControllerResponse } from '../types/common.types.js';
-import { SearchOptions } from './atlassian.search.types.js';
 import atlassianSearchService from '../services/vendor.atlassian.search.service.js';
 import { formatSearchResults } from './atlassian.search.formatter.js';
 import {
@@ -10,6 +9,7 @@ import {
 } from '../utils/pagination.util.js';
 import { DEFAULT_PAGE_SIZE, applyDefaults } from '../utils/defaults.util.js';
 import { SearchParams } from '../services/vendor.atlassian.search.types.js';
+import { SearchToolArgsType } from '../tools/atlassian.search.types.js';
 
 const controllerLogger = Logger.forContext(
 	'controllers/atlassian.search.controller.ts',
@@ -34,7 +34,7 @@ function escapeCqlValue(value: string): string {
  * @param options SearchOptions containing filters.
  * @returns The constructed CQL string.
  */
-function buildCqlQuery(options: SearchOptions): string {
+function buildCqlQuery(options: SearchToolArgsType): string {
 	const cqlParts: string[] = [];
 
 	if (options.title) {
@@ -74,7 +74,7 @@ function buildCqlQuery(options: SearchOptions): string {
  * @throws Error if search operation fails
  */
 async function search(
-	options: SearchOptions = {},
+	options: SearchToolArgsType = {},
 ): Promise<ControllerResponse> {
 	const methodLogger = Logger.forContext(
 		'controllers/atlassian.search.controller.ts',
@@ -83,10 +83,13 @@ async function search(
 	methodLogger.debug('Searching Confluence with options:', options);
 
 	try {
-		const defaults: Partial<SearchOptions> = {
+		const defaults: Partial<SearchToolArgsType> = {
 			limit: DEFAULT_PAGE_SIZE,
 		};
-		const mergedOptions = applyDefaults<SearchOptions>(options, defaults);
+		const mergedOptions = applyDefaults<SearchToolArgsType>(
+			options,
+			defaults,
+		);
 
 		const finalCql = buildCqlQuery(mergedOptions);
 
@@ -121,6 +124,8 @@ async function search(
 			searchData,
 			PaginationType.CURSOR,
 		);
+
+		// Pass search results directly to the formatter
 		const formattedResults = formatSearchResults(searchData.results);
 
 		return {

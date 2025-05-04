@@ -1,8 +1,7 @@
 import {
-	Page,
-	PageDetailed,
+	PageSchemaType,
+	PageDetailedSchemaType,
 } from '../services/vendor.atlassian.pages.types.js';
-import { Label } from '../services/vendor.atlassian.types.js';
 import { htmlToMarkdown } from '../utils/markdown.util.js';
 import {
 	formatUrl,
@@ -20,7 +19,7 @@ import {
  * @returns Formatted string with pages information in markdown format
  */
 export function formatPagesList(
-	pagesData: Page[],
+	pagesData: PageSchemaType[],
 	baseUrl: string = '',
 ): string {
 	if (!pagesData || pagesData.length === 0) {
@@ -78,7 +77,7 @@ export function formatPagesList(
  * @param pageData - Raw page details from the API
  * @returns Formatted string with page details in markdown format
  */
-export function formatPageDetails(pageData: PageDetailed): string {
+export function formatPageDetails(pageData: PageDetailedSchemaType): string {
 	// Create URL
 	const baseUrl = pageData._links.base || '';
 	const pageUrl = pageData._links.webui || '';
@@ -102,7 +101,7 @@ export function formatPageDetails(pageData: PageDetailed): string {
 		Status: pageData.status,
 		'Created At': pageData.createdAt,
 		'Author ID': pageData.authorId,
-		'Parent ID': pageData.parentId,
+		'Parent ID': pageData.parentId || 'None',
 	};
 
 	lines.push(formatBulletList(basicProperties, (key) => key));
@@ -124,9 +123,11 @@ export function formatPageDetails(pageData: PageDetailed): string {
 
 	if (pageData.labels?.results && pageData.labels.results.length > 0) {
 		const labelLines: string[] = [];
-		pageData.labels.results.forEach((label: Label) => {
-			labelLines.push(`- **${label.name}** (ID: ${label.id})`);
-		});
+		pageData.labels.results.forEach(
+			(label: { id: string; name: string }) => {
+				labelLines.push(`- **${label.name}** (ID: ${label.id})`);
+			},
+		);
 		lines.push(labelLines.join('\n'));
 	} else {
 		lines.push('*No labels assigned to this page*');
