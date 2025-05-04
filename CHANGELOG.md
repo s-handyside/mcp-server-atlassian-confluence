@@ -1,3 +1,20 @@
+# [1.21.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.6...v1.21.0) (2025-05-04)
+
+
+### Bug Fixes
+
+* remove mocks from controller tests and fix transport test assertion ([88147ea](https://github.com/aashari/mcp-server-atlassian-confluence/commit/88147ea306f1b696d8ac45b2f75c577c59ecb225))
+* remove unused import to fix linting error ([b915047](https://github.com/aashari/mcp-server-atlassian-confluence/commit/b9150474b9ee1bdffc7d3e1daf2bf331cd8bf05b))
+* switch to Confluence V1 Search API to resolve generic-content-type error ([b8ce825](https://github.com/aashari/mcp-server-atlassian-confluence/commit/b8ce82501d3a419905f539d3f1b501000d9fad2c))
+
+
+### Features
+
+* add Zod runtime validation to service functions for Phase 3 ([14b918b](https://github.com/aashari/mcp-server-atlassian-confluence/commit/14b918b87c335f670459d0ed1b77e8903d228bb6))
+* define Zod schemas for Confluence API responses for Phase 3 ([c37692f](https://github.com/aashari/mcp-server-atlassian-confluence/commit/c37692fcc95cf57d0ab14d18db0462e8d75238c9))
+* standardize CLI output format with header/context/footer ([f4a68aa](https://github.com/aashari/mcp-server-atlassian-confluence/commit/f4a68aa9f340cb5d4ebef05a1995f024ae7a316a))
+* update CLI files and tools to use inferred Zod types for Phase 1-2 ([95a8ca2](https://github.com/aashari/mcp-server-atlassian-confluence/commit/95a8ca269ef9db962744dae34e6c4b3b9bc08f9f))
+
 ## [1.20.6](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.20.5...v1.20.6) (2025-05-04)
 
 
