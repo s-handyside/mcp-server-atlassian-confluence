@@ -3,6 +3,9 @@
  * These functions should be used by all formatters to ensure consistent formatting.
  */
 
+import { Logger } from './logger.util.js';
+import { ResponsePagination } from '../types/common.types.js';
+
 /**
  * Format a date in a standardized way: YYYY-MM-DD HH:MM:SS UTC
  * @param dateString - ISO date string or Date object
@@ -39,35 +42,43 @@ export function formatHeading(text: string, level: number = 1): string {
 }
 
 /**
- * Format pagination information
- * @param count - The number of items in the current page
- * @param hasMore - Whether there are more items to fetch
- * @param nextCursor - The cursor for the next page (if available)
- * @returns Formatted pagination details
+ * Format pagination information in a standardized way for CLI output.
+ * Includes separator, item counts, availability message, next page instructions, and timestamp.
+ * @param pagination - The ResponsePagination object containing pagination details.
+ * @returns Formatted pagination footer string for CLI.
  */
-export function formatPagination(
-	count: number,
-	hasMore: boolean,
-	nextCursor?: string,
-): string {
-	const lines: string[] = [];
+export function formatPagination(pagination: ResponsePagination): string {
+	const methodLogger = Logger.forContext(
+		'utils/formatter.util.ts',
+		'formatPagination',
+	);
+	const parts: string[] = [formatSeparator()]; // Start with separator
 
-	// Append the count information
-	lines.push(`**Results:** ${count} items`);
+	const { count = 0, hasMore, nextCursor, total } = pagination;
 
-	// Append pagination information if available
-	if (hasMore) {
-		lines.push(
-			'**More results available:** Use the pagination cursor to fetch the next page.',
-		);
-		if (nextCursor) {
-			lines.push(`**Next cursor:** \`${nextCursor}\``);
-		}
-	} else {
-		lines.push('**No more results available.**');
+	// Showing count and potentially total
+	if (total !== undefined && total >= 0) {
+		parts.push(`*Showing ${count} of ${total} total items.*`);
+	} else if (count >= 0) {
+		parts.push(`*Showing ${count} item${count !== 1 ? 's' : ''}.*`);
 	}
 
-	return lines.join('\n');
+	// More results availability
+	if (hasMore) {
+		parts.push('More results are available.');
+	}
+
+	// Prompt for the next action (using cursor string for Confluence)
+	if (hasMore && nextCursor) {
+		parts.push(`*Use --cursor "${nextCursor}" to view more.*`);
+	}
+
+	// Add standard timestamp
+	parts.push(`*Information retrieved at: ${formatDate(new Date())}*`);
+
+	const result = parts.join('\n').trim(); // Join with newline
+	methodLogger.debug(`Formatted pagination footer: ${result}`);
+	return result;
 }
 
 /**

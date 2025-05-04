@@ -229,22 +229,19 @@ async function list(
 		const pagination = extractPaginationInfo(
 			pagesData,
 			PaginationType.CURSOR,
+			'Page',
 		);
 
-		// Pass the results array, baseUrl, and pagination info to the formatter
-		const baseUrl = pagesData._links?.base || ''; // Extract base URL
-		const formattedPages = formatPagesList(
-			pagesData.results,
-			baseUrl,
-			pagination,
-		);
+		// Pass the results array and baseUrl to the formatter (remove pagination arg)
+		const baseUrl = pagesData._links?.base || '';
+		const formattedPages = formatPagesList(pagesData.results, baseUrl);
 
 		return {
 			content: formattedPages,
 			pagination,
 		};
 	} catch (error) {
-		return handleControllerError(error, {
+		throw handleControllerError(error, {
 			entityType: 'Pages',
 			operation: 'listing',
 			source: 'controllers/atlassian.pages.controller.ts@list',
@@ -289,14 +286,13 @@ async function get(args: GetPageToolArgsType): Promise<ControllerResponse> {
 		);
 
 		// Format the page data for display
-		// Pass page data directly to the formatter
 		const formattedPage = formatPageDetails(pageData);
 
 		return {
 			content: formattedPage,
 		};
 	} catch (error) {
-		return handleControllerError(error, {
+		throw handleControllerError(error, {
 			entityType: 'Page',
 			entityId: pageId,
 			operation: 'retrieving',

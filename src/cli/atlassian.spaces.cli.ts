@@ -3,6 +3,7 @@ import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianSpacesController from '../controllers/atlassian.spaces.controller.js';
 import { ListSpacesToolArgsType } from '../tools/atlassian.spaces.types.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * CLI module for managing Confluence spaces.
@@ -121,8 +122,14 @@ function registerListSpacesCommand(program: Command): void {
 
 				actionLogger.debug('Successfully retrieved spaces');
 
-				// Print the main content (now includes footer)
+				// Print the main content (already includes timestamp footer from formatter)
 				console.log(result.content);
+
+				// Conditionally print the standardized pagination footer
+				if (result.pagination) {
+					// Use the updated formatPagination which takes the object
+					console.log('\n' + formatPagination(result.pagination));
+				}
 			} catch (error) {
 				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
@@ -165,7 +172,10 @@ function registerGetSpaceCommand(program: Command): void {
 					spaceKey: options.spaceKey,
 				});
 
+				// Print the main content (already includes timestamp footer from formatter)
 				console.log(result.content);
+
+				// No separate CLI pagination footer needed for 'get' commands
 			} catch (error) {
 				handleCliError(error);
 			}

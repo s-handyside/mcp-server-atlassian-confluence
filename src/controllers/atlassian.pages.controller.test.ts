@@ -470,13 +470,13 @@ describe('Atlassian Pages Controller', () => {
 			expect(result.content).toContain('**Status**:');
 			expect(result.content).toContain('**Created At**:');
 			expect(result.content).toContain('**Author ID**:');
+			expect(result.content).toContain('## Basic Information');
 			expect(result.content).toContain('## Content');
+			expect(result.content).toContain('## Labels');
 			expect(result.content).toContain('## Links');
 			expect(result.content).toContain('**Web UI**:');
-			expect(result.content).toContain('*Page information retrieved at');
-			expect(result.content).toContain(
-				'*To view this page in Confluence, visit:',
-			);
+			expect(result.content).toContain('*Information retrieved at:');
+			expect(result.content).toContain('*View this page in Confluence: ');
 		}, 15000);
 
 		it('should include content body in the page details', async () => {

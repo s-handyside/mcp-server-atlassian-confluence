@@ -16,7 +16,7 @@ import {
  * Returns a formatted markdown response with page details and pagination info.
  *
  * @param {ListPagesToolArgsType} args - Tool arguments for filtering pages
- * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted pages list
+ * @returns {Promise<{ content: Array<{ type: 'text', text: string }>, metadata: { pagination: { count: number; hasMore: boolean } } }>} MCP response with formatted pages list
  * @throws Will return error message if page listing fails
  */
 async function listPages(args: ListPagesToolArgsType) {
@@ -32,20 +32,23 @@ async function listPages(args: ListPagesToolArgsType) {
 		// With updated controller signature, we can pass the tool args directly
 		const result = await atlassianPagesController.list(args);
 
-		methodLogger.debug('Successfully retrieved pages list');
+		methodLogger.debug('Successfully retrieved pages list', {
+			count: result.pagination?.count,
+			hasMore: result.pagination?.hasMore,
+		});
 
-		const response = {
+		return {
 			content: [
 				{
 					type: 'text' as const,
 					text: result.content,
 				},
 			],
-			...(result.pagination && { pagination: result.pagination }),
-			...(result.metadata && { metadata: result.metadata }),
+			metadata: {
+				...(result.metadata || {}),
+				pagination: result.pagination,
+			},
 		};
-
-		return response;
 	} catch (error) {
 		methodLogger.error('Error listing pages:', error);
 		return formatErrorForMcpTool(error);

@@ -123,13 +123,11 @@ async function search(
 		const pagination = extractPaginationInfo(
 			searchData,
 			PaginationType.CURSOR,
+			'Search',
 		);
 
-		// Pass search results and pagination info to formatter
-		const formattedResults = formatSearchResults(
-			searchData.results,
-			pagination,
-		);
+		// Pass search results to formatter (remove pagination arg)
+		const formattedResults = formatSearchResults(searchData.results);
 
 		return {
 			content: formattedResults,
@@ -137,7 +135,7 @@ async function search(
 			metadata: { executedCql: finalCql },
 		};
 	} catch (error) {
-		return handleControllerError(error, {
+		throw handleControllerError(error, {
 			entityType: 'Search Results',
 			operation: 'searching',
 			source: 'controllers/atlassian.search.controller.ts@search',

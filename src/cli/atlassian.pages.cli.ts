@@ -3,6 +3,7 @@ import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
 import { ListPagesToolArgsType } from '../tools/atlassian.pages.types.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * CLI module for managing Confluence pages.
@@ -101,12 +102,14 @@ function registerListPagesCommand(program: Command): void {
 
 				actionLogger.debug('Successfully retrieved pages');
 
-				// Print the main content (now includes footer)
+				// Print the main content (already includes timestamp footer from formatter)
 				console.log(result.content);
 
-				// REMOVED warnings logic (can be integrated into formatter if needed)
-
-				// REMOVED pagination formatting logic
+				// Conditionally print the standardized pagination footer
+				if (result.pagination) {
+					// Use the updated formatPagination which takes the object
+					console.log('\n' + formatPagination(result.pagination));
+				}
 			} catch (error) {
 				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
@@ -147,7 +150,10 @@ function registerGetPageCommand(program: Command): void {
 					pageId: options.pageId,
 				});
 
+				// Print the main content (already includes timestamp footer from formatter)
 				console.log(result.content);
+
+				// No separate CLI pagination footer needed for 'get' commands
 			} catch (error) {
 				handleCliError(error);
 			}

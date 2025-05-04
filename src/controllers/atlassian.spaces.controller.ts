@@ -6,10 +6,7 @@ import {
 	formatSpacesList,
 	formatSpaceDetails,
 } from '../controllers/atlassian.spaces.formatter.js';
-import {
-	ControllerResponse,
-	ResponsePagination,
-} from '../types/common.types.js';
+import { ControllerResponse } from '../types/common.types.js';
 import atlassianPagesController from './atlassian.pages.controller.js';
 import {
 	DEFAULT_PAGE_SIZE,
@@ -25,6 +22,10 @@ import {
 	GetSpaceToolArgsType,
 	ListSpacesOptions,
 } from '../tools/atlassian.spaces.types.js';
+import {
+	extractPaginationInfo,
+	PaginationType,
+} from '../utils/pagination.util.js';
 
 /**
  * Controller for managing Confluence spaces.
@@ -85,31 +86,28 @@ async function list(
 
 		const spacesData = await atlassianSpacesService.list(params);
 
-		// Log only summary information instead of the entire response
+		// Log only summary information
 		controllerLogger.debug(
 			`Retrieved ${spacesData.results.length} spaces. Has more: ${spacesData._links?.next ? 'yes' : 'no'}`,
 		);
 
-		// The formatSpacesList function expects a spacesData parameter and pagination info
-		// Extract the nextCursor from the links
-		const nextCursor = spacesData._links?.next?.split('cursor=')[1] || '';
-		const currentPagination: ResponsePagination = {
-			count: spacesData.results.length,
-			hasMore: !!spacesData._links?.next,
-			nextCursor: nextCursor,
-			// total is not available from this endpoint
-		};
+		// Extract pagination info using the utility
+		const pagination = extractPaginationInfo(
+			spacesData,
+			PaginationType.CURSOR,
+			'Space',
+		);
 
-		// Format the spaces data directly using the Zod-inferred type
-		const formattedSpaces = formatSpacesList(spacesData, currentPagination);
+		// Format the spaces data using the formatter (remove pagination arg)
+		const formattedSpaces = formatSpacesList(spacesData);
 
 		return {
 			content: formattedSpaces,
-			pagination: currentPagination, // Return the constructed pagination object
+			pagination, // Return the extracted pagination object
 		};
 	} catch (error) {
 		// Use the standardized error handler
-		return handleControllerError(error, {
+		throw handleControllerError(error, {
 			entityType: 'Spaces',
 			operation: 'listing',
 			source: 'controllers/atlassian.spaces.controller.ts@list',
@@ -227,15 +225,15 @@ async function get(args: GetSpaceToolArgsType): Promise<ControllerResponse> {
 		}
 
 		// Format the space data for display with homepage content using the formatter
-		// Pass the Zod-validated space data directly to the formatter
 		const formattedSpace = formatSpaceDetails(spaceData, homepageContent);
 
 		return {
 			content: formattedSpace,
+			// No pagination needed for get
 		};
 	} catch (error) {
 		// Use the standardized error handler
-		return handleControllerError(error, {
+		throw handleControllerError(error, {
 			entityType: 'Space',
 			entityId: spaceKey,
 			operation: 'retrieving',

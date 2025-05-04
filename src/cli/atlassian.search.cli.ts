@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
-import { formatHeading } from '../utils/formatter.util.js';
+import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 import { SearchToolArgsType } from '../tools/atlassian.search.types.js';
 
 /**
@@ -126,8 +126,14 @@ function registerSearchCommand(program: Command): void {
 					console.log('`' + result.metadata.executedCql + '`\n');
 				}
 
-				console.log(formatHeading('Search Results', 2));
+				// Print the main content (already includes timestamp footer from formatter)
 				console.log(result.content);
+
+				// Conditionally print the standardized pagination footer
+				if (result.pagination) {
+					// Use the updated formatPagination which takes the object
+					console.log('\n' + formatPagination(result.pagination));
+				}
 			} catch (error) {
 				actionLogger.error('Operation failed:', error);
 				handleCliError(error);

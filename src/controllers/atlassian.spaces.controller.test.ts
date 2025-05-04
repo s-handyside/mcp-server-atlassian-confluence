@@ -2,6 +2,7 @@ import atlassianSpacesController from './atlassian.spaces.controller.js';
 import { getAtlassianCredentials } from '../utils/transport.util.js';
 import { config } from '../utils/config.util.js';
 import { McpError } from '../utils/error.util.js';
+import { formatSeparator, formatDate } from '../utils/formatter.util.js';
 
 describe('Atlassian Spaces Controller', () => {
 	// Load configuration and check for credentials before all tests
@@ -172,17 +173,16 @@ describe('Atlassian Spaces Controller', () => {
 				keys: [nonExistentKey],
 			});
 
-			// Check specific empty result message
+			// Check specific empty result message including the standard footer
 			expect(result.content).toBe(
-				'No Confluence spaces found matching your criteria.',
+				'No Confluence spaces found matching your criteria.\n\n' +
+					formatSeparator() +
+					'\n' +
+					`*Information retrieved at: ${formatDate(new Date())}*`,
 			);
 			// Verify pagination properties for empty result
 			expect(result.pagination).toHaveProperty('count', 0);
 			expect(result.pagination).toHaveProperty('hasMore', false);
-			expect(result.pagination?.nextCursor).toBe('');
-			console.log(
-				'Empty result test: Successfully verified empty result scenario.',
-			);
 		}, 30000);
 
 		it('should handle combined filtering criteria', async () => {

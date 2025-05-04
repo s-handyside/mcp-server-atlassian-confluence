@@ -3,21 +3,24 @@ import {
 	formatHeading,
 	formatBulletList,
 	formatNumberedList,
+	formatSeparator,
+	formatDate,
 } from '../utils/formatter.util.js';
-import { ResponsePagination } from '../types/common.types.js';
 
 /**
  * Format search results for display
  * @param searchData - Raw search results from the API
- * @param pagination - Pagination info for footer hints
  * @returns Formatted string with search results in markdown format
  */
-export function formatSearchResults(
-	searchData: SearchResultType[],
-	pagination?: ResponsePagination,
-): string {
+export function formatSearchResults(searchData: SearchResultType[]): string {
 	if (searchData.length === 0) {
-		return 'No Confluence content found matching your query.';
+		return (
+			'No Confluence content found matching your query.' +
+			'\n\n' +
+			formatSeparator() +
+			'\n' +
+			`*Information retrieved at: ${formatDate(new Date())}*`
+		);
 	}
 
 	const lines: string[] = [formatHeading('Confluence Search Results', 1), ''];
@@ -78,7 +81,12 @@ export function formatSearchResults(
 			result.friendlyLastModified;
 
 		if (modified) {
-			properties['Modified'] = modified;
+			// Attempt to format date, fallback to original string
+			try {
+				properties['Modified'] = formatDate(new Date(modified));
+			} catch {
+				properties['Modified'] = modified; // Fallback if parsing fails
+			}
 		}
 
 		// Create the formatted output
@@ -90,31 +98,9 @@ export function formatSearchResults(
 
 	lines.push(formattedList);
 
-	// --- Footer ---
-	const footerLines: string[] = [];
-	footerLines.push('---');
-
-	const displayedCount = pagination?.count ?? searchData.length;
-	// Confluence cursor pagination doesn't easily provide total count
-
-	if (pagination?.hasMore) {
-		footerLines.push(
-			`*Showing ${displayedCount} results. More results are available.*`,
-		);
-		if (pagination.nextCursor) {
-			footerLines.push(
-				`*Use --cursor "${pagination.nextCursor}" to view more.*`,
-			);
-		}
-	} else {
-		footerLines.push(`*Showing ${displayedCount} results.*`);
-	}
-
-	footerLines.push(
-		`*Information retrieved at: ${new Date().toLocaleString()}*`,
-	);
-
-	lines.push(...footerLines);
+	// Add standard footer with timestamp
+	lines.push('\n\n' + formatSeparator());
+	lines.push(`*Information retrieved at: ${formatDate(new Date())}*`);
 
 	return lines.join('\n');
 }

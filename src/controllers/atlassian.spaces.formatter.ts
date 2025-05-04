@@ -11,20 +11,23 @@ import {
 	formatSeparator,
 	formatNumberedList,
 } from '../utils/formatter.util.js';
-import { ResponsePagination } from '../types/common.types.js';
 
 /**
  * Format a list of spaces for display
  * @param spacesData - Raw spaces data from the API
- * @param pagination - Pagination info for footer hints
  * @returns Formatted string with spaces information in markdown format
  */
 export function formatSpacesList(
 	spacesData: z.infer<typeof SpacesResponseSchema>,
-	pagination: ResponsePagination,
 ): string {
 	if (!spacesData.results || spacesData.results.length === 0) {
-		return 'No Confluence spaces found matching your criteria.';
+		return (
+			'No Confluence spaces found matching your criteria.' +
+			'\n\n' +
+			formatSeparator() +
+			'\n' +
+			`*Information retrieved at: ${formatDate(new Date())}*`
+		);
 	}
 
 	const lines: string[] = [formatHeading('Confluence Spaces', 1), ''];
@@ -47,13 +50,12 @@ export function formatSpacesList(
 				Type: typedSpace.type,
 				Status: typedSpace.status,
 				Created: typedSpace.createdAt
-					? new Date(typedSpace.createdAt).toLocaleString()
-					: 'Not available',
+					? formatDate(typedSpace.createdAt)
+					: 'N/A',
 				'Homepage ID': typedSpace.homepageId || 'Not set',
 				Description:
 					typedSpace.description?.view?.value || 'Not available',
 				URL: formatUrl(
-					// Handle potentially missing base link
 					spacesData._links?.base
 						? `${spacesData._links.base}/spaces/${typedSpace.key}`
 						: `/spaces/${typedSpace.key}`,
@@ -74,30 +76,9 @@ export function formatSpacesList(
 
 	lines.push(formattedList);
 
-	// --- Footer ---
-	const footerLines: string[] = [];
-	footerLines.push('--');
-
-	const displayedCount = pagination.count ?? spacesData.results.length;
-
-	if (pagination.hasMore) {
-		footerLines.push(
-			`*Showing ${displayedCount} spaces. More results are available.*`,
-		);
-		if (pagination.nextCursor) {
-			footerLines.push(
-				`*Use --cursor "${pagination.nextCursor}" to view more.*`,
-			);
-		}
-	} else {
-		footerLines.push(`*Showing ${displayedCount} spaces.*`);
-	}
-
-	footerLines.push(
-		`*Information retrieved at: ${new Date().toLocaleString()}*`,
-	);
-
-	lines.push(...footerLines);
+	// Add standard footer with timestamp
+	lines.push('\n\n' + formatSeparator());
+	lines.push(`*Information retrieved at: ${formatDate(new Date())}*`);
 
 	return lines.join('\n');
 }
@@ -133,7 +114,7 @@ export function formatSpaceDetails(
 		Key: spaceData.key,
 		Type: spaceData.type,
 		Status: spaceData.status,
-		'Created At': spaceData.createdAt,
+		'Created At': formatDate(spaceData.createdAt),
 		'Author ID': spaceData.authorId,
 		'Homepage ID': spaceData.homepageId,
 		'Current Alias': spaceData.currentActiveAlias,
@@ -211,19 +192,22 @@ export function formatSpaceDetails(
 	links.push(`- ${formatUrl(fullUrl, 'Open in Confluence')}`);
 
 	if (spaceData.homepageId) {
-		const homepageUrl = `${baseUrl}/wiki/spaces/${spaceData.key}/overview`;
-		links.push(`- ${formatUrl(homepageUrl, 'View Homepage')}`);
+		// Construct homepage URL carefully using base and ID
+		const homepagePath = `/wiki/spaces/${spaceData.key}/pages/${spaceData.homepageId}`;
+		const fullHomepageUrl = `${baseUrl}${homepagePath}`;
+		links.push(`- ${formatUrl(fullHomepageUrl, 'View Homepage')}`);
 	}
 
 	lines.push(links.join('\n'));
 
-	// Footer
-	lines.push('');
-	lines.push(formatSeparator());
-	lines.push(
-		`*Space information retrieved at ${new Date().toLocaleString()}*`,
-	);
-	lines.push(`*To view this space in Confluence, visit: ${fullUrl}*`);
+	// Add standard footer with timestamp
+	lines.push('\n\n' + formatSeparator());
+	lines.push(`*Information retrieved at: ${formatDate(new Date())}*`);
+
+	// Optionally keep the direct link
+	if (fullUrl) {
+		lines.push(`*View this space in Confluence: ${fullUrl}*`);
+	}
 
 	return lines.join('\n');
 }

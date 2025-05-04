@@ -17,7 +17,7 @@ import atlassianSpacesController from '../controllers/atlassian.spaces.controlle
  * Returns a formatted markdown response with space details and pagination info.
  *
  * @param {ListSpacesToolArgsType} args - Tool arguments for filtering spaces
- * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted spaces list
+ * @returns {Promise<{ content: Array<{ type: 'text', text: string }>, metadata: { pagination: { count: number, hasMore: boolean } } }>} MCP response with formatted spaces list
  * @throws Will return error message if space listing fails
  */
 async function listSpaces(args: ListSpacesToolArgsType) {
@@ -29,25 +29,28 @@ async function listSpaces(args: ListSpacesToolArgsType) {
 
 	try {
 		// Pass the filter options to the controller
-		const message = await atlassianSpacesController.list({
+		const result = await atlassianSpacesController.list({
 			type: args.type === 'archived' ? 'global' : args.type,
 			status: args.status,
 			limit: args.limit,
 			cursor: args.cursor,
 		});
 
-		toolLogger.debug(
-			'Successfully retrieved spaces from controller',
-			message,
-		);
+		toolLogger.debug('Successfully retrieved spaces from controller', {
+			count: result.pagination?.count,
+			hasMore: result.pagination?.hasMore,
+		});
 
 		return {
 			content: [
 				{
 					type: 'text' as const,
-					text: message.content,
+					text: result.content,
 				},
 			],
+			metadata: {
+				pagination: result.pagination,
+			},
 		};
 	} catch (error) {
 		toolLogger.error('Failed to list spaces', error);
@@ -62,7 +65,7 @@ async function listSpaces(args: ListSpacesToolArgsType) {
  * Returns a formatted markdown response with space metadata.
  *
  * @param {GetSpaceToolArgsType} args - Tool arguments containing the space key or ID
- * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted space details
+ * @returns {Promise<{ content: Array<{ type: 'text', text: string }>, metadata: { pagination: { count: number, hasMore: boolean } } }>} MCP response with formatted space details
  * @throws Will return error message if space retrieval fails
  */
 async function getSpace(args: GetSpaceToolArgsType) {
@@ -88,6 +91,9 @@ async function getSpace(args: GetSpaceToolArgsType) {
 					text: result.content,
 				},
 			],
+			metadata: {
+				pagination: result.pagination,
+			},
 		};
 	} catch (error) {
 		methodLogger.error('Error retrieving space details:', error);
