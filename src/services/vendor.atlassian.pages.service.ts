@@ -1,15 +1,18 @@
-import { createAuthMissingError } from '../utils/error.util.js';
+import { createApiError, createAuthMissingError } from '../utils/error.util.js';
 import { Logger } from '../utils/logger.util.js';
 import {
 	fetchAtlassian,
 	getAtlassianCredentials,
 } from '../utils/transport.util.js';
 import {
-	PageDetailed,
-	PagesResponse,
+	PageDetailedSchema,
+	PageDetailedSchemaType,
+	PagesResponseSchema,
+	PagesResponseType,
 	ListPagesParams,
 	GetPageByIdParams,
 } from './vendor.atlassian.pages.types.js';
+import { z } from 'zod';
 
 /**
  * Base API path for Confluence REST API v2
@@ -33,17 +36,8 @@ const API_PATH = '/wiki/api/v2';
  *
  * @async
  * @memberof VendorAtlassianPagesService
- * @param {ListPagesParams} [params={}] - Optional parameters for customizing the request
- * @param {string[]} [params.id] - Filter by page IDs
- * @param {string[]} [params.spaceId] - Filter by space IDs
- * @param {string} [params.parentId] - Filter by parent page ID
- * @param {string} [params.sort] - Sort order for results
- * @param {string[]} [params.status] - Filter by page status
- * @param {string} [params.title] - Filter by page title
- * @param {string} [params.bodyFormat] - Format for page body content
- * @param {string} [params.cursor] - Pagination cursor
- * @param {number} [params.limit] - Maximum number of results to return
- * @returns {Promise<PagesResponse>} Promise containing the pages response with results and pagination info
+ * @param {ListPagesParams} params - Optional parameters to customize the request
+ * @returns {Promise<PagesResponseType>} Promise containing the pages response with results and pagination info
  * @throws {Error} If Atlassian credentials are missing or API request fails
  * @example
  * // List pages from a specific space
@@ -53,7 +47,7 @@ const API_PATH = '/wiki/api/v2';
  *   limit: 25
  * });
  */
-async function list(params: ListPagesParams = {}): Promise<PagesResponse> {
+async function list(params: ListPagesParams = {}): Promise<PagesResponseType> {
 	const serviceLogger = Logger.forContext(
 		'services/vendor.atlassian.pages.service.ts',
 		'list',
@@ -70,33 +64,28 @@ async function list(params: ListPagesParams = {}): Promise<PagesResponse> {
 	// Build query parameters
 	const queryParams = new URLSearchParams();
 
-	// Page identifiers
-	if (params.id?.length) {
-		queryParams.set('id', params.id.join(','));
-	}
+	// Content filters
 	if (params.spaceId?.length) {
-		params.spaceId.forEach((id) => {
-			queryParams.append('space-id', id);
-		});
-	}
-	if (params.parentId) {
-		queryParams.set('parent-id', params.parentId);
-	}
-
-	// Filtering and sorting
-	if (params.sort) {
-		queryParams.set('sort', params.sort);
-	}
-	if (params.status?.length) {
-		queryParams.set('status', params.status.join(','));
+		queryParams.set('space-id', params.spaceId.join(','));
 	}
 	if (params.title) {
 		queryParams.set('title', params.title);
 	}
+	if (params.status?.length) {
+		queryParams.set('status', params.status.join(','));
+	}
+	if (params.query) {
+		queryParams.set('query', params.query);
+	}
 
-	// Content format
+	// Content format options
 	if (params.bodyFormat) {
 		queryParams.set('body-format', params.bodyFormat);
+	}
+
+	// Sort order
+	if (params.sort) {
+		queryParams.set('sort', params.sort);
 	}
 
 	// Pagination
@@ -112,8 +101,38 @@ async function list(params: ListPagesParams = {}): Promise<PagesResponse> {
 		: '';
 	const path = `${API_PATH}/pages${queryString}`;
 
-	serviceLogger.debug('Sending request to:', path);
-	return fetchAtlassian<PagesResponse>(credentials, path);
+	serviceLogger.debug(`Sending request to: ${path}`);
+
+	try {
+		// Get the raw response data from the API
+		const rawData = await fetchAtlassian<unknown>(credentials, path);
+
+		// Validate the response data using the Zod schema
+		try {
+			const validatedData = PagesResponseSchema.parse(rawData);
+			serviceLogger.debug(
+				`Successfully validated response data for ${validatedData.results.length} pages`,
+			);
+			return validatedData;
+		} catch (validationError) {
+			if (validationError instanceof z.ZodError) {
+				serviceLogger.error(
+					'API response validation failed:',
+					validationError.format(),
+				);
+				throw createApiError(
+					`API response validation failed: ${validationError.message}`,
+					500,
+					validationError,
+				);
+			}
+			// Re-throw other errors
+			throw validationError;
+		}
+	} catch (error) {
+		serviceLogger.error('Error fetching pages:', error);
+		throw error; // Rethrow to be handled by the error handler util
+	}
 }
 
 /**
@@ -125,21 +144,8 @@ async function list(params: ListPagesParams = {}): Promise<PagesResponse> {
  * @async
  * @memberof VendorAtlassianPagesService
  * @param {string} id - The ID of the page to retrieve
- * @param {GetPageByIdParams} [params={}] - Optional parameters for customizing the response
- * @param {string} [params.bodyFormat] - Format for page body content
- * @param {boolean} [params.getDraft] - Whether to retrieve draft version
- * @param {string[]} [params.status] - Filter by page status
- * @param {number} [params.version] - Specific version to retrieve
- * @param {boolean} [params.includeLabels] - Include page labels
- * @param {boolean} [params.includeProperties] - Include page properties
- * @param {boolean} [params.includeOperations] - Include available operations
- * @param {boolean} [params.includeLikes] - Include like information
- * @param {boolean} [params.includeVersions] - Include version history
- * @param {boolean} [params.includeVersion] - Include version details
- * @param {boolean} [params.includeFavoritedByCurrentUserStatus] - Include favorite status
- * @param {boolean} [params.includeWebresources] - Include web resources
- * @param {boolean} [params.includeCollaborators] - Include collaborator information
- * @returns {Promise<PageDetailed>} Promise containing the detailed page information
+ * @param {GetPageByIdParams} params - Optional parameters to customize the response
+ * @returns {Promise<PageDetailedSchemaType>} Promise containing the detailed page information
  * @throws {Error} If Atlassian credentials are missing or API request fails
  * @example
  * // Get page details with labels and versions
@@ -152,12 +158,15 @@ async function list(params: ListPagesParams = {}): Promise<PagesResponse> {
 async function get(
 	id: string,
 	params: GetPageByIdParams = {},
-): Promise<PageDetailed> {
+): Promise<PageDetailedSchemaType> {
 	const serviceLogger = Logger.forContext(
 		'services/vendor.atlassian.pages.service.ts',
 		'get',
 	);
-	serviceLogger.debug('Getting Confluence page with ID:', id);
+	serviceLogger.debug(
+		`Getting Confluence page with ID: ${id}, params:`,
+		params,
+	);
 
 	const credentials = getAtlassianCredentials();
 	if (!credentials) {
@@ -173,51 +182,29 @@ async function get(
 	if (params.bodyFormat) {
 		queryParams.set('body-format', params.bodyFormat);
 	}
+
+	// Version
+	if (params.version) {
+		queryParams.set('version', params.version.toString());
+	}
 	if (params.getDraft !== undefined) {
 		queryParams.set('get-draft', params.getDraft.toString());
 	}
-	if (params.status?.length) {
-		queryParams.set('status', params.status.join(','));
-	}
-	if (params.version !== undefined) {
-		queryParams.set('version', params.version.toString());
-	}
 
 	// Include flags
-	if (params.includeLabels !== undefined) {
-		queryParams.set('include-labels', params.includeLabels.toString());
-	}
-	if (params.includeProperties !== undefined) {
+	if (params.includeAncestors !== undefined) {
 		queryParams.set(
-			'include-properties',
-			params.includeProperties.toString(),
+			'include-ancestors',
+			params.includeAncestors.toString(),
 		);
 	}
-	if (params.includeOperations !== undefined) {
+	if (params.includeBody !== undefined) {
+		queryParams.set('include-body', params.includeBody.toString());
+	}
+	if (params.includeChildTypes !== undefined) {
 		queryParams.set(
-			'include-operations',
-			params.includeOperations.toString(),
-		);
-	}
-	if (params.includeLikes !== undefined) {
-		queryParams.set('include-likes', params.includeLikes.toString());
-	}
-	if (params.includeVersions !== undefined) {
-		queryParams.set('include-versions', params.includeVersions.toString());
-	}
-	if (params.includeVersion !== undefined) {
-		queryParams.set('include-version', params.includeVersion.toString());
-	}
-	if (params.includeFavoritedByCurrentUserStatus !== undefined) {
-		queryParams.set(
-			'include-favorited-by-current-user-status',
-			params.includeFavoritedByCurrentUserStatus.toString(),
-		);
-	}
-	if (params.includeWebresources !== undefined) {
-		queryParams.set(
-			'include-webresources',
-			params.includeWebresources.toString(),
+			'include-child-types',
+			params.includeChildTypes.toString(),
 		);
 	}
 	if (params.includeCollaborators !== undefined) {
@@ -226,14 +213,62 @@ async function get(
 			params.includeCollaborators.toString(),
 		);
 	}
+	if (params.includeLabels !== undefined) {
+		queryParams.set('include-labels', params.includeLabels.toString());
+	}
+	if (params.includeOperations !== undefined) {
+		queryParams.set(
+			'include-operations',
+			params.includeOperations.toString(),
+		);
+	}
+	if (params.includeVersion !== undefined) {
+		queryParams.set('include-version', params.includeVersion.toString());
+	}
+	if (params.includeWebresources !== undefined) {
+		queryParams.set(
+			'include-webresources',
+			params.includeWebresources.toString(),
+		);
+	}
 
 	const queryString = queryParams.toString()
 		? `?${queryParams.toString()}`
 		: '';
 	const path = `${API_PATH}/pages/${id}${queryString}`;
 
-	serviceLogger.debug('Sending request to:', path);
-	return fetchAtlassian<PageDetailed>(credentials, path);
+	serviceLogger.debug(`Sending request to: ${path}`);
+
+	try {
+		// Get the raw response data from the API
+		const rawData = await fetchAtlassian<unknown>(credentials, path);
+
+		// Validate the response data using the Zod schema
+		try {
+			const validatedData = PageDetailedSchema.parse(rawData);
+			serviceLogger.debug(
+				`Successfully validated detailed page data for ID: ${validatedData.id}`,
+			);
+			return validatedData;
+		} catch (validationError) {
+			if (validationError instanceof z.ZodError) {
+				serviceLogger.error(
+					'API response validation failed:',
+					validationError.format(),
+				);
+				throw createApiError(
+					`API response validation failed: ${validationError.message}`,
+					500,
+					validationError,
+				);
+			}
+			// Re-throw other errors
+			throw validationError;
+		}
+	} catch (error) {
+		serviceLogger.error('Error fetching page details:', error);
+		throw error; // Rethrow to be handled by the error handler util
+	}
 }
 
 export default { list, get };

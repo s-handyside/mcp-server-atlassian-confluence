@@ -1,4 +1,4 @@
-import { createAuthMissingError } from '../utils/error.util.js';
+import { createApiError, createAuthMissingError } from '../utils/error.util.js';
 import { Logger } from '../utils/logger.util.js';
 import {
 	fetchAtlassian,
@@ -6,17 +6,26 @@ import {
 } from '../utils/transport.util.js';
 import {
 	SearchParams,
-	SearchResponse,
+	SearchResponseSchema,
+	SearchResponseType,
 } from './vendor.atlassian.search.types.js';
+import { z } from 'zod';
 
-const API_PATH = '/wiki/rest/api/search';
+/**
+ * Base API path for Confluence REST API v2
+ * @see https://developer.atlassian.com/cloud/confluence/rest/v2/intro/
+ * @constant {string}
+ */
+const API_PATH = '/wiki/api/v2';
 
 /**
  * Search Confluence content using CQL
- * @param params Search parameters
- * @returns Search results
+ *
+ * @param {SearchParams} params - Parameters for the search query
+ * @returns {Promise<SearchResponseType>} Promise containing the search results
+ * @throws {Error} If Atlassian credentials are missing or API request fails
  */
-async function search(params: SearchParams): Promise<SearchResponse> {
+async function search(params: SearchParams): Promise<SearchResponseType> {
 	const serviceLogger = Logger.forContext(
 		'services/vendor.atlassian.search.service.ts',
 		'search',
@@ -30,30 +39,74 @@ async function search(params: SearchParams): Promise<SearchResponse> {
 		);
 	}
 
-	const queryParams = new URLSearchParams({ cql: params.cql });
+	// Build query parameters
+	const queryParams = new URLSearchParams();
 
-	if (params.cqlcontext) queryParams.set('cqlcontext', params.cqlcontext);
-	if (params.cursor) queryParams.set('cursor', params.cursor);
-	if (params.limit !== undefined)
+	// Required CQL query
+	queryParams.set('cql', params.cql);
+
+	// Pagination
+	if (params.cursor) {
+		queryParams.set('cursor', params.cursor);
+	}
+	if (params.limit) {
 		queryParams.set('limit', params.limit.toString());
-	if (params.start !== undefined)
-		queryParams.set('start', params.start.toString());
-	if (params.includeArchivedSpaces !== undefined)
+	}
+
+	// Additional options
+	if (params.excerpt) {
+		queryParams.set('excerpt', params.excerpt);
+	}
+	if (params.includeTotalSize !== undefined) {
 		queryParams.set(
-			'includeArchivedSpaces',
+			'include-total-size',
+			params.includeTotalSize.toString(),
+		);
+	}
+	if (params.includeArchivedSpaces !== undefined) {
+		queryParams.set(
+			'include-archived-spaces',
 			params.includeArchivedSpaces.toString(),
 		);
-	if (params.excludeCurrentSpaces !== undefined)
-		queryParams.set(
-			'excludeCurrentSpaces',
-			params.excludeCurrentSpaces.toString(),
-		);
-	if (params.excerpt) queryParams.set('excerpt', params.excerpt);
+	}
 
-	const path = `${API_PATH}?${queryParams.toString()}`;
+	const queryString = queryParams.toString()
+		? `?${queryParams.toString()}`
+		: '';
+	const path = `${API_PATH}/search${queryString}`;
 
-	serviceLogger.debug('Sending request to:', path);
-	return fetchAtlassian<SearchResponse>(credentials, path);
+	serviceLogger.debug(`Sending request to: ${path}`);
+
+	try {
+		// Get the raw response data from the API
+		const rawData = await fetchAtlassian<unknown>(credentials, path);
+
+		// Validate the response data using the Zod schema
+		try {
+			const validatedData = SearchResponseSchema.parse(rawData);
+			serviceLogger.debug(
+				`Successfully validated search results for ${validatedData.results.length} items`,
+			);
+			return validatedData;
+		} catch (validationError) {
+			if (validationError instanceof z.ZodError) {
+				serviceLogger.error(
+					'API response validation failed:',
+					validationError.format(),
+				);
+				throw createApiError(
+					`API response validation failed: ${validationError.message}`,
+					500,
+					validationError,
+				);
+			}
+			// Re-throw other errors
+			throw validationError;
+		}
+	} catch (error) {
+		serviceLogger.error('Error searching content:', error);
+		throw error; // Rethrow to be handled by the error handler util
+	}
 }
 
 export default { search };

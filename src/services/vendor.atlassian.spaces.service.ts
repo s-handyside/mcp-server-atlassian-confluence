@@ -1,15 +1,18 @@
-import { createAuthMissingError } from '../utils/error.util.js';
+import { createApiError, createAuthMissingError } from '../utils/error.util.js';
 import { Logger } from '../utils/logger.util.js';
 import {
 	fetchAtlassian,
 	getAtlassianCredentials,
 } from '../utils/transport.util.js';
 import {
-	SpaceDetailed,
-	SpacesResponse,
 	ListSpacesParams,
 	GetSpaceByIdParams,
+	SpacesResponseSchema,
+	SpacesResponseType,
+	SpaceDetailedSchema,
+	SpaceDetailedSchemaType,
 } from './vendor.atlassian.spaces.types.js';
+import { z } from 'zod';
 
 /**
  * Base API path for Confluence REST API v2
@@ -46,7 +49,7 @@ const API_PATH = '/wiki/api/v2';
  * @param {boolean} [params.includeIcon] - Include space icon
  * @param {string} [params.cursor] - Pagination cursor
  * @param {number} [params.limit] - Maximum number of results to return
- * @returns {Promise<SpacesResponse>} Promise containing the spaces response with results and pagination info
+ * @returns {Promise<SpacesResponseType>} Promise containing the spaces response with results and pagination info
  * @throws {Error} If Atlassian credentials are missing or API request fails
  * @example
  * // List global spaces with icon
@@ -57,7 +60,9 @@ const API_PATH = '/wiki/api/v2';
  *   limit: 25
  * });
  */
-async function list(params: ListSpacesParams = {}): Promise<SpacesResponse> {
+async function list(
+	params: ListSpacesParams = {},
+): Promise<SpacesResponseType> {
 	const serviceLogger = Logger.forContext(
 		'services/vendor.atlassian.spaces.service.ts',
 		'list',
@@ -126,7 +131,37 @@ async function list(params: ListSpacesParams = {}): Promise<SpacesResponse> {
 	const path = `${API_PATH}/spaces${queryString}`;
 
 	serviceLogger.debug(`Sending request to: ${path}`);
-	return fetchAtlassian<SpacesResponse>(credentials, path);
+
+	try {
+		// Get the raw response data from the API
+		const rawData = await fetchAtlassian<unknown>(credentials, path);
+
+		// Validate the response data using the Zod schema
+		try {
+			const validatedData = SpacesResponseSchema.parse(rawData);
+			serviceLogger.debug(
+				`Successfully validated response data for ${validatedData.results.length} spaces`,
+			);
+			return validatedData;
+		} catch (validationError) {
+			if (validationError instanceof z.ZodError) {
+				serviceLogger.error(
+					'API response validation failed:',
+					validationError.format(),
+				);
+				throw createApiError(
+					`API response validation failed: ${validationError.message}`,
+					500,
+					validationError,
+				);
+			}
+			// Re-throw other errors
+			throw validationError;
+		}
+	} catch (error) {
+		serviceLogger.error('Error fetching spaces:', error);
+		throw error; // Rethrow to be handled by the error handler util
+	}
 }
 
 /**
@@ -146,7 +181,7 @@ async function list(params: ListSpacesParams = {}): Promise<SpacesResponse> {
  * @param {boolean} [params.includePermissions] - Include permission information
  * @param {boolean} [params.includeRoleAssignments] - Include role assignments
  * @param {boolean} [params.includeLabels] - Include space labels
- * @returns {Promise<SpaceDetailed>} Promise containing the detailed space information
+ * @returns {Promise<SpaceDetailedSchemaType>} Promise containing the detailed space information
  * @throws {Error} If Atlassian credentials are missing or API request fails
  * @example
  * // Get space details with labels and permissions
@@ -159,7 +194,7 @@ async function list(params: ListSpacesParams = {}): Promise<SpacesResponse> {
 async function get(
 	id: string,
 	params: GetSpaceByIdParams = {},
-): Promise<SpaceDetailed> {
+): Promise<SpaceDetailedSchemaType> {
 	const serviceLogger = Logger.forContext(
 		'services/vendor.atlassian.spaces.service.ts',
 		'get',
@@ -222,7 +257,37 @@ async function get(
 	const path = `${API_PATH}/spaces/${id}${queryString}`;
 
 	serviceLogger.debug(`Sending request to: ${path}`);
-	return fetchAtlassian<SpaceDetailed>(credentials, path);
+
+	try {
+		// Get the raw response data from the API
+		const rawData = await fetchAtlassian<unknown>(credentials, path);
+
+		// Validate the response data using the Zod schema
+		try {
+			const validatedData = SpaceDetailedSchema.parse(rawData);
+			serviceLogger.debug(
+				`Successfully validated detailed space data for ID: ${validatedData.id}`,
+			);
+			return validatedData;
+		} catch (validationError) {
+			if (validationError instanceof z.ZodError) {
+				serviceLogger.error(
+					'API response validation failed:',
+					validationError.format(),
+				);
+				throw createApiError(
+					`API response validation failed: ${validationError.message}`,
+					500,
+					validationError,
+				);
+			}
+			// Re-throw other errors
+			throw validationError;
+		}
+	} catch (error) {
+		serviceLogger.error('Error fetching space details:', error);
+		throw error; // Rethrow to be handled by the error handler util
+	}
 }
 
 export default { list, get };
