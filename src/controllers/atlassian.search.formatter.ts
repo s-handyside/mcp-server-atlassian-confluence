@@ -1,4 +1,4 @@
-import { SearchResult } from '../services/vendor.atlassian.search.types.js';
+import { SearchResultType } from '../services/vendor.atlassian.search.types.js';
 import {
 	formatHeading,
 	formatBulletList,
@@ -10,7 +10,7 @@ import {
  * @param searchData - Raw search results from the API
  * @returns Formatted string with search results in markdown format
  */
-export function formatSearchResults(searchData: SearchResult[]): string {
+export function formatSearchResults(searchData: SearchResultType[]): string {
 	if (searchData.length === 0) {
 		return 'No Confluence content found matching your query.';
 	}
@@ -20,67 +20,43 @@ export function formatSearchResults(searchData: SearchResult[]): string {
 	// Use the numbered list formatter for consistent formatting
 	const formattedList = formatNumberedList(searchData, (result) => {
 		const itemLines: string[] = [];
-		const entityType =
-			result.entityType || result.content?.type || 'unknown';
+
+		// Extract data from the new structure
 		const content = result.content;
+		const space = result.space;
 
-		// Determine title, ID, and status based on entity type
-		let title = 'Untitled Result';
-		let id = 'N/A';
-		let status = 'N/A';
-		let spaceTitle = result.resultGlobalContainer?.title || 'N/A';
-
-		if (entityType === 'page' || entityType === 'blogpost') {
-			title = content?.title || title;
-			id = content?.id || id;
-			status = content?.status || status;
-			// Space title comes from resultGlobalContainer for content types too
-		} else if (entityType === 'space') {
-			title = result.title || spaceTitle || title; // Use result.title for space name
-			id = result.space?.id || 'N/A'; // Use the top-level space object if present
-			status = result.space?.status || 'N/A';
-			spaceTitle = title; // The space IS the result
-		} else if (entityType === 'attachment') {
-			title = result.title || title;
-			id = content?.id || 'N/A'; // Attachment ID is usually in content
-			status = content?.status || status;
-		} else if (entityType === 'folder') {
-			title = result.title || title;
-			id = content?.id || 'N/A';
-			status = content?.status || status;
-		} else if (entityType === 'comment') {
-			title = 'Comment'; // Comments don't have a title
-			id = content?.id || 'N/A';
-			status = content?.status || status;
-		}
+		// Determine title, ID, and status
+		const title = content.title || 'Untitled Result';
+		const id = content.id || 'N/A';
+		const status = content.status || 'N/A';
+		const spaceTitle = space.name || 'N/A';
 
 		itemLines.push(formatHeading(title, 2));
 
-		// Create an object with common properties
+		// Create an object with properties
 		const properties: Record<string, unknown> = {
 			ID: id,
-			Type: entityType,
+			Type: content.type,
 			Status: status,
 			Space: spaceTitle,
-			URL: result.url
+			'Space ID': space.id,
+			URL: content._links.webui
 				? {
-						url: result.url,
+						url: content._links.webui,
 						title: 'View in Confluence',
 					}
 				: undefined,
-			Excerpt: result.excerpt
-				? result.excerpt.replace(/\\n/g, ' ')
-				: undefined,
-			Modified: result.lastModified,
+			Excerpt: content.excerpt ? content.excerpt.content : undefined,
+			Modified: content.lastModified,
 		};
 
 		// Format as a bullet list with proper formatting for each value type
 		itemLines.push(formatBulletList(properties, (key) => key));
 
-		return itemLines.join('\\n');
+		return itemLines.join('\n');
 	});
 
 	lines.push(formattedList);
 
-	return lines.join('\\n');
+	return lines.join('\n');
 }

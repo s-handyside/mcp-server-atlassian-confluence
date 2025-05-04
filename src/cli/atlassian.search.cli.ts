@@ -2,8 +2,8 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
-import { SearchOptions } from '../controllers/atlassian.search.types.js';
 import { formatHeading, formatPagination } from '../utils/formatter.util.js';
+import { SearchToolArgsType } from '../tools/atlassian.search.types.js';
 
 /**
  * CLI module for searching Confluence content.
@@ -95,11 +95,11 @@ function registerSearchCommand(program: Command): void {
 					}
 				}
 
-				const searchOptions: SearchOptions = {
+				const searchOptions: SearchToolArgsType = {
 					...(options.cql && { cql: options.cql }),
 					...(options.title && { title: options.title }),
 					...(options.spaceKey && { spaceKey: options.spaceKey }),
-					...(options.label && { label: options.label }),
+					...(options.label && { labels: options.label }),
 					...(options.type && {
 						contentType: options.type as 'page' | 'blogpost',
 					}),

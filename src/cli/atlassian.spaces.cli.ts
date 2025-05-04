@@ -2,8 +2,8 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianSpacesController from '../controllers/atlassian.spaces.controller.js';
-import { ListSpacesOptions } from '../controllers/atlassian.spaces.types.js';
 import { formatHeading, formatPagination } from '../utils/formatter.util.js';
+import { ListSpacesToolArgsType } from '../tools/atlassian.spaces.types.js';
 
 /**
  * CLI module for managing Confluence spaces.
@@ -69,10 +69,10 @@ function registerListSpacesCommand(program: Command): void {
 				// Validate type if provided
 				if (
 					options.type &&
-					!['global', 'personal'].includes(options.type)
+					!['global', 'personal', 'archived'].includes(options.type)
 				) {
 					throw new Error(
-						'Type must be either "global" or "personal"',
+						'Type must be one of: "global", "personal", or "archived"',
 					);
 				}
 
@@ -96,9 +96,16 @@ function registerListSpacesCommand(program: Command): void {
 					}
 				}
 
-				const filterOptions: ListSpacesOptions = {
-					...(options.type && { type: options.type }),
-					...(options.status && { status: options.status }),
+				const filterOptions: ListSpacesToolArgsType = {
+					...(options.type && {
+						type: options.type as
+							| 'global'
+							| 'personal'
+							| 'archived',
+					}),
+					...(options.status && {
+						status: options.status as 'current' | 'archived',
+					}),
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
 					}),

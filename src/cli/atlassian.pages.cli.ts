@@ -2,8 +2,8 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
-import { ListPagesOptions } from '../controllers/atlassian.pages.types.js';
 import { formatHeading, formatPagination } from '../utils/formatter.util.js';
+import { ListPagesToolArgsType } from '../tools/atlassian.pages.types.js';
 
 /**
  * CLI module for managing Confluence pages.
@@ -78,7 +78,7 @@ function registerListPagesCommand(program: Command): void {
 				actionLogger.debug('Processing command options:', options);
 
 				// Create filter options for controller
-				const filterOptions: ListPagesOptions = {
+				const filterOptions: ListPagesToolArgsType = {
 					// Map directly to spaceIds (plural)
 					...(options.spaceId && { spaceIds: options.spaceId }),
 					// Map spaceKey to spaceKeys (plural)

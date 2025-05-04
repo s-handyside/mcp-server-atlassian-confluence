@@ -2,7 +2,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Logger } from '../utils/logger.util.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
-import { ListPagesOptions } from '../controllers/atlassian.pages.types.js';
 import {
 	ListPagesToolArgsType,
 	ListPagesToolArgs,
@@ -28,34 +27,10 @@ async function listPages(args: ListPagesToolArgsType) {
 	methodLogger.debug('Tool called with args:', args);
 
 	try {
-		// Map the tool args to controller options
-		const options: ListPagesOptions = {};
+		methodLogger.debug('Calling controller with options:', args);
 
-		if (args.spaceIds) {
-			options.spaceIds = args.spaceIds;
-		}
-		if (args.spaceKeys) {
-			options.spaceKeys = args.spaceKeys;
-		}
-		if (args.query) {
-			options.query = args.query;
-		}
-		if (args.status) {
-			options.status = args.status;
-		}
-		if (args.limit) {
-			options.limit = args.limit;
-		}
-		if (args.cursor) {
-			options.cursor = args.cursor;
-		}
-		if (args.sort) {
-			options.sort = args.sort;
-		}
-
-		methodLogger.debug('Calling controller with options:', options);
-
-		const result = await atlassianPagesController.list(options);
+		// With updated controller signature, we can pass the tool args directly
+		const result = await atlassianPagesController.list(args);
 
 		methodLogger.debug('Successfully retrieved pages list');
 
@@ -95,10 +70,8 @@ async function getPage(args: GetPageToolArgsType) {
 	methodLogger.debug('Tool called with args:', args);
 
 	try {
-		// Call the controller to get page details
-		const result = await atlassianPagesController.get({
-			pageId: args.pageId,
-		});
+		// Call the controller to get page details - we can now pass args directly
+		const result = await atlassianPagesController.get(args);
 
 		methodLogger.debug('Successfully retrieved page details');
 
