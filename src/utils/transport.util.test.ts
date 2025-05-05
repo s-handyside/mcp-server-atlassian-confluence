@@ -1,8 +1,22 @@
 import { getAtlassianCredentials, fetchAtlassian } from './transport.util.js';
 import { config } from './config.util.js';
 import { Logger } from './logger.util.js';
-import { SpacesResponse } from '../services/vendor.atlassian.spaces.types.js';
 import { McpError } from './error.util.js';
+
+/**
+ * SpacesResponse type definition (moved from deleted vendor.atlassian.spaces.types.js)
+ */
+interface SpacesResponse {
+	results: Array<{
+		id: string;
+		key: string;
+		name: string;
+		[key: string]: any;
+	}>;
+	_links?: {
+		[key: string]: string;
+	};
+}
 
 // Mock the Logger class to prevent console output during tests
 jest.mock('./logger.util.js', () => ({

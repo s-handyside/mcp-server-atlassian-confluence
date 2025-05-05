@@ -170,8 +170,9 @@ export function formatNumberedList<T>(
  * @param language Optional language identifier
  * @returns Formatted code block string
  */
-export function formatCodeBlock(text: string, language: string = ''): string {
-	// Trim trailing newline if present to avoid extra line in block
-	const trimmedText = text.replace(/$\n/, '');
-	return `\`\`\`${language}\n${trimmedText}\n\`\`\``;
-}
+// Unused function - commented out
+// export function formatCodeBlock(text: string, language: string = ''): string {
+// 	// Trim trailing newline if present to avoid extra line in block
+// 	const trimmedText = text.replace(/$\n/, '');
+// 	return `\`\`\`${language}\n${trimmedText}\n\`\`\``;
+// }

@@ -37,14 +37,20 @@ export interface SearchParams {
  */
 
 /**
- * Excerpt format enum schema
+ * Excerpt format schema
  */
-export const ExcerptFormatSchema = z.enum(['plain', 'highlight']);
+// Unused schema - commented out
+// export const ExcerptFormatSchema = z.enum([
+//     'view', 'plain'
+// ]);
 
 /**
- * Generic content type enum schema
+ * Generic content type schema
  */
-export const GenericContentTypeSchema = z.nativeEnum(GenericContentType);
+// Unused schema - commented out
+// export const GenericContentTypeSchema = z.enum([
+//     'page', 'blogpost', 'attachment', 'content', 'space'
+// ]);
 
 /**
  * Content excerpt schema

@@ -3,13 +3,8 @@
  */
 import { z } from 'zod';
 import {
-	ContentProperty,
 	ContentRepresentation,
 	DescriptionFormat,
-	Label,
-	Operation,
-	OptionalFieldMeta,
-	OptionalFieldLinks,
 	PaginatedResponse,
 } from './vendor.atlassian.types.js';
 
@@ -63,7 +58,8 @@ export interface SpaceLinks {
 /**
  * Space property object - alias for ContentProperty with no additional fields
  */
-export type SpaceProperty = ContentProperty;
+// Unused type - referenced in commented SpaceDetailed interface
+// export type SpaceProperty = ContentProperty;
 
 /**
  * Permission subject object
@@ -76,20 +72,22 @@ export interface PermissionSubject {
 /**
  * Space permission assignment object
  */
-export interface SpacePermissionAssignment {
-	id: string;
-	subject: PermissionSubject;
-	operation: Operation;
-}
+// Unused type - referenced in commented SpaceDetailed interface
+// export interface SpacePermissionAssignment {
+// 	id: string;
+// 	subject: PermissionSubject;
+// 	operation: Operation;
+// }
 
 /**
  * Space role assignment object
  */
-export interface SpaceRoleAssignment {
-	id: string;
-	role: string;
-	subject: PermissionSubject;
-}
+// Unused type - referenced in commented SpaceDetailed interface
+// export interface SpaceRoleAssignment {
+// 	id: string;
+// 	role: string;
+// 	subject: PermissionSubject;
+// }
 
 /**
  * Space object returned from the API (basic fields)
@@ -98,47 +96,55 @@ export interface Space {
 	id: string;
 	key: string;
 	name: string;
-	type: SpaceType;
-	status: SpaceStatus;
-	authorId: string;
-	createdAt: string;
-	homepageId: string;
 	description?: SpaceDescription;
+	type: string;
+	status: SpaceStatus;
 	icon?: SpaceIcon;
 	_links: SpaceLinks;
-	currentActiveAlias?: string;
+	_expandable?: Record<string, string>;
+	homepage?: object; // Complex type in newer APIs
 }
 
 /**
  * Extended space object with optional fields
  */
-export interface SpaceDetailed extends Space {
-	labels?: {
-		results: Label[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-	properties?: {
-		results: SpaceProperty[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-	operations?: {
-		results: Operation[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-	permissions?: {
-		results: SpacePermissionAssignment[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-	roleAssignments?: {
-		results: SpaceRoleAssignment[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-}
+// Unused interface - replaced by SpaceDetailedSchemaType
+// export interface SpaceDetailed extends Space {
+// 	permissions?: {
+// 		results: SpacePermissionAssignment[];
+// 		meta: OptionalFieldMeta;
+// 		_links: OptionalFieldLinks;
+// 	};
+// 	roles?: {
+// 		results: SpaceRoleAssignment[];
+// 		meta: OptionalFieldMeta;
+// 		_links: OptionalFieldLinks;
+// 	};
+// 	properties?: {
+// 		results: SpaceProperty[];
+// 		meta: OptionalFieldMeta;
+// 		_links: OptionalFieldLinks;
+// 	};
+// 	_expandable?: {
+// 		settings?: string;
+// 		metadata?: string;
+// 		operations?: string;
+// 		lookAndFeel?: string;
+// 		identifiers?: string;
+// 		theme?: string;
+// 		children?: string;
+// 		history?: string;
+// 		ancestors?: string;
+// 		body?: string;
+// 		icon?: string;
+// 		description?: string;
+// 		homepage?: string;
+// 	};
+// 	settings?: Record<string, unknown>;
+// 	theme?: Record<string, unknown>;
+// 	lookAndFeel?: Record<string, unknown>;
+// 	history?: Record<string, unknown>;
+// }
 
 /**
  * Parameters for listing spaces
@@ -198,14 +204,15 @@ export const SpaceStatusSchema = z.enum(['current', 'archived']);
 /**
  * Space sort order enum schema
  */
-export const SpaceSortOrderSchema = z.enum([
-	'id',
-	'-id',
-	'key',
-	'-key',
-	'name',
-	'-name',
-]);
+// Unused schema - commented out
+// export const SpaceSortOrderSchema = z.enum([
+//     'id',
+//     '-id',
+//     'name',
+//     '-name',
+//     'key',
+//     '-key'
+// ]);
 
 /**
  * Content representation schema

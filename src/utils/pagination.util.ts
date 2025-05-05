@@ -48,11 +48,12 @@ export interface OffsetPaginationData extends PaginationData {
 /**
  * Response structure for cursor-based pagination
  */
-export interface CursorPaginationData extends PaginationData {
-	_links: {
-		next?: string;
-	};
-}
+// Unused interface - commented out
+// export interface CursorPaginationData extends PaginationData {
+// 	_links: {
+// 		next?: string;
+// 	};
+// }
 
 /**
  * Response structure for page-based pagination

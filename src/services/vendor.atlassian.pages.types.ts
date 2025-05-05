@@ -2,25 +2,6 @@
  * Types for Atlassian Confluence Pages API
  */
 import { z } from 'zod';
-import {
-	ContentProperty,
-	ContentRepresentation,
-	Label,
-	Operation,
-	OptionalFieldMeta,
-	OptionalFieldLinks,
-	PaginatedResponse,
-	Version,
-} from './vendor.atlassian.types.js';
-import {
-	LabelSchema,
-	OptionalCollectionSchema,
-	OperationSchema,
-} from './vendor.atlassian.spaces.types.js';
-
-/**
- * Legacy type definitions - these will be replaced by inferred types from Zod schemas
- */
 
 /**
  * Page status enum
@@ -32,11 +13,6 @@ export type ContentStatus =
 	| 'draft'
 	| 'archived'
 	| 'historical';
-
-/**
- * Parent content type enum
- */
-export type ParentContentType = 'page' | 'blogpost';
 
 /**
  * Page sort order enum
@@ -62,90 +38,6 @@ export type BodyFormat =
 	| 'anonymous_export_view'
 	| 'styled_view'
 	| 'editor';
-
-/**
- * Body type object - extends ContentRepresentation with no additional fields
- */
-export type BodyType = ContentRepresentation;
-
-/**
- * Body bulk object
- */
-export interface BodySingle {
-	storage?: BodyType;
-	atlas_doc_format?: BodyType;
-	view?: BodyType;
-}
-
-/**
- * Page links object
- */
-export interface PageLinks {
-	webui: string;
-	editui?: string;
-	tinyui?: string;
-	base?: string;
-}
-
-/**
- * Like object
- */
-export interface Like {
-	userId: string;
-	createdAt: string;
-}
-
-/**
- * Page object returned from the API (basic fields)
- */
-export interface Page {
-	id: string;
-	status: ContentStatus;
-	title: string;
-	spaceId: string;
-	parentId: string | null;
-	parentType?: ParentContentType;
-	position?: number | null;
-	authorId: string;
-	ownerId?: string | null;
-	lastOwnerId?: string | null;
-	createdAt: string;
-	version?: Version;
-	body?: BodySingle;
-	_links: PageLinks;
-}
-
-/**
- * Extended page object with optional fields
- */
-export interface PageDetailed extends Page {
-	labels?: {
-		results: Label[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-	properties?: {
-		results: ContentProperty[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-	operations?: {
-		results: Operation[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-	likes?: {
-		results: Like[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-	versions?: {
-		results: Version[];
-		meta: OptionalFieldMeta;
-		_links: OptionalFieldLinks;
-	};
-	isFavoritedByCurrentUser?: boolean;
-}
 
 /**
  * Parameters for listing pages
@@ -179,11 +71,6 @@ export interface GetPageByIdParams {
 }
 
 /**
- * API response for listing pages
- */
-export type PagesResponse = PaginatedResponse<Page>;
-
-/**
  * Zod schemas for Confluence API response types
  */
 
@@ -197,30 +84,6 @@ export const ContentStatusSchema = z.enum([
 	'trashed',
 	'archived',
 	'draft',
-]);
-
-/**
- * Page sort order enum schema
- */
-export const PageSortOrderSchema = z.enum([
-	'id',
-	'-id',
-	'created-date',
-	'-created-date',
-	'modified-date',
-	'-modified-date',
-	'title',
-	'-title',
-]);
-
-/**
- * Body format enum schema
- */
-export const BodyFormatSchema = z.enum([
-	'storage',
-	'view',
-	'export_view',
-	'styled_view',
 ]);
 
 /**
@@ -307,6 +170,52 @@ export const ChildTypesSchema = z.object({
 });
 
 /**
+ * Label schema (moved from deleted vendor.atlassian.spaces.types.js)
+ */
+export const LabelSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	prefix: z.string().optional(),
+});
+
+/**
+ * Operation schema (moved from deleted vendor.atlassian.spaces.types.js)
+ */
+export const OperationSchema = z.object({
+	key: z.string().optional(),
+	target: z.string().optional(),
+	targetType: z.string(),
+});
+
+/**
+ * Optional field metadata schema (moved from deleted vendor.atlassian.spaces.types.js)
+ */
+export const OptionalFieldMetaSchema = z.object({
+	count: z.number().optional(),
+});
+
+/**
+ * Optional field links schema (moved from deleted vendor.atlassian.spaces.types.js)
+ */
+export const OptionalFieldLinksSchema = z.object({
+	self: z.string().optional(),
+	next: z.string().optional(),
+});
+
+/**
+ * Optional collection schema - used for labels, properties, operations, etc.
+ * (moved from deleted vendor.atlassian.spaces.types.js)
+ */
+export const OptionalCollectionSchema = <T extends z.ZodTypeAny>(
+	itemSchema: T,
+) =>
+	z.object({
+		results: z.array(itemSchema),
+		meta: OptionalFieldMetaSchema,
+		_links: OptionalFieldLinksSchema,
+	});
+
+/**
  * Base page schema (common fields)
  */
 export const PageSchema = z.object({
@@ -359,5 +268,3 @@ export const PagesResponseSchema = z.object({
  */
 export type PageSchemaType = z.infer<typeof PageSchema>;
 export type PageDetailedSchemaType = z.infer<typeof PageDetailedSchema>;
-
-// export type PagesResponseType = z.infer<typeof PagesResponseSchema>; // Keep this commented/removed
