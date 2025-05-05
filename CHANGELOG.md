@@ -1,3 +1,10 @@
+## [1.22.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.2...v1.22.3) (2025-05-05)
+
+
+### Bug Fixes
+
+* Remove commented-out code and unused exports ([6f181df](https://github.com/aashari/mcp-server-atlassian-confluence/commit/6f181dfc46326854060fdc7cfe7b0a6c2e8751f3))
+
 ## [1.22.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.1...v1.22.2) (2025-05-05)
 
 
