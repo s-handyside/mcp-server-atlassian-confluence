@@ -1,3 +1,10 @@
+## [1.22.6](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.5...v1.22.6) (2025-05-05)
+
+
+### Bug Fixes
+
+* improve signal handling for npx support ([f455407](https://github.com/aashari/mcp-server-atlassian-confluence/commit/f455407ff29e6c44ce3a3a92dcf03a9255d9d941))
+
 ## [1.22.5](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.4...v1.22.5) (2025-05-05)
 
 
