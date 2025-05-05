@@ -148,7 +148,7 @@ describe('Atlassian Pages Controller', () => {
 
 			// Call the function with the query filter
 			const result = await atlassianPagesController.list({
-				query: searchTerm,
+				title: searchTerm,
 				limit: 5,
 			});
 
@@ -277,7 +277,7 @@ describe('Atlassian Pages Controller', () => {
 				Object.defineProperty(atlassianPagesController, 'list', {
 					value: jest.fn().mockImplementation(async (options) => {
 						// When query contains our specific test term, return empty result
-						if (options?.query?.includes('NonExistentPage')) {
+						if (options?.title?.includes('NonExistentPage')) {
 							return {
 								content:
 									'No Confluence pages found matching your criteria.',
@@ -303,7 +303,7 @@ describe('Atlassian Pages Controller', () => {
 				const uniqueSearchTerm = `NonExistentPage${Date.now()}${Math.random().toString(36).substring(2, 8)}`;
 
 				const result = await atlassianPagesController.list({
-					query: uniqueSearchTerm,
+					title: uniqueSearchTerm,
 					limit: 5,
 				});
 

@@ -49,8 +49,8 @@ function registerListPagesCommand(program: Command): void {
 			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
 		)
 		.option(
-			'-q, --query <text>',
-			'Filter pages by title, content, or labels (text search). Use this to narrow down results to specific topics or content.',
+			'-t, --title <text>',
+			'Filter pages by text contained *only* in the title. For full-text search across content, use the `search` command.',
 		)
 		.option(
 			'-s, --space-id <ids...>',
@@ -88,7 +88,7 @@ function registerListPagesCommand(program: Command): void {
 						limit: parseInt(options.limit, 10),
 					}),
 					...(options.cursor && { cursor: options.cursor }),
-					...(options.query && { query: options.query }),
+					...(options.title && { title: options.title }),
 					...(options.sort && { sort: options.sort }),
 				};
 

@@ -194,7 +194,7 @@ async function list(
 		// Map controller options to service parameters
 		const params: ListPagesParams = {
 			// Keep conditional spread for optional params
-			...(mergedOptions.query && { query: mergedOptions.query }),
+			...(mergedOptions.title && { title: mergedOptions.title }),
 			...(mergedOptions.status && { status: mergedOptions.status }),
 			...(mergedOptions.sort && { sort: mergedOptions.sort }),
 			...(mergedOptions.limit !== undefined && {

@@ -43,7 +43,7 @@ const ListPagesToolArgs = z.object({
 			'Optional: Space Keys (e.g., "DEV") to filter by. Use this OR spaceIds. Preferred for usability.',
 		),
 
-	query: z
+	title: z
 		.string()
 		.optional()
 		.describe(
