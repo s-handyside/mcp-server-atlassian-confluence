@@ -1,3 +1,10 @@
+## [1.22.5](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.4...v1.22.5) (2025-05-05)
+
+
+### Bug Fixes
+
+* Remove explicit exit after CLI execution in index.ts ([23f89f0](https://github.com/aashari/mcp-server-atlassian-confluence/commit/23f89f0c7677ea9c39e504eeb71d49e2bdb71701))
+
 ## [1.22.4](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.3...v1.22.4) (2025-05-05)
 
 
