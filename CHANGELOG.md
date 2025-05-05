@@ -1,3 +1,15 @@
+## [1.22.4](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.3...v1.22.4) (2025-05-05)
+
+
+### Bug Fixes
+
+* Apply cross-platform compatibility improvements from boilerplate ([0a29e2b](https://github.com/aashari/mcp-server-atlassian-confluence/commit/0a29e2b321adf755e395698f275128bfb6492b16))
+
+
+### Performance Improvements
+
+* Update dependencies ([586ccce](https://github.com/aashari/mcp-server-atlassian-confluence/commit/586cccede3cfd93afd0e22670f6cee4ade98589d))
+
 ## [1.22.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.2...v1.22.3) (2025-05-05)
 
 
