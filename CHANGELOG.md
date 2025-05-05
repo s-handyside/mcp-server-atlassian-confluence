@@ -1,3 +1,10 @@
+## [1.22.7](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.6...v1.22.7) (2025-05-05)
+
+
+### Bug Fixes
+
+* revert to working server version that stays running ([c397ab0](https://github.com/aashari/mcp-server-atlassian-confluence/commit/c397ab01b3acbef06a74fabc9eeddd6f83aa1c2c))
+
 ## [1.22.6](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.5...v1.22.6) (2025-05-05)
 
 
