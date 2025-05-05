@@ -1,3 +1,10 @@
+## [1.22.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.1...v1.22.2) (2025-05-05)
+
+
+### Bug Fixes
+
+* **pages:** rename ls-pages query filter to title and update descriptions ([53b0b88](https://github.com/aashari/mcp-server-atlassian-confluence/commit/53b0b88e944237e17905332c009e0b7d8127cff1))
+
 ## [1.22.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.0...v1.22.1) (2025-05-04)
 
 
