@@ -1,3 +1,10 @@
+## [1.22.8](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.7...v1.22.8) (2025-05-06)
+
+
+### Bug Fixes
+
+* improve main module detection for npx compatibility ([abf1cca](https://github.com/aashari/mcp-server-atlassian-confluence/commit/abf1cca59293a5c0444d3c0848aedede0e9f8fe1))
+
 ## [1.22.7](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.6...v1.22.7) (2025-05-05)
 
 
