@@ -1,3 +1,10 @@
+## [1.22.10](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.9...v1.22.10) (2025-05-06)
+
+
+### Bug Fixes
+
+* Revert back the index.ts and package.json ([1736bc9](https://github.com/aashari/mcp-server-atlassian-confluence/commit/1736bc96b1dac0eec09290e899c42cb1ad5ffe54))
+
 ## [1.22.9](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.8...v1.22.9) (2025-05-06)
 
 
