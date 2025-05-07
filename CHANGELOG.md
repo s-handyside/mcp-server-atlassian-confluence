@@ -1,3 +1,10 @@
+## [1.22.13](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.12...v1.22.13) (2025-05-07)
+
+
+### Performance Improvements
+
+* Update dependencies ([cc279b4](https://github.com/aashari/mcp-server-atlassian-confluence/commit/cc279b47e039009e406cf38841a6a86d43256fac))
+
 ## [1.22.12](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.11...v1.22.12) (2025-05-06)
 
 
