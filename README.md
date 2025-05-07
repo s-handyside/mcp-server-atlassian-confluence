@@ -110,25 +110,27 @@ This section covers the MCP tools available when using this server with an AI as
 
 ## `conf_ls_spaces`
 
-List available Confluence spaces with optional filtering.
+Lists Confluence spaces accessible to the user.
+
+- Filters: `type` ('global', 'personal'), `status` ('current', 'archived').
+- Pagination: `limit`, `cursor`.
+- Default sort: by name.
+
+**Example:**
 
 ```json
-{}
+{ "type": "global", "status": "current", "limit": 10 }
 ```
 
-_or:_
-
-```json
-{ "type": "global", "status": "current" }
-```
-
-> "Show me all Confluence spaces."
+> "Show me the first 10 current global Confluence spaces."
 
 ---
 
 ## `conf_get_space`
 
-Get full details for a specific space, including homepage information.
+Get full details for a specific space using its `spaceKey`. Includes homepage, description, and other metadata.
+
+**Example:**
 
 ```json
 { "spaceKey": "DEV" }
@@ -140,25 +142,32 @@ Get full details for a specific space, including homepage information.
 
 ## `conf_ls_pages`
 
-List pages within one or more spaces with optional filtering.
+Lists pages.
+
+- Filters: `spaceIds` (array of space IDs), `spaceKeys` (array of space keys), `title` (text in title), `status` (e.g., 'current', 'archived').
+- Sorting: `sort` (e.g., '-modified-date', 'title').
+- Pagination: `limit`, `cursor`.
+
+**Example (by space key and title):**
 
 ```json
-{ "spaceId": ["123456"] }
+{
+	"spaceKeys": ["DEV"],
+	"title": "API Documentation",
+	"status": ["current"],
+	"sort": "-modified-date"
+}
 ```
 
-_or:_
-
-```json
-{ "status": ["current"], "query": "Project Plan" }
-```
-
-> "Show me current pages in space 123456."
+> "Show me current pages in the DEV space with 'API Documentation' in the title, sorted by modification date."
 
 ---
 
 ## `conf_get_page`
 
-Get full content and metadata for a specific page.
+Get full content (as Markdown) and metadata for a specific page by its `pageId`.
+
+**Example:**
 
 ```json
 { "pageId": "12345678" }
@@ -170,19 +179,37 @@ Get full content and metadata for a specific page.
 
 ## `conf_search`
 
-Search Confluence content using CQL (Confluence Query Language).
+Searches Confluence content.
+
+- Querying: `cql` (full Confluence Query Language string) or combine simpler filters:
+    - `query` (free-text search for body and title)
+    - `title` (text in title)
+    - `spaceKey` (limit to a space)
+    - `labels` (array of labels - content must have ALL)
+    - `contentType` ('page', 'blogpost')
+- Pagination: `limit`, `cursor`.
+- Returns results as Markdown, including snippets and metadata. The executed CQL query is also returned in the metadata.
+
+**Example (simple search):**
 
 ```json
-{ "cql": "text ~ 'project plan'" }
+{
+	"query": "release notes Q1",
+	"spaceKey": "PRODUCT",
+	"contentType": "page",
+	"limit": 5
+}
 ```
 
-_or:_
+> "Search for 'release notes Q1' in pages within the PRODUCT space."
+
+**Example (advanced CQL):**
 
 ```json
 { "cql": "space = DEV AND label = api AND created >= '2023-01-01'" }
 ```
 
-> "Search Confluence for pages about project plans."
+> "Find content in the DEV space, labeled 'api', created since January 1st, 2023."
 
 ---
 
@@ -193,10 +220,12 @@ The CLI uses kebab-case for commands (e.g., `ls-spaces`) and options (e.g., `--s
 ## Quick Use with `npx`
 
 ```bash
-npx -y @aashari/mcp-server-atlassian-confluence ls-spaces --type global
+npx -y @aashari/mcp-server-atlassian-confluence ls-spaces --type global --status current --limit 10
+npx -y @aashari/mcp-server-atlassian-confluence get-space --space-key DEV
+npx -y @aashari/mcp-server-atlassian-confluence ls-pages --space-key DEV --title "Release Notes" --status current --sort "-modified-date"
 npx -y @aashari/mcp-server-atlassian-confluence get-page --page-id 12345678
-npx -y @aashari/mcp-server-atlassian-confluence ls-pages --space-id 98765
-npx -y @aashari/mcp-server-atlassian-confluence search --cql "text ~ 'release notes'"
+npx -y @aashari/mcp-server-atlassian-confluence search --query "security best practices" --space-key DOCS --type page --limit 5
+npx -y @aashari/mcp-server-atlassian-confluence search --cql "label = official-docs AND creator = currentUser()"
 ```
 
 ## Install Globally
