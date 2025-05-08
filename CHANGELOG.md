@@ -1,3 +1,10 @@
+# [1.24.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.23.0...v1.24.0) (2025-05-08)
+
+
+### Features
+
+* add context display for inline comments in Confluence ([658f6db](https://github.com/aashari/mcp-server-atlassian-confluence/commit/658f6dba7e4c57dd63d475f7f3d5067d5b237e7e))
+
 # [1.23.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.13...v1.23.0) (2025-05-08)
 
 
