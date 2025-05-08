@@ -2,8 +2,6 @@ import {
 	PageSchemaType,
 	PageDetailedSchemaType,
 } from '../services/vendor.atlassian.pages.types.js';
-import { htmlToMarkdown } from '../utils/markdown.util.js';
-import { adfToMarkdown } from '../utils/adf.util.js';
 import {
 	formatUrl,
 	formatDate,
@@ -74,9 +72,13 @@ export function formatPagesList(
 /**
  * Format detailed page information for display
  * @param pageData - Raw page details from the API
+ * @param markdownBody - Pre-converted markdown content for the page body
  * @returns Formatted string with page details in markdown format
  */
-export function formatPageDetails(pageData: PageDetailedSchemaType): string {
+export function formatPageDetails(
+	pageData: PageDetailedSchemaType,
+	markdownBody: string = '*No content available*',
+): string {
 	// Create URL
 	const baseUrl = pageData._links.base || '';
 	const pageUrl = pageData._links.webui || '';
@@ -109,22 +111,8 @@ export function formatPageDetails(pageData: PageDetailedSchemaType): string {
 	lines.push('');
 	lines.push(formatHeading('Content', 2));
 
-	// First try to use atlas_doc_format (ADF) if available
-	if (pageData.body?.atlas_doc_format?.value) {
-		// Convert ADF content to Markdown
-		const markdownContent = adfToMarkdown(
-			pageData.body.atlas_doc_format.value.trim(),
-		);
-		lines.push(markdownContent);
-	}
-	// Fall back to view (HTML) if ADF is not available
-	else if (pageData.body?.view?.value) {
-		// Convert HTML content to Markdown
-		const markdownContent = htmlToMarkdown(pageData.body.view.value.trim());
-		lines.push(markdownContent);
-	} else {
-		lines.push('*No content available*');
-	}
+	// Use the pre-converted markdown body passed by the controller
+	lines.push(markdownBody);
 
 	// Labels section
 	lines.push('');

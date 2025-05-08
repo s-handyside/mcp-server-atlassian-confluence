@@ -26,6 +26,7 @@ import {
 	ListPagesToolArgsType,
 	GetPageToolArgsType,
 } from '../tools/atlassian.pages.types.js';
+import { adfToMarkdown } from '../utils/adf.util.js';
 
 /**
  * Controller for managing Confluence pages.
@@ -201,7 +202,6 @@ async function list(
 				limit: mergedOptions.limit,
 			}),
 			...(mergedOptions.cursor && { cursor: mergedOptions.cursor }),
-			bodyFormat: 'storage', // Keep storage format for now
 		};
 
 		// Explicitly add spaceId if resolvedSpaceIds has items
@@ -285,8 +285,29 @@ async function get(args: GetPageToolArgsType): Promise<ControllerResponse> {
 			`Retrieved page: ${pageData.title} (${pageData.id})`,
 		);
 
-		// Format the page data for display
-		const formattedPage = formatPageDetails(pageData);
+		// Convert ADF to Markdown before formatting
+		let markdownBody = '*Content format not supported or unavailable*';
+		if (pageData.body?.atlas_doc_format?.value) {
+			try {
+				markdownBody = adfToMarkdown(
+					pageData.body.atlas_doc_format.value,
+				);
+				methodLogger.debug(
+					'Successfully converted ADF to Markdown for page body',
+				);
+			} catch (conversionError) {
+				methodLogger.error(
+					'ADF to Markdown conversion failed for page body',
+					conversionError,
+				);
+				// Keep the default error message for markdownBody
+			}
+		} else {
+			methodLogger.warn('No ADF content available for page', { pageId });
+		}
+
+		// Format the page data for display, passing the converted markdown body
+		const formattedPage = formatPageDetails(pageData, markdownBody);
 
 		return {
 			content: formattedPage,
