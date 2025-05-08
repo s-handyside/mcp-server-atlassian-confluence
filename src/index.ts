@@ -12,6 +12,7 @@ import { runCli } from './cli/index.js';
 import atlassianSpacesTools from './tools/atlassian.spaces.tool.js';
 import atlassianPagesTools from './tools/atlassian.pages.tool.js';
 import atlassianSearchTools from './tools/atlassian.search.tool.js';
+import atlassianCommentsTools from './tools/atlassian.comments.tool.js';
 
 // Create a contextualized logger for this file
 const indexLogger = Logger.forContext('index.ts');
@@ -73,6 +74,9 @@ export async function startServer(mode: 'stdio' | 'sse' = 'stdio') {
 
 	atlassianSearchTools.registerTools(serverInstance);
 	serverLogger.debug('Registered Search tools');
+
+	atlassianCommentsTools.registerTools(serverInstance);
+	serverLogger.debug('Registered Comments tools');
 
 	serverLogger.info('All tools registered successfully');
 

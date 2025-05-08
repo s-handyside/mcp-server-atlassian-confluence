@@ -3,6 +3,7 @@ import {
 	PageDetailedSchemaType,
 } from '../services/vendor.atlassian.pages.types.js';
 import { htmlToMarkdown } from '../utils/markdown.util.js';
+import { adfToMarkdown } from '../utils/adf.util.js';
 import {
 	formatUrl,
 	formatDate,
@@ -107,7 +108,17 @@ export function formatPageDetails(pageData: PageDetailedSchemaType): string {
 	// Content section
 	lines.push('');
 	lines.push(formatHeading('Content', 2));
-	if (pageData.body?.view?.value) {
+
+	// First try to use atlas_doc_format (ADF) if available
+	if (pageData.body?.atlas_doc_format?.value) {
+		// Convert ADF content to Markdown
+		const markdownContent = adfToMarkdown(
+			pageData.body.atlas_doc_format.value.trim(),
+		);
+		lines.push(markdownContent);
+	}
+	// Fall back to view (HTML) if ADF is not available
+	else if (pageData.body?.view?.value) {
 		// Convert HTML content to Markdown
 		const markdownContent = htmlToMarkdown(pageData.body.view.value.trim());
 		lines.push(markdownContent);

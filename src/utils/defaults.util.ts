@@ -14,9 +14,14 @@ export const DEFAULT_PAGE_SIZE = 25;
  */
 export const PAGE_DEFAULTS = {
 	/**
-	 * Default body format for page content
+	 * Default body format for fetching pages
 	 */
-	BODY_FORMAT: 'view',
+	BODY_FORMAT: 'atlas_doc_format',
+
+	/**
+	 * Default page size for fetching pages
+	 */
+	PAGE_SIZE: 10,
 
 	/**
 	 * Whether to include page labels by default

@@ -5,6 +5,7 @@ import { VERSION, CLI_NAME } from '../utils/constants.util.js';
 import atlassianSpacesCli from './atlassian.spaces.cli.js';
 import atlassianPagesCli from './atlassian.pages.cli.js';
 import atlassianSearchCli from './atlassian.search.cli.js';
+import atlassianCommentsCli from './atlassian.comments.cli.js';
 
 // Package description
 const DESCRIPTION =
@@ -24,6 +25,7 @@ export async function runCli(args: string[]) {
 	atlassianSpacesCli.register(program);
 	atlassianPagesCli.register(program);
 	atlassianSearchCli.register(program);
+	atlassianCommentsCli.register(program);
 	cliLogger.debug('All CLI commands registered successfully');
 
 	// Handle unknown commands
