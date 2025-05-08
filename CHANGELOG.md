@@ -1,3 +1,10 @@
+# [1.25.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.24.0...v1.25.0) (2025-05-08)
+
+
+### Features
+
+* standardize content handling to consistently use ADF format for pages ([1d7dcc5](https://github.com/aashari/mcp-server-atlassian-confluence/commit/1d7dcc54c9cb3ce3ab590f9d08a8ebd7a941c6fd))
+
 # [1.24.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.23.0...v1.24.0) (2025-05-08)
 
 
