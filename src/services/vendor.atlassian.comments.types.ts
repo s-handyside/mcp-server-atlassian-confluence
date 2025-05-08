@@ -58,6 +58,36 @@ export interface CommentBody {
 }
 
 /**
+ * Inline comment properties (position, text context, etc.)
+ */
+export interface InlineProperties {
+	/**
+	 * The original text that was highlighted/commented on
+	 */
+	originalSelection?: string;
+
+	/**
+	 * The container element identifier
+	 */
+	containerId?: string;
+
+	/**
+	 * Text representation for the highlighted text
+	 */
+	textContext?: string;
+
+	/**
+	 * Metadata about the comment position
+	 */
+	markerRef?: string;
+
+	/**
+	 * Additional positioning information
+	 */
+	[key: string]: unknown;
+}
+
+/**
  * Comment location (inline, footer, etc.)
  */
 export interface CommentExtensions {
@@ -67,9 +97,9 @@ export interface CommentExtensions {
 	location: string;
 
 	/**
-	 * Additional properties for this extension
+	 * Properties specific to inline comments
 	 */
-	inlineProperties?: unknown;
+	inlineProperties?: InlineProperties;
 
 	/**
 	 * Resolution info for resolved comments

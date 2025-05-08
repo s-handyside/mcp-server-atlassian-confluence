@@ -11,7 +11,12 @@ import {
 } from '../utils/pagination.util.js';
 import { ControllerResponse } from '../types/common.types.js';
 import { formatCommentsList } from './atlassian.comments.formatter.js';
-import { DEFAULT_PAGE_SIZE } from '../utils/defaults.util.js';
+import { DEFAULT_PAGE_SIZE, PAGE_DEFAULTS } from '../utils/defaults.util.js';
+import { adfToMarkdown } from '../utils/adf.util.js';
+import {
+	CommentData,
+	InlineProperties,
+} from '../services/vendor.atlassian.comments.types.js';
 
 // Create logger for this controller
 const logger = Logger.forContext(
@@ -44,6 +49,21 @@ interface ListPageCommentsOptions {
 }
 
 /**
+ * Extended interface for a comment with converted markdown content
+ */
+interface CommentWithContext extends CommentData {
+	/**
+	 * Converted markdown body
+	 */
+	convertedMarkdownBody: string;
+
+	/**
+	 * Highlighted text that the comment refers to (for inline comments)
+	 */
+	highlightedText?: string;
+}
+
+/**
  * List comments for a specific Confluence page
  *
  * @param options - Options for listing comments
@@ -59,7 +79,10 @@ async function listPageComments(
 			pageId,
 			limit = DEFAULT_PAGE_SIZE,
 			start = 0,
-			bodyFormat,
+			bodyFormat = PAGE_DEFAULTS.BODY_FORMAT as
+				| 'storage'
+				| 'view'
+				| 'atlas_doc_format', // Cast to expected type
 		} = options;
 
 		methodLogger.debug('Listing page comments', {
@@ -84,10 +107,77 @@ async function listPageComments(
 			'Comment',
 		);
 
+		// Convert ADF content to Markdown and extract highlighted text for inline comments
+		const convertedComments: CommentWithContext[] =
+			commentsData.results.map((comment) => {
+				let markdownBody =
+					'*Content format not supported or unavailable*';
+
+				// Convert comment body from ADF to Markdown
+				if (comment.body?.atlas_doc_format?.value) {
+					try {
+						markdownBody = adfToMarkdown(
+							comment.body.atlas_doc_format.value,
+						);
+						methodLogger.debug(
+							`Successfully converted ADF to Markdown for comment ${comment.id}`,
+						);
+					} catch (conversionError) {
+						methodLogger.error(
+							`ADF conversion failed for comment ${comment.id}`,
+							conversionError,
+						);
+						// Keep default error message
+					}
+				} else {
+					methodLogger.warn(
+						`No ADF content available for comment ${comment.id}`,
+					);
+				}
+
+				// Extract the highlighted text for inline comments
+				let highlightedText: string | undefined = undefined;
+				if (
+					comment.extensions?.location === 'inline' &&
+					comment.extensions.inlineProperties
+				) {
+					// Safely access inlineProperties fields with type checking
+					const props = comment.extensions
+						.inlineProperties as InlineProperties;
+
+					// Try different properties that might contain the highlighted text
+					// Some Confluence versions use different property names
+					highlightedText =
+						props.originalSelection || props.textContext;
+
+					// If not found in standard properties, check for custom properties
+					if (!highlightedText && 'selectionText' in props) {
+						highlightedText = String(props.selectionText || '');
+					}
+
+					if (highlightedText) {
+						methodLogger.debug(
+							`Found highlighted text for comment ${comment.id}: ${highlightedText.substring(0, 50)}${highlightedText.length > 50 ? '...' : ''}`,
+						);
+					} else {
+						methodLogger.warn(
+							`No highlighted text found for inline comment ${comment.id}`,
+						);
+					}
+				}
+
+				// Return comment with added context
+				return {
+					...comment,
+					convertedMarkdownBody: markdownBody,
+					highlightedText,
+				};
+			});
+
 		// Format the comments for display
 		const baseUrl = commentsData._links?.base || '';
 		const formattedContent = formatCommentsList(
-			commentsData.results,
+			convertedComments,
 			pageId,
 			baseUrl,
 		);

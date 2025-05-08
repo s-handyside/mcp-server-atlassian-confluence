@@ -59,7 +59,8 @@ async function listPageComments(
 
 	// Different endpoints and parameters depending on whether we use REST API or v2 API
 	// For now, we'll use the REST API which has better comment support
-	const path = `/wiki/rest/api/content/${pageId}/child/comment?${queryParams.toString()}&expand=body.${bodyFormat}`;
+	// Expand both the body format and inline properties for inline comments
+	const path = `/wiki/rest/api/content/${pageId}/child/comment?${queryParams.toString()}&expand=body.${bodyFormat},extensions.inlineProperties`;
 
 	// Make the API request
 	const response = await fetchAtlassian<ListCommentsResponse>(

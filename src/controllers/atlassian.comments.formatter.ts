@@ -3,8 +3,6 @@
  */
 
 import { CommentData } from '../services/vendor.atlassian.comments.types.js';
-import { adfToMarkdown } from '../utils/adf.util.js';
-import { htmlToMarkdown } from '../utils/markdown.util.js';
 import {
 	formatDate,
 	formatHeading,
@@ -14,14 +12,23 @@ import {
 } from '../utils/formatter.util.js';
 
 /**
+ * Extended CommentData interface with the converted markdown body and highlighted text
+ */
+interface CommentWithMarkdown extends CommentData {
+	convertedMarkdownBody: string;
+	highlightedText?: string;
+}
+
+/**
  * Format a list of comments for display
  *
- * @param commentsData - Raw comments data from the API
+ * @param commentsData - Raw comments data from the API with pre-converted markdown content
+ * @param pageId - ID of the page the comments belong to
  * @param baseUrl - Base URL for constructing comment links
  * @returns Formatted string with comments information in markdown format
  */
 export function formatCommentsList(
-	commentsData: CommentData[],
+	commentsData: CommentWithMarkdown[],
 	pageId: string,
 	baseUrl: string = '',
 ): string {
@@ -47,6 +54,22 @@ export function formatCommentsList(
 			const title = comment.title.replace(/^Re: /, '');
 			itemLines.push(formatHeading(title, 3));
 
+			// Add inline comment indicator if applicable
+			if (comment.extensions?.location === 'inline') {
+				itemLines.push('**📌 Inline Comment**');
+
+				// Add the highlighted text as a blockquote if available
+				if (comment.highlightedText) {
+					itemLines.push('');
+					// Format the highlighted text as a blockquote
+					const lines = comment.highlightedText.split('\n');
+					for (const line of lines) {
+						itemLines.push(`> ${line}`);
+					}
+					itemLines.push('');
+				}
+			}
+
 			// Comment metadata
 			const properties: Record<string, unknown> = {
 				ID: comment.id,
@@ -64,28 +87,10 @@ export function formatCommentsList(
 			// Comment content
 			itemLines.push(formatHeading('Content', 4));
 
-			let content = '';
-
-			// First try ADF format if available
-			if (comment.body?.atlas_doc_format?.value) {
-				content = adfToMarkdown(comment.body.atlas_doc_format.value);
-			}
-			// Then try storage format (XML)
-			else if (comment.body?.storage?.value) {
-				// For storage format, we currently don't have a direct converter
-				// Just strip HTML tags for now as a simple approach
-				content = htmlToMarkdown(comment.body.storage.value);
-			}
-			// Finally try HTML view format
-			else if (comment.body?.view?.value) {
-				content = htmlToMarkdown(comment.body.view.value);
-			}
-
-			if (content) {
-				itemLines.push(content);
-			} else {
-				itemLines.push('*No content available*');
-			}
+			// Use the pre-converted markdown content
+			itemLines.push(
+				comment.convertedMarkdownBody || '*No content available*',
+			);
 
 			// Add link to the comment if available
 			if (comment._links?.webui) {
