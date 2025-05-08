@@ -1,3 +1,10 @@
+# [1.23.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.13...v1.23.0) (2025-05-08)
+
+
+### Features
+
+* Standardize content handling and add comments listing functionality ([cb636d7](https://github.com/aashari/mcp-server-atlassian-confluence/commit/cb636d758f6fbd112aaead27655af4725bc9fb2b))
+
 ## [1.22.13](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.22.12...v1.22.13) (2025-05-07)
 
 
