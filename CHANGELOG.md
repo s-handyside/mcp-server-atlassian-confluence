@@ -1,3 +1,10 @@
+## [1.25.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.25.0...v1.25.1) (2025-05-09)
+
+
+### Bug Fixes
+
+* remove unused exports identified by ts-prune ([ba28a4d](https://github.com/aashari/mcp-server-atlassian-confluence/commit/ba28a4dadc9ec925f12eceb3f8b669c974ceceb1))
+
 # [1.25.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.24.0...v1.25.0) (2025-05-08)
 
 
