@@ -2,11 +2,7 @@
  * Types for Atlassian Confluence Spaces API
  */
 import { z } from 'zod';
-import {
-	ContentRepresentation,
-	DescriptionFormat,
-	PaginatedResponse,
-} from './vendor.atlassian.types.js';
+import { DescriptionFormat } from './vendor.atlassian.types.js';
 
 /**
  * Legacy type definitions - these will be replaced by inferred types from Zod schemas
@@ -32,119 +28,10 @@ export type SpaceStatus = 'current' | 'archived';
 export type SpaceSortOrder = 'id' | '-id' | 'key' | '-key' | 'name' | '-name';
 
 /**
- * Space description object
- */
-export interface SpaceDescription {
-	plain?: ContentRepresentation;
-	view?: ContentRepresentation;
-}
-
-/**
- * Space icon object
- */
-export interface SpaceIcon {
-	path?: string;
-	apiDownloadLink?: string;
-}
-
-/**
- * Space links object
- */
-export interface SpaceLinks {
-	webui: string;
-	base?: string;
-}
-
-/**
  * Space property object - alias for ContentProperty with no additional fields
  */
 // Unused type - referenced in commented SpaceDetailed interface
 // export type SpaceProperty = ContentProperty;
-
-/**
- * Permission subject object
- */
-export interface PermissionSubject {
-	type: 'user' | 'group';
-	identifier: string;
-}
-
-/**
- * Space permission assignment object
- */
-// Unused type - referenced in commented SpaceDetailed interface
-// export interface SpacePermissionAssignment {
-// 	id: string;
-// 	subject: PermissionSubject;
-// 	operation: Operation;
-// }
-
-/**
- * Space role assignment object
- */
-// Unused type - referenced in commented SpaceDetailed interface
-// export interface SpaceRoleAssignment {
-// 	id: string;
-// 	role: string;
-// 	subject: PermissionSubject;
-// }
-
-/**
- * Space object returned from the API (basic fields)
- */
-export interface Space {
-	id: string;
-	key: string;
-	name: string;
-	description?: SpaceDescription;
-	type: string;
-	status: SpaceStatus;
-	icon?: SpaceIcon;
-	_links: SpaceLinks;
-	_expandable?: Record<string, string>;
-	homepage?: object; // Complex type in newer APIs
-}
-
-/**
- * Extended space object with optional fields
- */
-// Unused interface - replaced by SpaceDetailedSchemaType
-// export interface SpaceDetailed extends Space {
-// 	permissions?: {
-// 		results: SpacePermissionAssignment[];
-// 		meta: OptionalFieldMeta;
-// 		_links: OptionalFieldLinks;
-// 	};
-// 	roles?: {
-// 		results: SpaceRoleAssignment[];
-// 		meta: OptionalFieldMeta;
-// 		_links: OptionalFieldLinks;
-// 	};
-// 	properties?: {
-// 		results: SpaceProperty[];
-// 		meta: OptionalFieldMeta;
-// 		_links: OptionalFieldLinks;
-// 	};
-// 	_expandable?: {
-// 		settings?: string;
-// 		metadata?: string;
-// 		operations?: string;
-// 		lookAndFeel?: string;
-// 		identifiers?: string;
-// 		theme?: string;
-// 		children?: string;
-// 		history?: string;
-// 		ancestors?: string;
-// 		body?: string;
-// 		icon?: string;
-// 		description?: string;
-// 		homepage?: string;
-// 	};
-// 	settings?: Record<string, unknown>;
-// 	theme?: Record<string, unknown>;
-// 	lookAndFeel?: Record<string, unknown>;
-// 	history?: Record<string, unknown>;
-// }
 
 /**
  * Parameters for listing spaces
@@ -176,11 +63,6 @@ export interface GetSpaceByIdParams {
 	includeRoleAssignments?: boolean;
 	includeLabels?: boolean;
 }
-
-/**
- * API response for listing spaces
- */
-export type SpacesResponse = PaginatedResponse<Space>;
 
 /**
  * Zod schemas for Atlassian Confluence Spaces API responses
