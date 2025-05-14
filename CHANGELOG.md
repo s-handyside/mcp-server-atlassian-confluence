@@ -1,3 +1,10 @@
+## [1.27.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.27.0...v1.27.1) (2025-05-14)
+
+
+### Bug Fixes
+
+* remove Dockerfile and smithery.yaml ([909c7f7](https://github.com/aashari/mcp-server-atlassian-confluence/commit/909c7f7f1ac4360498b35659abe15a38e8f08d11))
+
 # [1.27.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.26.0...v1.27.0) (2025-05-14)
 
 
