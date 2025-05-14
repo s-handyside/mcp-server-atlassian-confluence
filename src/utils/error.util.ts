@@ -1,4 +1,5 @@
 import { Logger } from './logger.util.js';
+import { formatSeparator } from './formatter.util.js';
 
 /**
  * Error types for classification
@@ -34,12 +35,36 @@ export class McpError extends Error {
 }
 
 /**
+ * Helper to unwrap nested McpErrors and return the deepest original error.
+ * This is useful when an McpError contains another McpError as `originalError`
+ * which in turn may wrap the vendor (Confluence) error text or object.
+ */
+function getDeepOriginalError(error: McpError | unknown): unknown {
+	let current: unknown = error;
+	// Traverse a maximum of 5 levels to avoid infinite loops in pathological cases
+	for (let i = 0; i < 5; i += 1) {
+		if (current instanceof McpError && current.originalError) {
+			current = current.originalError;
+			continue;
+		}
+		break;
+	}
+	return current instanceof McpError ? current.message : current;
+}
+
+/**
  * Create an authentication missing error
  */
 export function createAuthMissingError(
 	message: string = 'Authentication credentials are missing',
+	originalError?: unknown,
 ): McpError {
-	return new McpError(message, ErrorType.AUTH_MISSING);
+	return new McpError(
+		message,
+		ErrorType.AUTH_MISSING,
+		undefined,
+		originalError,
+	);
 }
 
 /**
@@ -47,8 +72,9 @@ export function createAuthMissingError(
  */
 export function createAuthInvalidError(
 	message: string = 'Authentication credentials are invalid',
+	originalError?: unknown,
 ): McpError {
-	return new McpError(message, ErrorType.AUTH_INVALID, 401);
+	return new McpError(message, ErrorType.AUTH_INVALID, 401, originalError);
 }
 
 /**
@@ -112,6 +138,10 @@ export function ensureMcpError(error: unknown): McpError {
  */
 export function formatErrorForMcpTool(error: unknown): {
 	content: Array<{ type: 'text'; text: string }>;
+	metadata: {
+		errorType: ErrorType;
+		statusCode?: number;
+	};
 } {
 	const methodLogger = Logger.forContext(
 		'utils/error.util.ts',
@@ -121,13 +151,30 @@ export function formatErrorForMcpTool(error: unknown): {
 
 	methodLogger.error(`${mcpError.type} error`, mcpError);
 
+	let detailedMessage = `Error: ${mcpError.message}`;
+
+	const deepOriginal = getDeepOriginalError(mcpError);
+	if (deepOriginal) {
+		let vendorText = '';
+		if (deepOriginal instanceof Error) {
+			vendorText = deepOriginal.message;
+		} else if (typeof deepOriginal === 'object') {
+			vendorText = JSON.stringify(deepOriginal);
+		} else {
+			vendorText = String(deepOriginal);
+		}
+
+		if (!detailedMessage.includes(vendorText)) {
+			detailedMessage += `\nVendor API Error: ${vendorText}`;
+		}
+	}
+
 	return {
-		content: [
-			{
-				type: 'text' as const,
-				text: `Error: ${mcpError.message}`,
-			},
-		],
+		content: [{ type: 'text' as const, text: detailedMessage }],
+		metadata: {
+			errorType: mcpError.type,
+			...(mcpError.statusCode && { statusCode: mcpError.statusCode }),
+		},
 	};
 }
 
@@ -201,7 +248,30 @@ export function handleCliError(error: unknown, source?: string): never {
 		stack: mcpError.stack,
 	});
 
-	// Display user-friendly message to console
-	console.error(`Error: ${mcpError.message}`);
+	// Build structured CLI output
+	const cliLines: string[] = [];
+	cliLines.push(`❌  ${mcpError.message}`);
+	if (mcpError.statusCode) {
+		cliLines.push(`HTTP Status: ${mcpError.statusCode}`);
+	}
+	cliLines.push(formatSeparator());
+
+	const deepOriginal = getDeepOriginalError(mcpError);
+	if (deepOriginal) {
+		cliLines.push('Vendor API Error:');
+		let vendorText = '';
+		if (deepOriginal instanceof Error) {
+			vendorText = deepOriginal.message;
+		} else if (typeof deepOriginal === 'object') {
+			vendorText = JSON.stringify(deepOriginal, null, 2);
+		} else {
+			vendorText = String(deepOriginal);
+		}
+		cliLines.push('```json');
+		cliLines.push(vendorText.trim());
+		cliLines.push('```');
+	}
+
+	console.error(cliLines.join('\n'));
 	process.exit(1);
 }

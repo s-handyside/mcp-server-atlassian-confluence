@@ -146,20 +146,51 @@ export async function fetchAtlassian<T>(
 				) {
 					parsedError = JSON.parse(errorText);
 
-					// Extract specific error details from Atlassian API response formats
-					if (
+					// Confluence v2 common format: { statusCode, message, reason }
+					if (parsedError.message) {
+						errorMessage = parsedError.message;
+						// Optionally include reason if available
+						if (
+							parsedError.reason &&
+							!errorMessage.includes(parsedError.reason)
+						) {
+							errorMessage += `: ${parsedError.reason}`;
+						}
+					}
+					// Newer API format: { title, status, detail }
+					else if (parsedError.title) {
+						errorMessage = parsedError.title;
+						// Include detail if available
+						if (
+							parsedError.detail &&
+							!errorMessage.includes(parsedError.detail)
+						) {
+							errorMessage += `: ${parsedError.detail}`;
+						}
+					}
+					// Format: {"errors":[{"message":"Invalid spaceId"}]}
+					else if (
 						parsedError.errors &&
 						Array.isArray(parsedError.errors) &&
 						parsedError.errors.length > 0
 					) {
-						// Format: {"errors":[{"status":400,"code":"INVALID_REQUEST_PARAMETER","title":"..."}]}
-						const atlassianError = parsedError.errors[0];
-						if (atlassianError.title) {
-							errorMessage = atlassianError.title;
+						if (parsedError.errors[0].message) {
+							// Join multiple error messages if available
+							errorMessage = parsedError.errors
+								.map((e: { message: string }) => e.message)
+								.join('; ');
+						} else if (parsedError.errors[0].title) {
+							// Format: {"errors":[{"status":400,"code":"INVALID_REQUEST_PARAMETER","title":"..."}]}
+							errorMessage = parsedError.errors[0].title;
 						}
-					} else if (parsedError.message) {
-						// Format: {"message":"Some error message"}
-						errorMessage = parsedError.message;
+					}
+					// Older API might return errorMessages array (like Jira)
+					else if (
+						parsedError.errorMessages &&
+						Array.isArray(parsedError.errorMessages) &&
+						parsedError.errorMessages.length > 0
+					) {
+						errorMessage = parsedError.errorMessages.join('; ');
 					}
 				}
 			} catch (parseError) {
@@ -169,12 +200,22 @@ export async function fetchAtlassian<T>(
 
 			// Classify HTTP errors based on status code
 			if (response.status === 401 || response.status === 403) {
-				throw createAuthInvalidError('Invalid Atlassian credentials');
+				throw createAuthInvalidError(
+					`Authentication failed. Confluence API: ${errorMessage}`,
+					errorText,
+				);
 			} else if (response.status === 404) {
-				throw createNotFoundError(`Resource not found`, errorText);
+				throw createNotFoundError(
+					`Resource not found. Confluence API: ${errorMessage}`,
+					errorText,
+				);
 			} else {
 				// For other API errors, preserve the original error message from Atlassian API
-				throw createApiError(errorMessage, response.status, errorText);
+				throw createApiError(
+					`Confluence API request failed. Detail: ${errorMessage}`,
+					response.status,
+					errorText,
+				);
 			}
 		}
 
