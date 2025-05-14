@@ -1,3 +1,10 @@
+# [1.26.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.25.2...v1.26.0) (2025-05-14)
+
+
+### Features
+
+* enhance error handling with vendor propagation and enriched CLI/Tool formatting ([51dcc21](https://github.com/aashari/mcp-server-atlassian-confluence/commit/51dcc21a69b0db496844803fccabe83c65d50fa4))
+
 ## [1.25.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.25.1...v1.25.2) (2025-05-13)
 
 
