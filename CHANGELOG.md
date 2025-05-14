@@ -1,3 +1,10 @@
+# [1.27.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.26.0...v1.27.0) (2025-05-14)
+
+
+### Features
+
+* enhance mention links with formatted email addresses for better user experience ([9865b5d](https://github.com/aashari/mcp-server-atlassian-confluence/commit/9865b5d40d1f6ca5d92b80dff3863acdc391eb21))
+
 # [1.26.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.25.2...v1.26.0) (2025-05-14)
 
 
