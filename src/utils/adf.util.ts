@@ -104,7 +104,10 @@ function processMention(node: AdfNode): string {
 		return '';
 	}
 
+	// Get the display text and account ID
 	const text = node.attrs.text || node.attrs.displayName || '';
+	const accountId = node.attrs.id;
+
 	if (!text) {
 		return '';
 	}
@@ -115,6 +118,26 @@ function processMention(node: AdfNode): string {
 		typeof text === 'string' && text.startsWith('@')
 			? text.substring(1)
 			: text;
+
+	// If we have an account ID, create a mailto link with the user's name
+	// This creates a standardized format that works in markdown and doesn't need actual API calls
+	if (accountId) {
+		// Create a normalized email format from the username
+		// Ensure we're working with a string type
+		const cleanTextStr = String(cleanText);
+		const nameParts = cleanTextStr.split(' ');
+		if (nameParts.length >= 2) {
+			// If we have full name, create first.last@company.com format
+			const firstName = nameParts[0].toLowerCase();
+			const lastName = nameParts[nameParts.length - 1].toLowerCase();
+			return `[${cleanTextStr}](mailto:${firstName}.${lastName}@codapayments.com)`;
+		} else {
+			// If just one name part, use that
+			return `[${cleanTextStr}](mailto:${cleanTextStr.toLowerCase().replace(/\s+/g, '.')}@codapayments.com)`;
+		}
+	}
+
+	// Fallback to the original plain text format
 	return `@${cleanText}`;
 }
 
