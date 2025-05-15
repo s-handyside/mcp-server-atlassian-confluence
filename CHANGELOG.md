@@ -1,3 +1,10 @@
+# [1.28.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.27.1...v1.28.0) (2025-05-15)
+
+
+### Features
+
+* enhance error handling for Confluence API responses ([3466361](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3466361f3d5d4e9db78fc43c789f61f00139282e))
+
 ## [1.27.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.27.0...v1.27.1) (2025-05-14)
 
 
