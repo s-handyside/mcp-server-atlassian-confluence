@@ -10,6 +10,7 @@ import {
 import { DEFAULT_PAGE_SIZE, applyDefaults } from '../utils/defaults.util.js';
 import { SearchParams } from '../services/vendor.atlassian.search.types.js';
 import { SearchToolArgsType } from '../tools/atlassian.search.types.js';
+import { buildErrorContext } from '../utils/error-handler.util.js';
 
 const controllerLogger = Logger.forContext(
 	'controllers/atlassian.search.controller.ts',
@@ -135,11 +136,22 @@ async function search(
 			metadata: { executedCql: finalCql },
 		};
 	} catch (error) {
-		throw handleControllerError(error, {
-			entityType: 'Search Results',
-			operation: 'searching',
-			source: 'controllers/atlassian.search.controller.ts@search',
-		});
+		throw handleControllerError(
+			error,
+			buildErrorContext(
+				'Search',
+				'performing',
+				'controllers/atlassian.search.controller.ts@search',
+				{}, // No specific entityId for search
+				{
+					cql: options.cql || '',
+					query: options.query || '',
+					spaceKey: options.spaceKey,
+					limit: options.limit,
+					cursor: options.cursor,
+				}, // Include search parameters
+			),
+		);
 	}
 }
 

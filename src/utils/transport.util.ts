@@ -146,19 +146,11 @@ export async function fetchAtlassian<T>(
 				) {
 					parsedError = JSON.parse(errorText);
 
-					// Confluence v2 common format: { statusCode, message, reason }
-					if (parsedError.message) {
-						errorMessage = parsedError.message;
-						// Optionally include reason if available
-						if (
-							parsedError.reason &&
-							!errorMessage.includes(parsedError.reason)
-						) {
-							errorMessage += `: ${parsedError.reason}`;
-						}
-					}
-					// Newer API format: { title, status, detail }
-					else if (parsedError.title) {
+					// Log the full parsed error for debugging
+					fetchLogger.debug('Parsed Confluence error', parsedError);
+
+					// Confluence v2 API - { "title": "xxx", "status": xxx, "detail": "xxx" } format
+					if (parsedError.title) {
 						errorMessage = parsedError.title;
 						// Include detail if available
 						if (
@@ -168,20 +160,43 @@ export async function fetchAtlassian<T>(
 							errorMessage += `: ${parsedError.detail}`;
 						}
 					}
-					// Format: {"errors":[{"message":"Invalid spaceId"}]}
+					// Older API format or error format: { "message": "xxx" }
+					else if (parsedError.message) {
+						errorMessage = parsedError.message;
+						// Optionally include reason if available
+						if (
+							parsedError.reason &&
+							!errorMessage.includes(parsedError.reason)
+						) {
+							errorMessage += `: ${parsedError.reason}`;
+						}
+					}
+					// Format: {"errors":[{"message":"Invalid query","extensions":{...}}]}
 					else if (
 						parsedError.errors &&
 						Array.isArray(parsedError.errors) &&
 						parsedError.errors.length > 0
 					) {
-						if (parsedError.errors[0].message) {
-							// Join multiple error messages if available
-							errorMessage = parsedError.errors
-								.map((e: { message: string }) => e.message)
-								.join('; ');
-						} else if (parsedError.errors[0].title) {
-							// Format: {"errors":[{"status":400,"code":"INVALID_REQUEST_PARAMETER","title":"..."}]}
-							errorMessage = parsedError.errors[0].title;
+						if (
+							parsedError.errors[0].message ||
+							parsedError.errors[0].title
+						) {
+							// Join multiple error messages if available, limiting to first 3
+							const errorMsgs = parsedError.errors
+								.slice(0, 3)
+								.map((e: Record<string, unknown>) =>
+									e.message
+										? String(e.message)
+										: e.title
+											? String(e.title)
+											: 'Unknown error',
+								);
+							errorMessage = errorMsgs.join('; ');
+
+							// Add count indicator if there are more than 3 errors
+							if (parsedError.errors.length > 3) {
+								errorMessage += `; and ${parsedError.errors.length - 3} more errors`;
+							}
 						}
 					}
 					// Older API might return errorMessages array (like Jira)
@@ -192,29 +207,54 @@ export async function fetchAtlassian<T>(
 					) {
 						errorMessage = parsedError.errorMessages.join('; ');
 					}
+					// Try to look for status code description
+					else if (parsedError.statusCode && parsedError.message) {
+						errorMessage = `${parsedError.statusCode}: ${parsedError.message}`;
+					}
 				}
 			} catch (parseError) {
 				fetchLogger.debug(`Error parsing error response:`, parseError);
 				// Fall back to the default error message
 			}
 
+			// Use the parsed error object or raw text as originalError for context
+			const originalError = parsedError || errorText;
+
 			// Classify HTTP errors based on status code
-			if (response.status === 401 || response.status === 403) {
+			if (response.status === 401) {
 				throw createAuthInvalidError(
 					`Authentication failed. Confluence API: ${errorMessage}`,
-					errorText,
+					originalError,
+				);
+			} else if (response.status === 403) {
+				throw createApiError(
+					`Access denied. Confluence API: ${errorMessage}`,
+					403,
+					originalError,
 				);
 			} else if (response.status === 404) {
 				throw createNotFoundError(
 					`Resource not found. Confluence API: ${errorMessage}`,
-					errorText,
+					originalError,
+				);
+			} else if (response.status === 429) {
+				throw createApiError(
+					`Rate limit exceeded. Confluence API: ${errorMessage}`,
+					429,
+					originalError,
+				);
+			} else if (response.status >= 500) {
+				throw createApiError(
+					`Confluence service error. Detail: ${errorMessage}`,
+					response.status,
+					originalError,
 				);
 			} else {
-				// For other API errors, preserve the original error message from Atlassian API
+				// For other API errors
 				throw createApiError(
 					`Confluence API request failed. Detail: ${errorMessage}`,
 					response.status,
-					errorText,
+					originalError,
 				);
 			}
 		}
@@ -239,17 +279,29 @@ export async function fetchAtlassian<T>(
 			throw error;
 		}
 
-		// Handle network or parsing errors
-		if (error instanceof TypeError || error instanceof SyntaxError) {
+		// Handle network errors (typically TypeErrors from fetch)
+		if (error instanceof TypeError) {
+			fetchLogger.debug('Network error details:', error);
 			throw createApiError(
-				`Network or parsing error: ${error instanceof Error ? error.message : String(error)}`,
+				`Network error connecting to Confluence API: ${error.message}`,
+				500, // Will be classified as NETWORK_ERROR by detectErrorType
+				error,
+			);
+		}
+
+		// Handle JSON parsing errors
+		if (error instanceof SyntaxError) {
+			fetchLogger.debug('JSON parsing error:', error);
+			throw createApiError(
+				`Invalid response format from Confluence API: ${error.message}`,
 				500,
 				error,
 			);
 		}
 
+		// Generic error handler for any other types of errors
 		throw createUnexpectedError(
-			`Unexpected error while calling Atlassian API: ${error instanceof Error ? error.message : String(error)}`,
+			`Unexpected error while calling Confluence API: ${error instanceof Error ? error.message : String(error)}`,
 			error,
 		);
 	}
