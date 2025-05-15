@@ -1,3 +1,10 @@
+## [1.28.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.28.0...v1.28.1) (2025-05-15)
+
+
+### Bug Fixes
+
+* resolve linter error in transport utility ([3fa8922](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3fa89224c92642adfa379cabc08bbd23075fb7f2))
+
 # [1.28.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.27.1...v1.28.0) (2025-05-15)
 
 
