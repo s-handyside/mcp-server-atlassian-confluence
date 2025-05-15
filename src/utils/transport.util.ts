@@ -1,3 +1,5 @@
+/* eslint-disable no-dupe-else-if */
+
 import { Logger } from './logger.util.js';
 import { config } from './config.util.js';
 import {
