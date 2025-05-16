@@ -11,6 +11,7 @@ import { DEFAULT_PAGE_SIZE, applyDefaults } from '../utils/defaults.util.js';
 import { SearchParams } from '../services/vendor.atlassian.search.types.js';
 import { SearchToolArgsType } from '../tools/atlassian.search.types.js';
 import { buildErrorContext } from '../utils/error-handler.util.js';
+import { ensureMcpError } from '../utils/error.util.js';
 
 const controllerLogger = Logger.forContext(
 	'controllers/atlassian.search.controller.ts',
@@ -136,20 +137,25 @@ async function search(
 			metadata: { executedCql: finalCql },
 		};
 	} catch (error) {
+		const mcpError = ensureMcpError(error);
+		// Check if it's a 400 error, potentially from bad CQL
+		if (mcpError.statusCode === 400) {
+			mcpError.message = `Search failed (Status 400 - Bad Request): ${mcpError.message}. This may be due to invalid CQL syntax. Please check your CQL query, ensure terms in text searches are quoted (e.g., text ~ "your terms"), and refer to the Confluence CQL documentation.`;
+		}
 		throw handleControllerError(
-			error,
+			mcpError, // Pass the potentially modified error
 			buildErrorContext(
 				'Search',
 				'performing',
 				'controllers/atlassian.search.controller.ts@search',
-				{}, // No specific entityId for search
+				{},
 				{
 					cql: options.cql || '',
 					query: options.query || '',
 					spaceKey: options.spaceKey,
 					limit: options.limit,
 					cursor: options.cursor,
-				}, // Include search parameters
+				},
 			),
 		);
 	}

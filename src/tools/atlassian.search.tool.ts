@@ -67,7 +67,7 @@ function registerTools(server: McpServer) {
 	// Register the search content tool
 	server.tool(
 		'conf_search',
-		`Searches Confluence content using CQL (Confluence Query Language).\n- Use this to find pages, blog posts, and other content across spaces.\n- Multiple filter options: \`cql\` (custom CQL query), \`title\` (title filter), \`spaceKey\` (specific space), \`labels\` (content tagged with specified labels), and \`contentType\` (page or blogpost).\n- Basic free-text search via \`query\` parameter (equivalent to CQL: text ~ "query").\n- Filters can be combined (AND logic) and will automatically be converted to proper CQL.\n- Supports pagination via \`limit\` and \`cursor\`.\nReturns formatted search results in Markdown format, including titles, links, content snippets, and metadata.`,
+		`Searches Confluence content. Supports multiple filter options: \`cql\` (for providing a complete custom Confluence Query Language string), \`title\` (text in title), \`spaceKey\`, \`labels\`, and \`contentType\` (page/blogpost). A general \`query\` parameter performs a basic text search (equivalent to CQL: text ~ "your query").\nIMPORTANT for \`cql\` users: Ensure your CQL syntax is correct, especially quoting terms in text searches (e.g., \`text ~ "search phrase"\`). Invalid CQL will result in an error. Refer to official Confluence CQL documentation. Filters are generally combined with AND logic.\nSupports pagination (\`limit\`, \`cursor\`). Returns Markdown formatted results with snippets and metadata. Requires Confluence credentials.`,
 		SearchToolArgs.shape,
 		searchContent,
 	);

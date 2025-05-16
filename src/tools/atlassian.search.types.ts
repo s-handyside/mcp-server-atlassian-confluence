@@ -31,7 +31,7 @@ const SearchToolArgs = z.object({
 		.string()
 		.optional()
 		.describe(
-			'Optional: Full Confluence Query Language (CQL) string for advanced filtering (e.g., \'type=page AND space=DEV AND text ~ "release notes"\'). Use this for complex queries. If combined with other specific filter arguments (title, spaceKey, etc.), they will be added with AND logic.',
+			'Optional: Full Confluence Query Language (CQL) string for advanced filtering. Example: `space = "DOCS" AND label = "release-notes" AND (title ~ "Q1" OR text ~ "Quarter 1")`. Ensure terms in `text ~` clauses are double-quoted if they contain spaces or are not simple words (e.g., `text ~ "my search phrase"`). Refer to Confluence CQL syntax guide for details. If this is provided, other specific filter arguments (title, spaceKey, query, etc.) are typically ANDed to this CQL query, unless this CQL is complex enough to stand alone.',
 		),
 	title: z
 		.string()

@@ -112,7 +112,7 @@ function registerTools(server: McpServer) {
 	// Register the list pages tool
 	server.tool(
 		'conf_ls_pages',
-		`Lists pages within specified spaces (by \`spaceId\` or \`spaceKey\`) or globally. Filters by \`title\` (title text only, not full content search), \`status\` (current, archived, etc.). Supports sorting (\`sort\`) and pagination (\`limit\`, \`cursor\`). Returns a formatted list of pages including ID, title, status, space ID, author, version, and URL. For full-text search, use \`conf_search\`. Requires Confluence credentials.`,
+		`Lists pages within specified spaces (by \`spaceId\` or \`spaceKey\`) or globally. Filters by \`title\` (NOTE: this is an EXACT match on the page title), \`status\` (current, archived, etc.). Supports sorting (\`sort\`) and pagination (\`limit\`, \`cursor\`). Returns a formatted list of pages including ID, title, status, space ID, author, version, and URL. For partial title matching or full-text content search, use the \`conf_search\` tool. Requires Confluence credentials.`,
 		ListPagesToolArgs.shape,
 		listPages,
 	);

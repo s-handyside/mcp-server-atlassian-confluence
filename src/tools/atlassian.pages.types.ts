@@ -43,11 +43,16 @@ const ListPagesToolArgs = z.object({
 			'Optional: Space Keys (e.g., "DEV") to filter by. Use this OR spaceIds. Preferred for usability.',
 		),
 
+	ttparentId: z
+		.string()
+		.optional()
+		.describe('Parent page ID to filter children of.'),
+
 	title: z
 		.string()
 		.optional()
 		.describe(
-			'Filter pages by title, content, or labels (text search). Use this to narrow down results to specific topics or content.',
+			'Filter pages by title. NOTE: This performs an EXACT match on the page title. For partial title matching or full-text content search, use the `conf_search` tool.',
 		),
 
 	status: z
