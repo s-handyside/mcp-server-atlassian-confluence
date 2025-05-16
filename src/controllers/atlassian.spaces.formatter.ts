@@ -101,7 +101,7 @@ export function formatSpaceDetails(
 		: `${baseUrl}${spaceUrl}`;
 
 	const lines: string[] = [
-		formatHeading(`Confluence Space: ${spaceData.name}`, 1),
+		formatHeading(`Confluence Space: ${spaceData.key}`, 1),
 		'',
 		`> A ${spaceData.status} ${spaceData.type} space with key \`${spaceData.key}\` created on ${formatDate(spaceData.createdAt)}.`,
 		'',
@@ -112,6 +112,7 @@ export function formatSpaceDetails(
 	const basicProperties: Record<string, unknown> = {
 		ID: spaceData.id,
 		Key: spaceData.key,
+		Name: spaceData.name,
 		Type: spaceData.type,
 		Status: spaceData.status,
 		'Created At': formatDate(spaceData.createdAt),

@@ -55,6 +55,8 @@ async function list(
 		// Create defaults object with proper typing
 		const defaults: Partial<ListSpacesOptions> = {
 			limit: DEFAULT_PAGE_SIZE,
+			type: 'global', // Add default that matches CLI option
+			status: 'current', // Add default that matches CLI option
 		};
 
 		// Apply defaults
