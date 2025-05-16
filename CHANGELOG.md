@@ -1,3 +1,10 @@
+## [1.28.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.28.1...v1.28.2) (2025-05-16)
+
+
+### Bug Fixes
+
+* ensure consistent default values between CLI and MCP tools for Confluence spaces ([7fdbf20](https://github.com/aashari/mcp-server-atlassian-confluence/commit/7fdbf204e095faa27009c4e230faadabe7a35bc6))
+
 ## [1.28.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.28.0...v1.28.1) (2025-05-15)
 
 
