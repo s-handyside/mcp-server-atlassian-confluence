@@ -1,3 +1,10 @@
+## [1.28.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.28.2...v1.28.3) (2025-05-16)
+
+
+### Bug Fixes
+
+* clarify Confluence filter behaviors and CQL guidance ([f3e991d](https://github.com/aashari/mcp-server-atlassian-confluence/commit/f3e991d35c8e2fcfab0e65268f1428a4705f26e8))
+
 ## [1.28.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.28.1...v1.28.2) (2025-05-16)
 
 
