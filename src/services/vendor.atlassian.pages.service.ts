@@ -77,6 +77,9 @@ async function list(
 	if (params.query) {
 		queryParams.set('query', params.query);
 	}
+	if (params.parentId) {
+		queryParams.set('parent-id', params.parentId);
+	}
 
 	// Content format options
 	if (params.bodyFormat) {

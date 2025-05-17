@@ -203,6 +203,7 @@ async function list(
 				limit: mergedOptions.limit,
 			}),
 			...(mergedOptions.cursor && { cursor: mergedOptions.cursor }),
+			...(mergedOptions.parentId && { parentId: mergedOptions.parentId }),
 		};
 
 		// Explicitly add spaceId if resolvedSpaceIds has items

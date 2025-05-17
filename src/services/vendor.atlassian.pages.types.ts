@@ -51,6 +51,7 @@ export interface ListPagesParams {
 	query?: string;
 	cursor?: string;
 	limit?: number;
+	parentId?: string;
 }
 
 /**
