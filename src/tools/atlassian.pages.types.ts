@@ -20,7 +20,7 @@ const PaginationArgs = {
 		.string()
 		.optional()
 		.describe(
-			'Pagination cursor for retrieving the next set of results. Obtain this opaque string from the metadata of a previous response when more results are available.',
+			'Pagination cursor for retrieving the next set of results. Obtain this opaque string from the metadata.pagination.nextCursor of a previous response when more results are available. Confluence uses cursor-based pagination rather than offset-based pagination.',
 		),
 };
 
@@ -33,26 +33,26 @@ const ListPagesToolArgs = z.object({
 		.array(z.string())
 		.optional()
 		.describe(
-			'Optional: Numeric Space IDs to filter by. Use this OR spaceKeys.',
+			'Optional: Numeric Space IDs to filter by. Either use this OR spaceKeys, not both together. If both are provided, only spaceIds will be used.',
 		),
 
 	spaceKeys: z
 		.array(z.string())
 		.optional()
 		.describe(
-			'Optional: Space Keys (e.g., "DEV") to filter by. Use this OR spaceIds. Preferred for usability.',
+			'Optional: Space Keys (e.g., "DEV") to filter by. Either use this OR spaceIds, not both together. If both are provided, only spaceIds will be used. Preferred for usability as keys are more human-readable than IDs.',
 		),
 
-	ttparentId: z
+	parentId: z
 		.string()
 		.optional()
-		.describe('Parent page ID to filter children of.'),
+		.describe('Optional: Parent page ID to filter for child pages only.'),
 
 	title: z
 		.string()
 		.optional()
 		.describe(
-			'Filter pages by title. NOTE: This performs an EXACT match on the page title. For partial title matching or full-text content search, use the `conf_search` tool.',
+			'Filter pages by title. IMPORTANT: This performs an EXACT match on the page title, not a partial or contains match. For partial title matching or full-text content search, use the `conf_search` tool instead, which supports fuzzy title matching via `title ~ "Your Text"`.',
 		),
 
 	status: z

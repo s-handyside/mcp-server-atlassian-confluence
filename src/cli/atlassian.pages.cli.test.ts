@@ -76,7 +76,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 		// List pages in the space
 		const listResult = await CliTestUtil.runCommand([
 			'ls-pages',
-			'--space-id',
+			'--space-ids',
 			spaceId,
 			'--limit',
 			'1',
@@ -117,7 +117,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run the CLI command
 			const result = await CliTestUtil.runCommand([
 				'ls-pages',
-				'--space-id',
+				'--space-ids',
 				spaceId,
 			]);
 
@@ -149,7 +149,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run the CLI command with limit
 			const result = await CliTestUtil.runCommand([
 				'ls-pages',
-				'--space-id',
+				'--space-ids',
 				spaceId,
 				'--limit',
 				'1',
@@ -203,7 +203,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// Run command with invalid ID
 			const result = await CliTestUtil.runCommand([
 				'ls-pages',
-				'--space-id',
+				'--space-ids',
 				invalidId,
 			]);
 
@@ -234,7 +234,7 @@ describe('Atlassian Confluence Pages CLI Commands', () => {
 			// With commander's array syntax, multiple values are passed as separate arguments
 			const result = await CliTestUtil.runCommand([
 				'ls-pages',
-				'--space-id',
+				'--space-ids',
 				spaceId,
 				'999999999', // Adding an invalid ID alongside the valid one
 			]);

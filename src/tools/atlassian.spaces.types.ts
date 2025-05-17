@@ -19,7 +19,7 @@ const PaginationArgs = {
 		.string()
 		.optional()
 		.describe(
-			'Pagination cursor for retrieving the next set of results. Obtain this opaque string from the metadata of a previous response when more results are available.',
+			'Pagination cursor for retrieving the next set of results. Obtain this opaque string from the metadata.pagination.nextCursor of a previous response when more results are available. Confluence uses cursor-based pagination rather than offset-based pagination.',
 		),
 };
 

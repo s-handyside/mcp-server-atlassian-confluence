@@ -20,20 +20,22 @@ function register(program: Command): void {
 	// Register the command to list comments for a page
 	program
 		.command('ls-page-comments')
-		.description('List comments for a Confluence page')
+		.description(
+			'List comments for a Confluence page, with pagination support.',
+		)
 		.requiredOption(
-			'--page-id <pageId>',
-			'ID of the page to get comments for',
+			'-p, --page-id <pageId>',
+			'The numeric ID of the Confluence page to get comments from. This is required and must be a valid page ID from your Confluence instance.',
 		)
 		.option(
-			'--limit <limit>',
-			'Maximum number of results to return',
+			'-l, --limit <limit>',
+			'Maximum number of comments to return (1-100). Use this to control the response size. Useful for pagination or when you only need a few results.',
 			(val) => parseInt(val, 10),
 			DEFAULT_PAGE_SIZE,
 		)
 		.option(
-			'--start <start>',
-			'Starting point for pagination',
+			'-c, --start <start>',
+			'Pagination start position (0-based offset). For comments, Confluence uses offset-based pagination via the "start" parameter rather than cursor-based pagination used in other endpoints.',
 			(val) => parseInt(val, 10),
 			0,
 		)

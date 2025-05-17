@@ -46,28 +46,32 @@ function registerListPagesCommand(program: Command): void {
 		)
 		.option(
 			'-c, --cursor <string>',
-			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
+			'Pagination cursor for retrieving the next set of results. Obtain this opaque string from the pagination.nextCursor field of a previous response. Confluence uses cursor-based pagination rather than offset-based pagination.',
 		)
 		.option(
 			'-t, --title <text>',
-			'Filter pages by text contained *only* in the title. For full-text search across content, use the `search` command.',
+			'Filter pages by title. IMPORTANT: This performs an EXACT match on the page title, not a partial or contains match. For partial title matching or full-text content search, use the `search` command instead.',
 		)
 		.option(
-			'-s, --space-id <ids...>',
-			'Filter pages by space IDs. Provide space IDs (e.g., "123456" "789012") to only show pages from specific spaces. Use either this or --space-key.',
+			'-S, --space-ids <ids...>',
+			'Filter pages by space IDs. Provide one or more space IDs (e.g., "123456" "789012") to only show pages from specific spaces. Use either this or --space-keys, not both together.',
 		)
 		.option(
-			'-k, --space-key <keys...>',
-			'Filter pages by space keys. Provide space keys (e.g., "DEV" "HR" "MARKETING") to only show pages from specific spaces. More user-friendly than space IDs.',
+			'-k, --space-keys <keys...>',
+			'Filter pages by space keys. Provide one or more space keys (e.g., "DEV" "HR" "MARKETING") to only show pages from specific spaces. More user-friendly than space IDs. Use either this or --space-ids, not both together.',
 		)
 		.option(
-			'-S, --status <status>',
-			'Filter pages by status. Options include: "current" (published pages), "archived" (archived pages), "trashed" (pages in trash), or "deleted" (permanently deleted). Defaults to "current" if not specified. Provide as an array to include multiple statuses.',
+			'-s, --status <status>',
+			'Filter pages by status. Options include: "current" (published pages), "archived" (archived pages), "trashed" (pages in trash), or "deleted" (permanently deleted). Defaults to "current" if not specified.',
 			'current',
 		)
 		.option(
-			'--sort <sort>',
+			'-o, --sort <sort>',
 			'Property to sort pages by. Default is "-modified-date" which displays the most recently modified pages first. The "-" prefix indicates descending order. Valid values: "id", "-id", "created-date", "-created-date", "modified-date", "-modified-date", "title", "-title".',
+		)
+		.option(
+			'-p, --parent-id <id>',
+			'Filter to show only child pages of the specified parent page ID.',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
@@ -80,9 +84,9 @@ function registerListPagesCommand(program: Command): void {
 				// Create filter options for controller
 				const filterOptions: ListPagesToolArgsType = {
 					// Map directly to spaceIds (plural)
-					...(options.spaceId && { spaceIds: options.spaceId }),
-					// Map spaceKey to spaceKeys (plural)
-					...(options.spaceKey && { spaceKeys: options.spaceKey }),
+					...(options.spaceIds && { spaceIds: options.spaceIds }),
+					// Map spaceKeys to spaceKeys (plural)
+					...(options.spaceKeys && { spaceKeys: options.spaceKeys }),
 					...(options.status && { status: [options.status] }),
 					...(options.limit && {
 						limit: parseInt(options.limit, 10),
@@ -90,6 +94,7 @@ function registerListPagesCommand(program: Command): void {
 					...(options.cursor && { cursor: options.cursor }),
 					...(options.title && { title: options.title }),
 					...(options.sort && { sort: options.sort }),
+					...(options.parentId && { parentId: options.parentId }),
 				};
 
 				actionLogger.debug(

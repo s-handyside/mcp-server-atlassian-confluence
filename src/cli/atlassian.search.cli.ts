@@ -45,27 +45,27 @@ function registerSearchCommand(program: Command): void {
 		)
 		.option(
 			'-c, --cursor <string>',
-			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. The cursor value can be obtained from the pagination information in a previous response.',
+			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. Obtain this opaque string from the pagination information in a previous response. Confluence uses cursor-based pagination rather than offset-based pagination.',
 		)
 		.option(
 			'-q, --cql <cql>',
-			'Optional: Full CQL query for advanced filtering. Combines with other options via AND.',
+			'Full CQL query for advanced filtering. If provided, this forms the base of the search and other filter options (--title, --space-key, etc.) will be ANDed with it. Example: `space = "DOCS" AND label = "release-notes"`.',
 		)
 		.option(
 			'-t, --title <text>',
-			'Optional: Filter by text contained in the title.',
+			'Filter results to content where the title contains this text (case-insensitive search). If --cql is also provided, this will be ANDed with it. Otherwise, it will be used to build the CQL as `title ~ "YOUR_TITLE"`.',
 		)
 		.option(
 			'-k, --space-key <key>',
-			'Optional: Filter by space key (e.g., "DEV").',
+			'Filter results to content within a specific space key. If --cql is also provided, this will be ANDed with it. Otherwise, it will be used to build the CQL as `space = "YOUR_SPACE"`.',
 		)
 		.option(
 			'--label <labels...>',
-			'Optional: Filter by one or more labels (requires content to have ALL specified labels).',
+			'Filter results to content tagged with ALL of these labels (repeatable option). If --cql is also provided, this will be ANDed with it. Otherwise, it will be used to build the CQL with multiple label conditions.',
 		)
 		.option(
 			'--type <type>',
-			'Optional: Filter by content type (page or blogpost).',
+			'Filter results by content type. Choose either "page" or "blogpost". If --cql is also provided, this will be ANDed with it. Otherwise, it will be used to build the CQL as `type = "YOUR_TYPE"`.',
 			(value) => {
 				if (!['page', 'blogpost'].includes(value)) {
 					throw new Error('Type must be either "page" or "blogpost"');
@@ -75,7 +75,7 @@ function registerSearchCommand(program: Command): void {
 		)
 		.option(
 			'-s, --query <text>',
-			'Optional: Simple free-text search (maps to CQL text ~ "<text>").',
+			'Simple text search query. This will search for the given text within content body, title, and comments. Translates to CQL: `text ~ "YOUR_QUERY"`. If both --query and --cql are provided, they will be combined with AND.',
 		)
 		.action(async (options) => {
 			const actionLogger = Logger.forContext(
