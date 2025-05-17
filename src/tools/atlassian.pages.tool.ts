@@ -14,10 +14,10 @@ import { formatPagination } from '../utils/formatter.util.js';
  * MCP Tool: List Confluence Pages
  *
  * Lists Confluence pages with optional filtering by space, status, and limit.
- * Returns a formatted markdown response with page details and pagination info.
+ * Returns a formatted markdown response with page details and pagination info appended to content.
  *
  * @param {ListPagesToolArgsType} args - Tool arguments for filtering pages
- * @returns {Promise<{ content: Array<{ type: 'text', text: string }>, metadata: { pagination: { count: number; hasMore: boolean } } }>} MCP response with formatted pages list
+ * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted pages list
  * @throws Will return error message if page listing fails
  */
 async function listPages(args: ListPagesToolArgsType) {

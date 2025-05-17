@@ -54,6 +54,7 @@ type ListPageCommentsArgs = z.infer<typeof ListPageCommentsArgsSchema>;
 
 /**
  * Handle the request to list comments for a page
+ * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted comments list
  */
 async function handleListPageComments(args: ListPageCommentsArgs) {
 	const methodLogger = logger.forMethod('handleListPageComments');
@@ -77,9 +78,9 @@ async function handleListPageComments(args: ListPageCommentsArgs) {
 		// Format the response for MCP
 		return {
 			content: [{ type: 'text' as const, text: finalText }],
-			metadata: {
-				/* pagination: result.pagination */
-			}, // Removed pagination from metadata
+			// metadata: { // Removed as it became empty
+			// 	/* pagination: result.pagination */
+			// }, // Removed pagination from metadata
 		};
 	} catch (error) {
 		methodLogger.error('Tool conf_ls_page_comments failed', error);

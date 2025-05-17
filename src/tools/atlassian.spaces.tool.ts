@@ -15,10 +15,10 @@ import { formatPagination } from '../utils/formatter.util.js';
  * MCP Tool: List Confluence Spaces
  *
  * Lists Confluence spaces with optional filtering by type and name.
- * Returns a formatted markdown response with space details and pagination info.
+ * Returns a formatted markdown response with space details and pagination info appended to content.
  *
  * @param {ListSpacesToolArgsType} args - Tool arguments for filtering spaces
- * @returns {Promise<{ content: Array<{ type: 'text', text: string }>, metadata: { pagination: { count: number, hasMore: boolean } } }>} MCP response with formatted spaces list
+ * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted spaces list
  * @throws Will return error message if space listing fails
  */
 async function listSpaces(args: ListSpacesToolArgsType) {
@@ -54,9 +54,6 @@ async function listSpaces(args: ListSpacesToolArgsType) {
 					text: finalText,
 				},
 			],
-			metadata: {
-				// pagination: result.pagination, // Removed pagination from metadata
-			},
 		};
 	} catch (error) {
 		toolLogger.error('Failed to list spaces', error);
@@ -71,7 +68,7 @@ async function listSpaces(args: ListSpacesToolArgsType) {
  * Returns a formatted markdown response with space metadata.
  *
  * @param {GetSpaceToolArgsType} args - Tool arguments containing the space key or ID
- * @returns {Promise<{ content: Array<{ type: 'text', text: string }>, metadata: { pagination: { count: number, hasMore: boolean } } }>} MCP response with formatted space details
+ * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted space details
  * @throws Will return error message if space retrieval fails
  */
 async function getSpace(args: GetSpaceToolArgsType) {
@@ -97,9 +94,6 @@ async function getSpace(args: GetSpaceToolArgsType) {
 					text: result.content,
 				},
 			],
-			metadata: {
-				// pagination: result.pagination, // Removed pagination from metadata for getSpace as well, if it ever had it.
-			},
 		};
 	} catch (error) {
 		methodLogger.error('Error retrieving space details:', error);
