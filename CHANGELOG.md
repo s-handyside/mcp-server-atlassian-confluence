@@ -1,3 +1,10 @@
+## [1.29.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.29.1...v1.29.2) (2025-05-17)
+
+
+### Bug Fixes
+
+* ensure JSDocs and metadata removal are complete for tool pagination ([3e389dc](https://github.com/aashari/mcp-server-atlassian-confluence/commit/3e389dc2d4899ccd45018aaa3bdd711b1cfca4a5))
+
 ## [1.29.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.29.0...v1.29.1) (2025-05-17)
 
 
