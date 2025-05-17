@@ -1,3 +1,10 @@
+## [1.29.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.29.0...v1.29.1) (2025-05-17)
+
+
+### Bug Fixes
+
+* implement parentId filtering for ls-pages in controller and service ([2952b4c](https://github.com/aashari/mcp-server-atlassian-confluence/commit/2952b4c25f5d37c620fec6c9df9b2b214da0d753))
+
 # [1.29.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.28.3...v1.29.0) (2025-05-17)
 
 
