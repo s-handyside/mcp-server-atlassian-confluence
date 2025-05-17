@@ -8,6 +8,7 @@ import { Logger } from '../utils/logger.util.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import { atlassianCommentsController } from '../controllers/atlassian.comments.controller.js';
 import { PAGE_DEFAULTS } from '../utils/defaults.util.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 // Create logger for this file
 const logger = Logger.forContext('tools/atlassian.comments.tool.ts');
@@ -68,10 +69,17 @@ async function handleListPageComments(args: ListPageCommentsArgs) {
 			bodyFormat: PAGE_DEFAULTS.BODY_FORMAT as 'atlas_doc_format',
 		});
 
+		let finalText = result.content;
+		if (result.pagination) {
+			finalText += '\n\n' + formatPagination(result.pagination);
+		}
+
 		// Format the response for MCP
 		return {
-			content: [{ type: 'text' as const, text: result.content }],
-			metadata: { pagination: result.pagination },
+			content: [{ type: 'text' as const, text: finalText }],
+			metadata: {
+				/* pagination: result.pagination */
+			}, // Removed pagination from metadata
 		};
 	} catch (error) {
 		methodLogger.error('Tool conf_ls_page_comments failed', error);

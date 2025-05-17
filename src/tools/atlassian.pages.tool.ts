@@ -8,6 +8,7 @@ import {
 	GetPageToolArgsType,
 	GetPageToolArgs,
 } from './atlassian.pages.types.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * MCP Tool: List Confluence Pages
@@ -37,16 +38,20 @@ async function listPages(args: ListPagesToolArgsType) {
 			hasMore: result.pagination?.hasMore,
 		});
 
+		let finalText = result.content;
+		if (result.pagination) {
+			finalText += '\n\n' + formatPagination(result.pagination);
+		}
+
 		return {
 			content: [
 				{
 					type: 'text' as const,
-					text: result.content,
+					text: finalText,
 				},
 			],
 			metadata: {
 				...(result.metadata || {}),
-				pagination: result.pagination,
 			},
 		};
 	} catch (error) {

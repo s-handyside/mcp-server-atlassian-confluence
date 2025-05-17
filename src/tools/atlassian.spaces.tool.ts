@@ -9,6 +9,7 @@ import {
 } from './atlassian.spaces.types.js';
 
 import atlassianSpacesController from '../controllers/atlassian.spaces.controller.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * MCP Tool: List Confluence Spaces
@@ -41,15 +42,20 @@ async function listSpaces(args: ListSpacesToolArgsType) {
 			hasMore: result.pagination?.hasMore,
 		});
 
+		let finalText = result.content;
+		if (result.pagination) {
+			finalText += '\n\n' + formatPagination(result.pagination);
+		}
+
 		return {
 			content: [
 				{
 					type: 'text' as const,
-					text: result.content,
+					text: finalText,
 				},
 			],
 			metadata: {
-				pagination: result.pagination,
+				// pagination: result.pagination, // Removed pagination from metadata
 			},
 		};
 	} catch (error) {
@@ -92,7 +98,7 @@ async function getSpace(args: GetSpaceToolArgsType) {
 				},
 			],
 			metadata: {
-				pagination: result.pagination,
+				// pagination: result.pagination, // Removed pagination from metadata for getSpace as well, if it ever had it.
 			},
 		};
 	} catch (error) {

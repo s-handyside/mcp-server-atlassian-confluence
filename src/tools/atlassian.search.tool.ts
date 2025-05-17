@@ -6,6 +6,7 @@ import {
 	SearchToolArgsType,
 	SearchToolArgs,
 } from './atlassian.search.types.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * MCP Tool: Search Confluence Content
@@ -30,16 +31,22 @@ async function searchContent(args: SearchToolArgsType) {
 
 		methodLogger.debug('Successfully searched Confluence content');
 
+		let finalText = result.content;
+		if (result.pagination) {
+			finalText += '\n\n' + formatPagination(result.pagination);
+		}
+
 		// Convert the string content to an MCP text resource with the correct type
 		const response = {
 			content: [
 				{
 					type: 'text' as const,
-					text: result.content,
+					text: finalText,
 				},
 			],
-			...(result.pagination && { pagination: result.pagination }),
-			...(result.metadata && { metadata: result.metadata }),
+			metadata: {
+				...(result.metadata || {}),
+			},
 		};
 
 		return response;
