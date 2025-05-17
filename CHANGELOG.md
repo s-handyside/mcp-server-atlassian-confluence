@@ -1,3 +1,15 @@
+# [1.29.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.28.3...v1.29.0) (2025-05-17)
+
+
+### Bug Fixes
+
+* remove mocking from pagination test to ensure all tests run against live APIs ([a5abbad](https://github.com/aashari/mcp-server-atlassian-confluence/commit/a5abbad72e5458c1aa0308fb9000ed04d712fb7c))
+
+
+### Features
+
+* Enhance get-space to include top-level pages and get-page to include comments ([becaac0](https://github.com/aashari/mcp-server-atlassian-confluence/commit/becaac01dec20b5243844e98e18d0d012bef8b47))
+
 ## [1.28.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.28.2...v1.28.3) (2025-05-16)
 
 
