@@ -2,6 +2,7 @@ import { Logger } from '../utils/logger.util.js';
 import { createApiError } from '../utils/error.util.js';
 import { handleControllerError } from '../utils/error-handler.util.js';
 import atlassianSpacesService from '../services/vendor.atlassian.spaces.service.js';
+import atlassianPagesService from '../services/vendor.atlassian.pages.service.js';
 import {
 	formatSpacesList,
 	formatSpaceDetails,
@@ -226,8 +227,35 @@ async function get(args: GetSpaceToolArgsType): Promise<ControllerResponse> {
 			}
 		}
 
+		// Fetch top-level pages in the space to include in the response
+		let topLevelPagesData = null;
+		try {
+			controllerLogger.debug(
+				`Fetching top pages for space ID: ${spaceId}`,
+			);
+			topLevelPagesData = await atlassianPagesService.list({
+				spaceId: [spaceId],
+				limit: 5, // Limit to 5 top-level pages
+				sort: '-modified-date', // Sort by most recently modified
+				status: ['current'], // Only show current (not archived/deleted) pages
+			});
+
+			controllerLogger.debug(
+				`Retrieved ${topLevelPagesData.results.length} top-level pages for the space`,
+			);
+		} catch (error) {
+			controllerLogger.warn(
+				`Failed to fetch top-level pages: ${error instanceof Error ? error.message : String(error)}`,
+			);
+			// Continue even if we couldn't get the pages
+		}
+
 		// Format the space data for display with homepage content using the formatter
-		const formattedSpace = formatSpaceDetails(spaceData, homepageContent);
+		const formattedSpace = formatSpaceDetails(
+			spaceData,
+			homepageContent,
+			topLevelPagesData,
+		);
 
 		return {
 			content: formattedSpace,

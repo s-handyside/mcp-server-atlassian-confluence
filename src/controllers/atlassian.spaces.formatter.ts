@@ -3,6 +3,7 @@ import {
 	SpacesResponseSchema,
 	SpaceDetailedSchemaType,
 } from '../services/vendor.atlassian.spaces.types.js';
+import { PagesResponseSchema } from '../services/vendor.atlassian.pages.types.js';
 import {
 	formatUrl,
 	formatDate,
@@ -87,11 +88,13 @@ export function formatSpacesList(
  * Format detailed space information for display
  * @param spaceData - Raw space details from the API
  * @param homepageContent - Optional homepage content to include
+ * @param topLevelPagesData - Optional top-level pages data to include
  * @returns Formatted string with space details in markdown format
  */
 export function formatSpaceDetails(
 	spaceData: SpaceDetailedSchemaType,
 	homepageContent?: string,
+	topLevelPagesData?: z.infer<typeof PagesResponseSchema> | null,
 ): string {
 	// Create URL
 	const baseUrl = spaceData._links.base || '';
@@ -152,6 +155,56 @@ export function formatSpaceDetails(
 		} else {
 			lines.push('*No homepage content available*');
 		}
+	}
+
+	// Top-level pages section
+	if (
+		topLevelPagesData &&
+		topLevelPagesData.results &&
+		topLevelPagesData.results.length > 0
+	) {
+		lines.push('');
+		lines.push(formatHeading('Recent Pages', 2));
+
+		const pagesFormatted = formatNumberedList(
+			topLevelPagesData.results,
+			(page) => {
+				// Get the page URL
+				const pageUrl = page._links?.webui || '';
+				const fullPageUrl = pageUrl.startsWith('http')
+					? pageUrl
+					: `${baseUrl}${pageUrl}`;
+
+				// Format last modified date
+				const lastModified = page.version?.createdAt
+					? formatDate(page.version.createdAt)
+					: 'N/A';
+
+				// Create a list of page properties
+				const pageProps = {
+					ID: page.id,
+					Title: page.title,
+					'Last Modified': lastModified,
+					Link: formatUrl(fullPageUrl, 'Open Page'),
+				};
+
+				// Return the formatted page info
+				return formatBulletList(pageProps, (key) => key);
+			},
+		);
+
+		lines.push(pagesFormatted);
+		lines.push('');
+
+		// Add link to view all pages in this space
+		const spaceViewAllPagesUrl = `${baseUrl}/spaces/${spaceData.key}/pages`;
+		lines.push(
+			`*${formatUrl(spaceViewAllPagesUrl, 'View all pages in this space')}*`,
+		);
+	} else if (topLevelPagesData) {
+		lines.push('');
+		lines.push(formatHeading('Recent Pages', 2));
+		lines.push('*No pages found in this space*');
 	}
 
 	// Labels section

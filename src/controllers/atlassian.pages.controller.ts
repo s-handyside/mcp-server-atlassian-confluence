@@ -8,6 +8,7 @@ import {
 } from './atlassian.pages.formatter.js';
 import atlassianPagesService from '../services/vendor.atlassian.pages.service.js';
 import atlassianSpacesService from '../services/vendor.atlassian.spaces.service.js';
+import { atlassianCommentsController } from './atlassian.comments.controller.js';
 import {
 	DEFAULT_PAGE_SIZE,
 	PAGE_DEFAULTS,
@@ -306,8 +307,35 @@ async function get(args: GetPageToolArgsType): Promise<ControllerResponse> {
 			methodLogger.warn('No ADF content available for page', { pageId });
 		}
 
-		// Format the page data for display, passing the converted markdown body
-		const formattedPage = formatPageDetails(pageData, markdownBody);
+		// Fetch recent comments for this page
+		let commentsSummary = null;
+		try {
+			methodLogger.debug(
+				`Fetching recent comments for page ID: ${pageId}`,
+			);
+			commentsSummary =
+				await atlassianCommentsController.listPageComments({
+					pageId,
+					limit: 3, // Get just a few recent comments
+					bodyFormat: 'atlas_doc_format', // Get the comments in ADF format
+				});
+
+			methodLogger.debug(
+				`Retrieved comments summary for page. Has more: ${commentsSummary.pagination?.hasMore ? 'yes' : 'no'}`,
+			);
+		} catch (error) {
+			methodLogger.warn(
+				`Failed to fetch comments: ${error instanceof Error ? error.message : String(error)}`,
+			);
+			// Continue even if we couldn't get the comments
+		}
+
+		// Format the page data for display, passing the converted markdown body and comments
+		const formattedPage = formatPageDetails(
+			pageData,
+			markdownBody,
+			commentsSummary,
+		);
 
 		return {
 			content: formattedPage,

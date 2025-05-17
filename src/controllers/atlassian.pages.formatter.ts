@@ -2,6 +2,7 @@ import {
 	PageSchemaType,
 	PageDetailedSchemaType,
 } from '../services/vendor.atlassian.pages.types.js';
+import { ControllerResponse } from '../types/common.types.js';
 import {
 	formatUrl,
 	formatDate,
@@ -73,11 +74,13 @@ export function formatPagesList(
  * Format detailed page information for display
  * @param pageData - Raw page details from the API
  * @param markdownBody - Pre-converted markdown content for the page body
+ * @param commentsSummary - Optional comments data to include a summary of recent comments
  * @returns Formatted string with page details in markdown format
  */
 export function formatPageDetails(
 	pageData: PageDetailedSchemaType,
 	markdownBody: string = '*No content available*',
+	commentsSummary?: ControllerResponse | null,
 ): string {
 	// Create URL
 	const baseUrl = pageData._links.base || '';
@@ -113,6 +116,50 @@ export function formatPageDetails(
 
 	// Use the pre-converted markdown body passed by the controller
 	lines.push(markdownBody);
+
+	// Comments section if available
+	if (commentsSummary && commentsSummary.content) {
+		lines.push('');
+		lines.push(formatHeading('Recent Comments', 2));
+
+		// Check if there's comment content to display
+		if (commentsSummary.content.includes('No comments found')) {
+			lines.push('*No comments found for this page*');
+		} else {
+			// Extract a shorter version of the comments that doesn't include the original heading
+			// and footer to integrate better with our page details format
+			let commentsContent = commentsSummary.content;
+
+			// Remove the original "Page Comments" heading if it exists
+			commentsContent = commentsContent.replace(
+				/# Page Comments\n\n/,
+				'',
+			);
+
+			// Remove the footer timestamp if it exists
+			commentsContent = commentsContent.replace(
+				/\n\n---+\n\*Information retrieved at:.*\*/,
+				'',
+			);
+
+			// Add the extracted comments content
+			lines.push(commentsContent);
+
+			// Add a link to view all comments if there are more
+			if (
+				commentsSummary.pagination &&
+				commentsSummary.pagination.hasMore
+			) {
+				lines.push('');
+
+				// Link to view all comments for this page
+				const allCommentsUrl = `${baseUrl}/pages/viewpage.action?pageId=${pageData.id}&showComments=true`;
+				lines.push(
+					`*${formatUrl(allCommentsUrl, 'View all comments on this page')}*`,
+				);
+			}
+		}
+	}
 
 	// Labels section
 	lines.push('');
