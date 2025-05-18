@@ -159,6 +159,16 @@ Lists pages.
 }
 ```
 
+**Example (multiple space keys):**
+
+```json
+{
+	"spaceKeys": ["DEV", "HR", "MARKETING"],
+	"limit": 15,
+	"sort": "-modified-date"
+}
+```
+
 > "Show me current pages in the DEV space with 'API Documentation' in the title, sorted by modification date."
 
 ---
@@ -222,7 +232,7 @@ The CLI uses kebab-case for commands (e.g., `ls-spaces`) and options (e.g., `--s
 ```bash
 npx -y @aashari/mcp-server-atlassian-confluence ls-spaces --type global --status current --limit 10
 npx -y @aashari/mcp-server-atlassian-confluence get-space --space-key DEV
-npx -y @aashari/mcp-server-atlassian-confluence ls-pages --space-key DEV --title "Release Notes" --status current --sort "-modified-date"
+npx -y @aashari/mcp-server-atlassian-confluence ls-pages --space-keys DEV HR MARKETING --limit 15 --sort "-modified-date"
 npx -y @aashari/mcp-server-atlassian-confluence get-page --page-id 12345678
 npx -y @aashari/mcp-server-atlassian-confluence search --query "security best practices" --space-key DOCS --type page --limit 5
 npx -y @aashari/mcp-server-atlassian-confluence search --cql "label = official-docs AND creator = currentUser()"
@@ -239,6 +249,84 @@ Then run directly:
 ```bash
 mcp-atlassian-confluence ls-spaces
 mcp-atlassian-confluence get-page --page-id 12345678
+```
+
+## Available Commands
+
+The following CLI commands are available:
+
+### `ls-spaces`
+
+Lists Confluence spaces with optional filtering and pagination.
+
+```bash
+mcp-atlassian-confluence ls-spaces [options]
+
+Options:
+  -l, --limit <number>    Maximum number of items to return (1-100). Default is 25
+  -c, --cursor <string>   Pagination cursor for retrieving the next set of results
+  -t, --type <type>       Filter spaces by type. Options: "global" (team spaces), 
+                          "personal" (user spaces), or "archived" (archived spaces)
+  -s, --status <status>   Filter spaces by status. Options: "current" (active spaces) 
+                          or "archived" (archived spaces)
+```
+
+### `get-space`
+
+Gets detailed information about a specific Confluence space.
+
+```bash
+mcp-atlassian-confluence get-space --space-key <key>
+
+Options:
+  -k, --space-key <key>   The key of the Confluence space to retrieve (required)
+```
+
+### `ls-pages`
+
+Lists Confluence pages with filtering, sorting, and pagination.
+
+```bash
+mcp-atlassian-confluence ls-pages [options]
+
+Options:
+  -l, --limit <number>         Maximum number of items to return (1-250). Default is 25
+  -c, --cursor <string>        Pagination cursor for next set of results
+  -t, --title <text>           Filter pages by title (EXACT match)
+  -S, --space-ids <ids...>     Filter by space IDs (repeatable)
+  -k, --space-keys <keys...>   Filter by space keys (repeatable, e.g., "DEV" "HR")
+  -s, --status <status>        Filter by status (current, archived, trashed, deleted)
+  -o, --sort <sort>            Property to sort pages by (e.g., "-modified-date", "title")
+  -p, --parent-id <id>         Filter to show only child pages of the specified parent page ID
+```
+
+### `get-page`
+
+Gets detailed information and content for a specific Confluence page.
+
+```bash
+mcp-atlassian-confluence get-page --page-id <id>
+
+Options:
+  -p, --page-id <id>    The numeric ID of the Confluence page to retrieve (required)
+```
+
+### `search`
+
+Searches Confluence content using CQL (Confluence Query Language) or simplified filters.
+
+```bash
+mcp-atlassian-confluence search [options]
+
+Options:
+  -l, --limit <number>       Maximum number of items to return (1-100). Default is 25
+  -c, --cursor <string>      Pagination cursor for next set of results
+  -q, --cql <cql>            Full CQL query for advanced filtering
+  -t, --title <text>         Filter results by title (contains)
+  -k, --space-key <key>      Filter results to a specific space
+  --label <labels...>        Filter by one or more labels (repeatable)
+  --type <type>              Filter by content type (page or blogpost)
+  -s, --query <text>         Simple text search query
 ```
 
 ## Discover More CLI Options
