@@ -1,3 +1,11 @@
+## [1.29.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.29.2...v1.29.3) (2025-05-18)
+
+
+### Bug Fixes
+
+* update README with correct metadata handling and remove unused imports ([f5fe829](https://github.com/aashari/mcp-server-atlassian-confluence/commit/f5fe8290a20ec6da6bf8bab901162d6e86a5a3bc))
+* update tests to handle unified content format ([f23a219](https://github.com/aashari/mcp-server-atlassian-confluence/commit/f23a2198fc2a8dc05f6609e9616d60c6a592e622))
+
 ## [1.29.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.29.1...v1.29.2) (2025-05-17)
 
 
