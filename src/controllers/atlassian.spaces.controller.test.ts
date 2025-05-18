@@ -28,29 +28,27 @@ describe('Atlassian Spaces Controller', () => {
 			// Verify the ControllerResponse structure
 			expect(result).toHaveProperty('content');
 			expect(typeof result.content).toBe('string');
-			expect(result).toHaveProperty('pagination');
 
 			// Basic Markdown content checks
 			if (
-				result.content !==
-				'No Confluence spaces found matching your criteria.'
+				!result.content.includes(
+					'No Confluence spaces found matching your criteria.',
+				)
 			) {
 				expect(result.content).toMatch(/^# Confluence Spaces/m); // Main heading for spaces list
 				// The actual format is now a numbered list rather than a table
 				expect(result.content).toContain('**ID**:');
 				expect(result.content).toContain('**Key**:');
 				expect(result.content).toContain('**Type**:');
-			}
 
-			// Verify pagination structure
-			expect(result.pagination).toBeDefined();
-			expect(result.pagination).toHaveProperty('hasMore');
-			expect(typeof result.pagination?.hasMore).toBe('boolean');
-			expect(result.pagination).toHaveProperty('count'); // Should have count from service
-			// nextCursor might be undefined if hasMore is false
-			if (result.pagination?.hasMore) {
-				expect(result.pagination).toHaveProperty('nextCursor');
-				expect(typeof result.pagination?.nextCursor).toBe('string');
+				// Check for pagination information in the content
+				expect(result.content).toContain('Information retrieved at:');
+				// Pagination info should be in the content if available
+				if (result.content.includes('More results are available')) {
+					expect(result.content).toMatch(
+						/\*Use --cursor "([^"]+)" to view more\.\*/,
+					);
+				}
 			}
 		}, 30000); // Increased timeout
 
@@ -61,32 +59,36 @@ describe('Atlassian Spaces Controller', () => {
 			const result1 = await atlassianSpacesController.list({
 				limit: 1,
 			});
-			expect(result1.pagination?.count).toBeLessThanOrEqual(1);
 
-			// Verify pagination properties
-			expect(result1.pagination).toHaveProperty('count');
-			expect(result1.pagination).toHaveProperty('hasMore');
+			// Check that the content includes the limited result count
+			expect(result1.content).toContain('Showing 1 ');
+
+			// Extract the cursor for the next page if available
+			const cursorMatch = result1.content.match(
+				/\*Use --cursor "([^"]+)" to view more\.\*/,
+			);
+			const nextCursor = cursorMatch ? cursorMatch[1] : null;
 
 			// Fetch the next page using the live cursor if available
-			if (result1.pagination?.hasMore && result1.pagination.nextCursor) {
+			if (nextCursor) {
 				console.log(
-					`Pagination test: Fetching next page with cursor: ${result1.pagination.nextCursor}`,
+					`Pagination test: Fetching next page with cursor: ${nextCursor}`,
 				);
 				const result2 = await atlassianSpacesController.list({
 					limit: 1,
-					cursor: result1.pagination.nextCursor, // Use live cursor
+					cursor: nextCursor, // Use live cursor
 				});
 
 				// Verify the structure of the second response
 				expect(result2).toHaveProperty('content');
 				expect(typeof result2.content).toBe('string');
-				expect(result2.content).not.toBe(
+				expect(result2.content).not.toContain(
 					'No Confluence spaces found matching your criteria.',
 				);
-				expect(result2.pagination?.count).toBeLessThanOrEqual(1);
-				expect(result2.pagination).toHaveProperty('hasMore'); // Check structure
+				expect(result2.content).toContain('Showing 1 ');
+
 				console.log(
-					`Pagination test: Second page fetched successfully. Count: ${result2.pagination?.count}, HasMore: ${result2.pagination?.hasMore}`,
+					'Pagination test: Second page fetched successfully.',
 				);
 			} else {
 				console.warn(
@@ -105,8 +107,9 @@ describe('Atlassian Spaces Controller', () => {
 			});
 
 			if (
-				resultGlobal.content !==
-				'No Confluence spaces found matching your criteria.'
+				!resultGlobal.content.includes(
+					'No Confluence spaces found matching your criteria.',
+				)
 			) {
 				// Check that all returned spaces mention 'global' type
 				expect(resultGlobal.content).toContain('**Type**: global');
@@ -137,8 +140,9 @@ describe('Atlassian Spaces Controller', () => {
 			});
 
 			if (
-				resultCurrent.content !==
-				'No Confluence spaces found matching your criteria.'
+				!resultCurrent.content.includes(
+					'No Confluence spaces found matching your criteria.',
+				)
 			) {
 				// Check that all returned spaces mention 'current' status
 				expect(resultCurrent.content).toContain('**Status**: current');
@@ -173,16 +177,11 @@ describe('Atlassian Spaces Controller', () => {
 				keys: [nonExistentKey],
 			});
 
-			// Check specific empty result message including the standard footer
-			expect(result.content).toBe(
-				'No Confluence spaces found matching your criteria.\n\n' +
-					formatSeparator() +
-					'\n' +
-					`*Information retrieved at: ${formatDate(new Date())}*`,
+			// Update to test only the beginning part, since the pagination formatting might vary
+			expect(result.content).toContain(
+				'No Confluence spaces found matching your criteria.',
 			);
-			// Verify pagination properties for empty result
-			expect(result.pagination).toHaveProperty('count', 0);
-			expect(result.pagination).toHaveProperty('hasMore', false);
+			expect(result.content).toContain('Information retrieved at:');
 		}, 30000);
 
 		it('should handle combined filtering criteria', async () => {
@@ -197,12 +196,12 @@ describe('Atlassian Spaces Controller', () => {
 
 			// Verify the response structure
 			expect(resultCombined).toHaveProperty('content');
-			expect(resultCombined).toHaveProperty('pagination');
 
 			// If results are returned, verify they match both criteria
 			if (
-				resultCombined.content !==
-				'No Confluence spaces found matching your criteria.'
+				!resultCombined.content.includes(
+					'No Confluence spaces found matching your criteria.',
+				)
 			) {
 				expect(resultCombined.content).toContain('**Type**: global');
 				expect(resultCombined.content).toContain('**Status**: current');
@@ -219,8 +218,9 @@ describe('Atlassian Spaces Controller', () => {
 					limit: 1,
 				});
 				if (
-					listResult.content ===
-					'No Confluence spaces found matching your criteria.'
+					listResult.content.includes(
+						'No Confluence spaces found matching your criteria.',
+					)
 				) {
 					return null;
 				}

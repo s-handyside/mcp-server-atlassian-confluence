@@ -34,24 +34,29 @@ describe('Atlassian Search Controller', () => {
 			// Verify the response structure
 			expect(result).toHaveProperty('content');
 			expect(typeof result.content).toBe('string');
-			expect(result).toHaveProperty('pagination');
 
 			// Verify the content format
 			if (
-				result.content !==
-				'No Confluence content found matching your query.'
+				!result.content.includes(
+					'No Confluence content found matching your query.',
+				)
 			) {
+				// Check for executed CQL in the content
+				expect(result.content).toContain('### Executed CQL Query');
+				expect(result.content).toContain('`type=page`');
+
 				expect(result.content).toContain('# Confluence Search Results');
 				expect(result.content).toContain('**ID**');
 				expect(result.content).toContain('**Type**');
 				expect(result.content).toContain('**Status**');
 				expect(result.content).toContain('**Space**');
-			}
 
-			// Verify pagination if present
-			if (result.pagination?.hasMore) {
-				expect(result.pagination).toHaveProperty('nextCursor');
-				// Pagination information is now handled by the CLI, not in the content
+				// Check for pagination information if content indicates there's more
+				if (result.content.includes('More results are available')) {
+					expect(result.content).toMatch(
+						/\*Use --cursor "([^"]+)" to view more\.\*/,
+					);
+				}
 			}
 		}, 15000);
 
@@ -69,9 +74,14 @@ describe('Atlassian Search Controller', () => {
 
 			// Verify the content format
 			if (
-				result.content !==
-				'No Confluence content found matching your query.'
+				!result.content.includes(
+					'No Confluence content found matching your query.',
+				)
 			) {
+				// Check for executed CQL in the content
+				expect(result.content).toContain('### Executed CQL Query');
+				expect(result.content).toContain('`space="IN"`');
+
 				expect(result.content).toContain('# Confluence Search Results');
 			}
 		}, 15000);
@@ -110,15 +120,21 @@ describe('Atlassian Search Controller', () => {
 			// Verify the response structure
 			expect(result).toHaveProperty('content');
 			expect(typeof result.content).toBe('string');
-			expect(result).toHaveProperty('pagination');
+
+			// Check for executed CQL in the content
+			expect(result.content).toContain('### Executed CQL Query');
+			expect(result.content).toContain(
+				'`type=page AND creator=currentUser() AND created >= "2020-01-01"`',
+			);
 
 			// We can't predict if there will be results, so just verify the function runs
 			// without errors and returns either results or the empty message
 			expect([
 				true,
 				result.content.includes('# Confluence Search Results'),
-				result.content ===
+				result.content.includes(
 					'No Confluence content found matching your query.',
+				),
 			]).toContain(true);
 		}, 15000);
 
@@ -134,7 +150,10 @@ describe('Atlassian Search Controller', () => {
 			// Verify the response structure
 			expect(result).toHaveProperty('content');
 			expect(typeof result.content).toBe('string');
-			expect(result).toHaveProperty('pagination');
+
+			// Check for executed CQL in the content
+			expect(result.content).toContain('### Executed CQL Query');
+			expect(result.content).toContain('`text ~ "test"`');
 		}, 15000);
 
 		it('should correctly process CQL with parentheses and logical operators', async () => {
@@ -149,14 +168,20 @@ describe('Atlassian Search Controller', () => {
 			// Verify the response structure
 			expect(result).toHaveProperty('content');
 			expect(typeof result.content).toBe('string');
-			expect(result).toHaveProperty('pagination');
+
+			// Check for executed CQL in the content
+			expect(result.content).toContain('### Executed CQL Query');
+			expect(result.content).toContain(
+				'`(type=page OR type=blogpost) AND space.type=global`',
+			);
 
 			// The content should either contain results or the empty message
 			expect([
 				true,
 				result.content.includes('# Confluence Search Results'),
-				result.content ===
+				result.content.includes(
 					'No Confluence content found matching your query.',
+				),
 			]).toContain(true);
 		}, 15000);
 
@@ -177,7 +202,10 @@ describe('Atlassian Search Controller', () => {
 			// Verify the response structure
 			expect(result).toHaveProperty('content');
 			expect(typeof result.content).toBe('string');
-			expect(result).toHaveProperty('pagination');
+
+			// Check for executed CQL in the content
+			expect(result.content).toContain('### Executed CQL Query');
+			expect(result.content).toContain(`\`created >= "${dateString}"\``);
 		}, 15000);
 
 		it('should handle pagination with cursor-based navigation', async () => {
@@ -191,32 +219,42 @@ describe('Atlassian Search Controller', () => {
 
 			// Verify first page structure
 			expect(firstPage).toHaveProperty('content');
-			expect(firstPage).toHaveProperty('pagination');
-			expect(firstPage.pagination).toHaveProperty('count');
-			expect(firstPage.pagination).toHaveProperty('hasMore');
+			expect(typeof firstPage.content).toBe('string');
 
-			// If there are more pages and we have a cursor, test pagination
+			// Check for executed CQL in the content
+			expect(firstPage.content).toContain('### Executed CQL Query');
+			expect(firstPage.content).toContain('`type=page`');
+
+			// Extract cursor from content if available
+			const cursorMatch = firstPage.content.match(
+				/\*Use --cursor "([^"]+)" to view more\.\*/,
+			);
+			const nextCursor = cursorMatch ? cursorMatch[1] : null;
+
+			// If there's pagination info in the content, test it
 			if (
-				firstPage.pagination?.hasMore &&
-				firstPage.pagination.nextCursor
+				nextCursor &&
+				firstPage.content.includes('More results are available')
 			) {
 				// Get second page using the cursor
 				const secondPage = await atlassianSearchController.search({
 					cql: 'type=page',
 					limit: 2,
-					cursor: firstPage.pagination.nextCursor,
+					cursor: nextCursor,
 				});
 
 				// Verify second page structure
 				expect(secondPage).toHaveProperty('content');
-				expect(secondPage).toHaveProperty('pagination');
+				expect(typeof secondPage.content).toBe('string');
 
 				// If both pages have content (not the empty message), they should be different
 				if (
-					firstPage.content !==
-						'No Confluence content found matching your query.' &&
-					secondPage.content !==
-						'No Confluence content found matching your query.'
+					!firstPage.content.includes(
+						'No Confluence content found matching your query.',
+					) &&
+					!secondPage.content.includes(
+						'No Confluence content found matching your query.',
+					)
 				) {
 					expect(firstPage.content).not.toEqual(secondPage.content);
 				}
@@ -257,6 +295,10 @@ describe('Atlassian Search Controller', () => {
 
 			// Verify the function runs without errors (proper result structuring is tested elsewhere)
 			expect(result).toHaveProperty('content');
+
+			// Check for executed CQL in the content
+			expect(result.content).toContain('### Executed CQL Query');
+			expect(result.content).toContain('`type=page AND space=test`');
 		}, 15000);
 
 		it('should process CQL query for OR criteria correctly', async () => {
@@ -270,6 +312,10 @@ describe('Atlassian Search Controller', () => {
 
 			// Verify the function runs without errors
 			expect(result).toHaveProperty('content');
+
+			// Check for executed CQL in the content
+			expect(result.content).toContain('### Executed CQL Query');
+			expect(result.content).toContain('`type=page OR type=blogpost`');
 		}, 15000);
 
 		it('should process CQL query with text search correctly', async () => {
@@ -283,6 +329,10 @@ describe('Atlassian Search Controller', () => {
 
 			// Verify the function runs without errors
 			expect(result).toHaveProperty('content');
+
+			// Check for executed CQL in the content
+			expect(result.content).toContain('### Executed CQL Query');
+			expect(result.content).toContain('`text ~ "test"`');
 		}, 15000);
 
 		it('should process CQL query with exact text match correctly', async () => {
@@ -296,6 +346,10 @@ describe('Atlassian Search Controller', () => {
 
 			// Verify the function runs without errors
 			expect(result).toHaveProperty('content');
+
+			// Check for executed CQL in the content
+			expect(result.content).toContain('### Executed CQL Query');
+			expect(result.content).toContain('`title = "Welcome"`');
 		}, 15000);
 
 		it('should properly handle multiple keywords that need quoting', async () => {
@@ -310,6 +364,10 @@ describe('Atlassian Search Controller', () => {
 
 				// Verify the response structure
 				expect(result).toHaveProperty('content');
+
+				// Check for executed CQL in the content
+				expect(result.content).toContain('### Executed CQL Query');
+				expect(result.content).toContain('`space=AND AND title=OR`');
 			} catch (error) {
 				// This might fail if space/title with those names don't exist
 				// That's ok, we're testing the query processing, not the result
@@ -332,6 +390,9 @@ describe('Atlassian Search Controller', () => {
 
 				// Verify the response structure
 				expect(result).toHaveProperty('content');
+
+				// Check for executed CQL in the content - won't test exact content as quotes may be escaped differently
+				expect(result.content).toContain('### Executed CQL Query');
 			} catch (error) {
 				// If the API doesn't accept the processed query, check that it's the right error type
 				expect(error).toBeInstanceOf(McpError);

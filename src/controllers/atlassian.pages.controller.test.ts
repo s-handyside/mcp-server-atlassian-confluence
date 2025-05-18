@@ -30,18 +30,26 @@ describe('Atlassian Pages Controller', () => {
 			// Verify the response structure
 			expect(result).toHaveProperty('content');
 			expect(typeof result.content).toBe('string');
-			expect(result).toHaveProperty('pagination');
 
 			// Verify the content format
 			if (
-				result.content !==
-				'No Confluence pages found matching your criteria.'
+				!result.content.includes(
+					'No Confluence pages found matching your criteria.',
+				)
 			) {
 				expect(result.content).toContain('# Confluence Pages');
 				expect(result.content).toContain('**ID**');
 				expect(result.content).toContain('**Title**');
 				expect(result.content).toContain('**Space ID**');
 				expect(result.content).toContain('**Status**');
+
+				// Check for pagination information in the content if it exists
+				expect(result.content).toContain('Information retrieved at:');
+				if (result.content.includes('More results are available')) {
+					expect(result.content).toMatch(
+						/\*Use --cursor "([^"]+)" to view more\.\*/,
+					);
+				}
 			}
 		}, 15000);
 
@@ -53,8 +61,9 @@ describe('Atlassian Pages Controller', () => {
 
 			// Skip if no pages are available
 			if (
-				initialResult.content ===
-				'No Confluence pages found matching your criteria.'
+				initialResult.content.includes(
+					'No Confluence pages found matching your criteria.',
+				)
 			) {
 				console.warn('Skipping test: No pages available');
 				return;
@@ -84,8 +93,9 @@ describe('Atlassian Pages Controller', () => {
 
 			// If results were found, verify they contain the space ID
 			if (
-				result.content !==
-				'No Confluence pages found matching your criteria.'
+				!result.content.includes(
+					'No Confluence pages found matching your criteria.',
+				)
 			) {
 				expect(result.content).toContain(`**Space ID**: ${spaceId}`);
 			}
@@ -106,8 +116,9 @@ describe('Atlassian Pages Controller', () => {
 
 			// If results were found, verify they contain current status
 			if (
-				result.content !==
-				'No Confluence pages found matching your criteria.'
+				!result.content.includes(
+					'No Confluence pages found matching your criteria.',
+				)
 			) {
 				expect(result.content).toContain('**Status**: current');
 				// No archived status should be present
@@ -125,8 +136,9 @@ describe('Atlassian Pages Controller', () => {
 
 			// Skip if no pages are available
 			if (
-				initialResult.content ===
-				'No Confluence pages found matching your criteria.'
+				initialResult.content.includes(
+					'No Confluence pages found matching your criteria.',
+				)
 			) {
 				console.warn('Skipping test: No pages available');
 				return;
@@ -183,9 +195,8 @@ describe('Atlassian Pages Controller', () => {
 			// so we just verify the calls complete successfully
 		}, 15000);
 
-		// Skip the pagination test that was using mocking
-		// This test was violating the 'no mocks' policy
-		it.skip('should handle pagination with limit and cursor', async () => {
+		// Updated test for pagination
+		it('should handle pagination with limit and cursor', async () => {
 			if (skipIfNoCredentials()) return;
 
 			// Get the first page with a small limit
@@ -195,24 +206,28 @@ describe('Atlassian Pages Controller', () => {
 
 			// Verify the first page response
 			expect(firstPageResult).toHaveProperty('content');
-			expect(firstPageResult).toHaveProperty('pagination');
-			expect(firstPageResult.pagination).toHaveProperty('count');
-			expect(firstPageResult.pagination).toHaveProperty('hasMore');
+			expect(typeof firstPageResult.content).toBe('string');
 
-			// If there are more pages, test cursor-based pagination
+			// If there are more pages indicated in the content, test cursor-based pagination
+			// Extract cursor from content
+			const cursorMatch = firstPageResult.content.match(
+				/\*Use --cursor "([^"]+)" to view more\.\*/,
+			);
+			const nextCursor = cursorMatch ? cursorMatch[1] : null;
+
 			if (
-				firstPageResult.pagination?.hasMore &&
-				firstPageResult.pagination?.nextCursor
+				nextCursor &&
+				firstPageResult.content.includes('More results are available')
 			) {
 				// Get the second page using the cursor from first page
 				const secondPageResult = await atlassianPagesController.list({
 					limit: 2,
-					cursor: firstPageResult.pagination.nextCursor,
+					cursor: nextCursor,
 				});
 
 				// Verify the second page response
 				expect(secondPageResult).toHaveProperty('content');
-				expect(secondPageResult).toHaveProperty('pagination');
+				expect(typeof secondPageResult.content).toBe('string');
 			} else {
 				console.info('Skipping cursor test: No more pages available');
 			}
@@ -240,11 +255,6 @@ describe('Atlassian Pages Controller', () => {
 							return {
 								content:
 									'No Confluence pages found matching your criteria.',
-								pagination: {
-									count: 0,
-									hasMore: false,
-									nextCursor: undefined,
-								},
 							};
 						}
 
@@ -270,9 +280,6 @@ describe('Atlassian Pages Controller', () => {
 				expect(result.content).toBe(
 					'No Confluence pages found matching your criteria.',
 				);
-				expect(result.pagination).toHaveProperty('count', 0);
-				expect(result.pagination).toHaveProperty('hasMore', false);
-				expect(result.pagination?.nextCursor).toBeUndefined();
 
 				// Restore original implementation
 				Object.defineProperty(
@@ -291,8 +298,9 @@ describe('Atlassian Pages Controller', () => {
 
 			// Skip if no pages are available
 			if (
-				initialResult.content ===
-				'No Confluence pages found matching your criteria.'
+				initialResult.content.includes(
+					'No Confluence pages found matching your criteria.',
+				)
 			) {
 				console.warn('Skipping test: No pages available');
 				return;
@@ -319,12 +327,12 @@ describe('Atlassian Pages Controller', () => {
 
 			// Verify the response
 			expect(result).toHaveProperty('content');
-			expect(result).toHaveProperty('pagination');
 
 			// If results were found, verify they contain both filters
 			if (
-				result.content !==
-				'No Confluence pages found matching your criteria.'
+				!result.content.includes(
+					'No Confluence pages found matching your criteria.',
+				)
 			) {
 				expect(result.content).toContain(`**Space ID**: ${spaceId}`);
 				expect(result.content).toContain('**Status**: current');
@@ -385,8 +393,9 @@ describe('Atlassian Pages Controller', () => {
 
 				// Skip if no pages are available
 				if (
-					listResult.content ===
-					'No Confluence pages found matching your criteria.'
+					listResult.content.includes(
+						'No Confluence pages found matching your criteria.',
+					)
 				) {
 					return null;
 				}

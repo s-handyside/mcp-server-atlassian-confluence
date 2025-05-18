@@ -145,10 +145,9 @@ export function formatPageDetails(
 			// Add the extracted comments content
 			lines.push(commentsContent);
 
-			// Add a link to view all comments if there are more
+			// Add a link to view all comments if there are more - check in the content string
 			if (
-				commentsSummary.pagination &&
-				commentsSummary.pagination.hasMore
+				commentsSummary.content.includes('More results are available')
 			) {
 				lines.push('');
 
