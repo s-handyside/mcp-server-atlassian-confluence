@@ -2,7 +2,6 @@ import atlassianSpacesController from './atlassian.spaces.controller.js';
 import { getAtlassianCredentials } from '../utils/transport.util.js';
 import { config } from '../utils/config.util.js';
 import { McpError } from '../utils/error.util.js';
-import { formatSeparator, formatDate } from '../utils/formatter.util.js';
 
 describe('Atlassian Spaces Controller', () => {
 	// Load configuration and check for credentials before all tests

@@ -113,7 +113,7 @@ This section covers the MCP tools available when using this server with an AI as
 Lists Confluence spaces accessible to the user.
 
 - Filters: `type` ('global', 'personal'), `status` ('current', 'archived').
-- Pagination: `limit`, `cursor`.
+- Pagination: `limit`, `cursor`. Pagination information, including the next cursor value, is included directly in the returned text content.
 - Default sort: by name.
 
 **Example:**
@@ -146,7 +146,7 @@ Lists pages.
 
 - Filters: `spaceIds` (array of space IDs), `spaceKeys` (array of space keys), `title` (text in title), `status` (e.g., 'current', 'archived').
 - Sorting: `sort` (e.g., '-modified-date', 'title').
-- Pagination: `limit`, `cursor`.
+- Pagination: `limit`, `cursor`. Pagination information, including the next cursor value, is included directly in the returned text content.
 
 **Example (by space key and title):**
 
@@ -187,8 +187,8 @@ Searches Confluence content.
     - `spaceKey` (limit to a space)
     - `labels` (array of labels - content must have ALL)
     - `contentType` ('page', 'blogpost')
-- Pagination: `limit`, `cursor`.
-- Returns results as Markdown, including snippets and metadata. The executed CQL query is also returned in the metadata.
+- Pagination: `limit`, `cursor`. Pagination information, including the next cursor value, is included directly in the returned text content.
+- Returns results as Markdown, including snippets and metadata. The executed CQL query is also included directly in the returned text content.
 
 **Example (simple search):**
 
