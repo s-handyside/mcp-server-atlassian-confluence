@@ -12,6 +12,7 @@ import { SearchParams } from '../services/vendor.atlassian.search.types.js';
 import { SearchToolArgsType } from '../tools/atlassian.search.types.js';
 import { buildErrorContext } from '../utils/error-handler.util.js';
 import { ensureMcpError } from '../utils/error.util.js';
+import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 
 const controllerLogger = Logger.forContext(
 	'controllers/atlassian.search.controller.ts',
@@ -102,7 +103,6 @@ async function search(
 			return {
 				content:
 					'Please provide search criteria (CQL, title, space, etc.).',
-				pagination: { hasMore: false, count: 0 },
 			};
 		}
 
@@ -128,13 +128,31 @@ async function search(
 			'Search',
 		);
 
-		// Pass search results to formatter (remove pagination arg)
+		// Format the search results
 		const formattedResults = formatSearchResults(searchData.results);
 
+		// Prepare the complete content string with CQL and pagination information
+		let finalContent = '';
+
+		// Add the executed CQL query if available
+		if (finalCql && finalCql.trim()) {
+			finalContent += `${formatHeading('Executed CQL Query', 3)}\n\`${finalCql}\`\n\n`;
+		}
+
+		// Add the formatted search results
+		finalContent += formattedResults;
+
+		// Add pagination information if available
+		if (
+			pagination &&
+			(pagination.hasMore || pagination.count !== undefined)
+		) {
+			const paginationString = formatPagination(pagination);
+			finalContent += '\n\n' + paginationString;
+		}
+
 		return {
-			content: formattedResults,
-			pagination,
-			metadata: { executedCql: finalCql },
+			content: finalContent,
 		};
 	} catch (error) {
 		const mcpError = ensureMcpError(error);

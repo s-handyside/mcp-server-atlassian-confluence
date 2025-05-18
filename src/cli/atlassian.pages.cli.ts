@@ -3,7 +3,6 @@ import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianPagesController from '../controllers/atlassian.pages.controller.js';
 import { ListPagesToolArgsType } from '../tools/atlassian.pages.types.js';
-import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * CLI module for managing Confluence pages.
@@ -46,7 +45,7 @@ function registerListPagesCommand(program: Command): void {
 		)
 		.option(
 			'-c, --cursor <string>',
-			'Pagination cursor for retrieving the next set of results. Obtain this opaque string from the pagination.nextCursor field of a previous response. Confluence uses cursor-based pagination rather than offset-based pagination.',
+			'Pagination cursor for retrieving the next set of results. Obtain this opaque string from the pagination information included at the end of the previous response. Confluence uses cursor-based pagination rather than offset-based pagination.',
 		)
 		.option(
 			'-t, --title <text>',
@@ -107,14 +106,8 @@ function registerListPagesCommand(program: Command): void {
 
 				actionLogger.debug('Successfully retrieved pages');
 
-				// Print the main content (already includes timestamp footer from formatter)
+				// Print the main content (which now includes pagination information)
 				console.log(result.content);
-
-				// Conditionally print the standardized pagination footer
-				if (result.pagination) {
-					// Use the updated formatPagination which takes the object
-					console.log('\n' + formatPagination(result.pagination));
-				}
 			} catch (error) {
 				actionLogger.error('Operation failed:', error);
 				handleCliError(error);
@@ -155,10 +148,8 @@ function registerGetPageCommand(program: Command): void {
 					pageId: options.pageId,
 				});
 
-				// Print the main content (already includes timestamp footer from formatter)
+				// Print the main content
 				console.log(result.content);
-
-				// No separate CLI pagination footer needed for 'get' commands
 			} catch (error) {
 				handleCliError(error);
 			}

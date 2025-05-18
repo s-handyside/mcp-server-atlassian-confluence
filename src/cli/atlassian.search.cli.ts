@@ -2,12 +2,11 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import atlassianSearchController from '../controllers/atlassian.search.controller.js';
-import { formatHeading, formatPagination } from '../utils/formatter.util.js';
 import { SearchToolArgsType } from '../tools/atlassian.search.types.js';
 
 /**
  * CLI module for searching Confluence content.
- * Provides commands for searching content using Confluence Query Language (CQL).
+ * Provides commands for searching Confluence content using Confluence Query Language (CQL).
  * All commands require valid Atlassian credentials.
  */
 
@@ -45,7 +44,7 @@ function registerSearchCommand(program: Command): void {
 		)
 		.option(
 			'-c, --cursor <string>',
-			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. Obtain this opaque string from the pagination information in a previous response. Confluence uses cursor-based pagination rather than offset-based pagination.',
+			'Pagination cursor for retrieving the next set of results. Use this to navigate through large result sets. Obtain this opaque string from the pagination information included at the end of the previous response. Confluence uses cursor-based pagination rather than offset-based pagination.',
 		)
 		.option(
 			'-q, --cql <cql>',
@@ -120,20 +119,8 @@ function registerSearchCommand(program: Command): void {
 
 				actionLogger.debug('Successfully received search results');
 
-				// Print the executed CQL if available in metadata
-				if (result.metadata?.executedCql) {
-					console.log(formatHeading('Executed CQL Query', 3));
-					console.log('`' + result.metadata.executedCql + '`\n');
-				}
-
-				// Print the main content (already includes timestamp footer from formatter)
+				// Print the main content (which now includes executed CQL and pagination information)
 				console.log(result.content);
-
-				// Conditionally print the standardized pagination footer
-				if (result.pagination) {
-					// Use the updated formatPagination which takes the object
-					console.log('\n' + formatPagination(result.pagination));
-				}
 			} catch (error) {
 				actionLogger.error('Operation failed:', error);
 				handleCliError(error);

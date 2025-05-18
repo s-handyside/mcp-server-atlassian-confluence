@@ -8,13 +8,12 @@ import {
 	GetPageToolArgsType,
 	GetPageToolArgs,
 } from './atlassian.pages.types.js';
-import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * MCP Tool: List Confluence Pages
  *
  * Lists Confluence pages with optional filtering by space, status, and limit.
- * Returns a formatted markdown response with page details and pagination info appended to content.
+ * Returns a formatted markdown response with page details and pagination info.
  *
  * @param {ListPagesToolArgsType} args - Tool arguments for filtering pages
  * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted pages list
@@ -33,26 +32,15 @@ async function listPages(args: ListPagesToolArgsType) {
 		// With updated controller signature, we can pass the tool args directly
 		const result = await atlassianPagesController.list(args);
 
-		methodLogger.debug('Successfully retrieved pages list', {
-			count: result.pagination?.count,
-			hasMore: result.pagination?.hasMore,
-		});
-
-		let finalText = result.content;
-		if (result.pagination) {
-			finalText += '\n\n' + formatPagination(result.pagination);
-		}
+		methodLogger.debug('Successfully retrieved pages list');
 
 		return {
 			content: [
 				{
 					type: 'text' as const,
-					text: finalText,
+					text: result.content, // Content now includes pagination information
 				},
 			],
-			metadata: {
-				...(result.metadata || {}),
-			},
 		};
 	} catch (error) {
 		methodLogger.error('Error listing pages:', error);
@@ -117,7 +105,11 @@ function registerTools(server: McpServer) {
 	// Register the list pages tool
 	server.tool(
 		'conf_ls_pages',
-		`Lists pages within specified spaces (by \`spaceId\` or \`spaceKey\`) or globally. Filters by \`title\` (NOTE: this is an EXACT match on the page title), \`status\` (current, archived, etc.). Supports sorting (\`sort\`) and pagination (\`limit\`, \`cursor\`). Returns a formatted list of pages including ID, title, status, space ID, author, version, and URL. For partial title matching or full-text content search, use the \`conf_search\` tool. Requires Confluence credentials.`,
+		`Lists pages within specified spaces (by \`spaceId\` or \`spaceKey\`) or globally. Filters by \`title\` (NOTE: this is an EXACT match on the page title), \`status\` (current, archived, etc.). Supports sorting (\`sort\`) and pagination (\`limit\`, \`cursor\`). 
+- Returns a formatted list of pages including ID, title, status, space ID, author, version, and URL. 
+- Pagination information including next cursor value is included at the end of the returned text content.
+- For partial title matching or full-text content search, use the \`conf_search\` tool. 
+- Requires Confluence credentials.`,
 		ListPagesToolArgs.shape,
 		listPages,
 	);

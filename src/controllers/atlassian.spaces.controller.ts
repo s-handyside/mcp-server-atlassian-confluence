@@ -27,6 +27,7 @@ import {
 	extractPaginationInfo,
 	PaginationType,
 } from '../utils/pagination.util.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * Controller for managing Confluence spaces.
@@ -40,7 +41,7 @@ import {
  * @param options.status - Filter by space status (current, archived)
  * @param options.limit - Maximum number of spaces to return
  * @param options.cursor - Pagination cursor for subsequent requests
- * @returns Promise with formatted spaces list content and pagination info
+ * @returns Promise with formatted spaces list content including pagination information
  * @throws Error if space listing fails
  */
 async function list(
@@ -101,12 +102,23 @@ async function list(
 			'Space',
 		);
 
-		// Format the spaces data using the formatter (remove pagination arg)
+		// Format the spaces data using the formatter
 		const formattedSpaces = formatSpacesList(spacesData);
 
+		// Create the complete content string by appending the pagination information
+		let finalContent = formattedSpaces;
+
+		// Only add pagination information if it exists and contains relevant information
+		if (
+			pagination &&
+			(pagination.hasMore || pagination.count !== undefined)
+		) {
+			const paginationString = formatPagination(pagination);
+			finalContent += '\n\n' + paginationString;
+		}
+
 		return {
-			content: formattedSpaces,
-			pagination, // Return the extracted pagination object
+			content: finalContent,
 		};
 	} catch (error) {
 		// Use the standardized error handler
@@ -259,7 +271,6 @@ async function get(args: GetSpaceToolArgsType): Promise<ControllerResponse> {
 
 		return {
 			content: formattedSpace,
-			// No pagination needed for get
 		};
 	} catch (error) {
 		// Use the standardized error handler

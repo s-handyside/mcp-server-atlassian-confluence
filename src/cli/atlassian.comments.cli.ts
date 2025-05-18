@@ -5,7 +5,6 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { handleCliError } from '../utils/error.util.js';
 import { atlassianCommentsController } from '../controllers/atlassian.comments.controller.js';
-import { formatPagination } from '../utils/formatter.util.js';
 import { DEFAULT_PAGE_SIZE } from '../utils/defaults.util.js';
 
 // Create logger for this CLI module
@@ -35,7 +34,7 @@ function register(program: Command): void {
 		)
 		.option(
 			'-c, --start <start>',
-			'Pagination start position (0-based offset). For comments, Confluence uses offset-based pagination via the "start" parameter rather than cursor-based pagination used in other endpoints.',
+			'Pagination start position (0-based offset). For comments, Confluence uses offset-based pagination via the "start" parameter rather than cursor-based pagination used in other endpoints. The pagination information is included at the end of the response.',
 			(val) => parseInt(val, 10),
 			0,
 		)
@@ -55,13 +54,8 @@ function register(program: Command): void {
 						bodyFormat: 'atlas_doc_format',
 					});
 
-				// Output the content
+				// Output the content (which now includes pagination information)
 				console.log(result.content);
-
-				// Output pagination information if available
-				if (result.pagination) {
-					console.log('\n' + formatPagination(result.pagination));
-				}
 			} catch (error) {
 				handleCliError(error);
 			}

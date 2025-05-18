@@ -17,6 +17,7 @@ import {
 	CommentData,
 	InlineProperties,
 } from '../services/vendor.atlassian.comments.types.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 // Create logger for this controller
 const logger = Logger.forContext(
@@ -182,9 +183,20 @@ async function listPageComments(
 			baseUrl,
 		);
 
+		// Create the final content with pagination information included
+		let finalContent = formattedContent;
+
+		// Add pagination information if available
+		if (
+			pagination &&
+			(pagination.hasMore || pagination.count !== undefined)
+		) {
+			const paginationString = formatPagination(pagination);
+			finalContent += '\n\n' + paginationString;
+		}
+
 		return {
-			content: formattedContent,
-			pagination,
+			content: finalContent,
 		};
 	} catch (error) {
 		// Handle errors

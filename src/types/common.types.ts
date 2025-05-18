@@ -7,6 +7,8 @@
 /**
  * Common pagination information for API responses.
  * This is used for providing consistent pagination details to clients.
+ * Note: This is now only used internally by controllers and formatPagination.
+ * The formatted pagination information will be integrated into the content string.
  */
 export interface ResponsePagination {
 	/**
@@ -61,23 +63,16 @@ export interface PaginationOptions {
 /**
  * Common response structure for controller operations.
  * All controller methods should return this structure.
+ *
+ * Note: All information, including what was previously in metadata or handled
+ * as a separate pagination object, is now part of this single Markdown content string,
+ * composed by the Controller and its Formatters.
  */
 export interface ControllerResponse {
 	/**
 	 * Formatted content to be displayed to the user.
-	 * Usually a Markdown-formatted string.
+	 * A comprehensive Markdown-formatted string that includes all necessary information,
+	 * including pagination details and any additional metadata.
 	 */
 	content: string;
-
-	/**
-	 * Optional pagination information for list operations.
-	 * If present, indicates that more results are available.
-	 */
-	pagination?: ResponsePagination;
-
-	/**
-	 * Optional metadata for additional context or debugging information.
-	 * Can include warnings, errors, or other useful data.
-	 */
-	metadata?: Record<string, unknown>;
 }

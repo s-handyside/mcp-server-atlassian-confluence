@@ -9,13 +9,12 @@ import {
 } from './atlassian.spaces.types.js';
 
 import atlassianSpacesController from '../controllers/atlassian.spaces.controller.js';
-import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * MCP Tool: List Confluence Spaces
  *
  * Lists Confluence spaces with optional filtering by type and name.
- * Returns a formatted markdown response with space details and pagination info appended to content.
+ * Returns a formatted markdown response with space details and pagination info.
  *
  * @param {ListSpacesToolArgsType} args - Tool arguments for filtering spaces
  * @returns {Promise<{ content: Array<{ type: 'text', text: string }> }>} MCP response with formatted spaces list
@@ -37,21 +36,13 @@ async function listSpaces(args: ListSpacesToolArgsType) {
 			cursor: args.cursor,
 		});
 
-		toolLogger.debug('Successfully retrieved spaces from controller', {
-			count: result.pagination?.count,
-			hasMore: result.pagination?.hasMore,
-		});
-
-		let finalText = result.content;
-		if (result.pagination) {
-			finalText += '\n\n' + formatPagination(result.pagination);
-		}
+		toolLogger.debug('Successfully retrieved spaces from controller');
 
 		return {
 			content: [
 				{
 					type: 'text' as const,
-					text: finalText,
+					text: result.content, // Content now includes pagination information
 				},
 			],
 		};
@@ -122,7 +113,7 @@ function registerTools(server: McpServer) {
 		'conf_ls_spaces',
 		`Lists Confluence spaces accessible to the user, with optional filtering by \`type\` (global, personal), or \`status\` (current, archived).
 - Use this to discover spaces and find their keys needed for other tools.
-- Supports pagination via \`limit\` and \`cursor\`.
+- Supports pagination via \`limit\` and \`cursor\` parameters. Pagination information, including next cursor value, is included directly in the returned text content.
 - **Note:** Filtering by \`type\` alone does not filter by status; the \`status\` parameter defaults to returning spaces with *all* statuses (current and archived) unless explicitly set to \`current\` or \`archived\`.
 - Returns a formatted list of spaces including ID, key, name, type, status, and URL.
 - Default sort is by name descending.`,

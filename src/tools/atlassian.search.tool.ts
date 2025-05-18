@@ -6,7 +6,6 @@ import {
 	SearchToolArgsType,
 	SearchToolArgs,
 } from './atlassian.search.types.js';
-import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * MCP Tool: Search Confluence Content
@@ -31,22 +30,14 @@ async function searchContent(args: SearchToolArgsType) {
 
 		methodLogger.debug('Successfully searched Confluence content');
 
-		let finalText = result.content;
-		if (result.pagination) {
-			finalText += '\n\n' + formatPagination(result.pagination);
-		}
-
 		// Convert the string content to an MCP text resource with the correct type
 		const response = {
 			content: [
 				{
 					type: 'text' as const,
-					text: finalText,
+					text: result.content, // Content now includes executed CQL and pagination information
 				},
 			],
-			metadata: {
-				...(result.metadata || {}),
-			},
 		};
 
 		return response;
@@ -74,7 +65,13 @@ function registerTools(server: McpServer) {
 	// Register the search content tool
 	server.tool(
 		'conf_search',
-		`Searches Confluence content. Supports multiple filter options: \`cql\` (for providing a complete custom Confluence Query Language string), \`title\` (text in title), \`spaceKey\`, \`labels\`, and \`contentType\` (page/blogpost). A general \`query\` parameter performs a basic text search (equivalent to CQL: text ~ "your query").\nIMPORTANT for \`cql\` users: Ensure your CQL syntax is correct, especially quoting terms in text searches (e.g., \`text ~ "search phrase"\`). Invalid CQL will result in an error. Refer to official Confluence CQL documentation. Filters are generally combined with AND logic.\nSupports pagination (\`limit\`, \`cursor\`). Returns Markdown formatted results with snippets and metadata. Requires Confluence credentials.`,
+		`Searches Confluence content. Supports multiple filter options: \`cql\` (for providing a complete custom Confluence Query Language string), \`title\` (text in title), \`spaceKey\`, \`labels\`, and \`contentType\` (page/blogpost). A general \`query\` parameter performs a basic text search (equivalent to CQL: text ~ "your query").
+- IMPORTANT for \`cql\` users: Ensure your CQL syntax is correct, especially quoting terms in text searches (e.g., \`text ~ "search phrase"\`). Invalid CQL will result in an error. Refer to official Confluence CQL documentation. 
+- Filters are generally combined with AND logic.
+- Supports pagination (\`limit\`, \`cursor\`). 
+- The executed CQL and pagination information (including next cursor value) are included directly in the returned text content.
+- Returns Markdown formatted results with snippets and metadata. 
+- Requires Confluence credentials.`,
 		SearchToolArgs.shape,
 		searchContent,
 	);

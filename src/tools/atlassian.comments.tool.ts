@@ -8,7 +8,6 @@ import { Logger } from '../utils/logger.util.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import { atlassianCommentsController } from '../controllers/atlassian.comments.controller.js';
 import { PAGE_DEFAULTS } from '../utils/defaults.util.js';
-import { formatPagination } from '../utils/formatter.util.js';
 
 // Create logger for this file
 const logger = Logger.forContext('tools/atlassian.comments.tool.ts');
@@ -45,7 +44,7 @@ const ListPageCommentsArgsSchema = z.object({
 		.min(0)
 		.default(0)
 		.describe(
-			'Starting point for pagination (used with cursor from metadata)',
+			'Starting point for pagination (used for retrieving subsequent pages of results)',
 		),
 });
 
@@ -70,17 +69,9 @@ async function handleListPageComments(args: ListPageCommentsArgs) {
 			bodyFormat: PAGE_DEFAULTS.BODY_FORMAT as 'atlas_doc_format',
 		});
 
-		let finalText = result.content;
-		if (result.pagination) {
-			finalText += '\n\n' + formatPagination(result.pagination);
-		}
-
 		// Format the response for MCP
 		return {
-			content: [{ type: 'text' as const, text: finalText }],
-			// metadata: { // Removed as it became empty
-			// 	/* pagination: result.pagination */
-			// }, // Removed pagination from metadata
+			content: [{ type: 'text' as const, text: result.content }],
 		};
 	} catch (error) {
 		methodLogger.error('Tool conf_ls_page_comments failed', error);
@@ -99,7 +90,7 @@ function registerTools(server: McpServer) {
 	// Register the list comments tool
 	server.tool(
 		'conf_ls_page_comments',
-		'Lists comments for a Confluence page, identified by `pageId`. Includes both page-level and inline comments. Shows comment content and metadata in Markdown format. Supports pagination via `limit` and `start` parameters (check metadata). Requires Confluence credentials to be configured. Returns comment details as Markdown.',
+		'Lists comments for a Confluence page, identified by `pageId`. Includes both page-level and inline comments. Shows comment content and metadata in Markdown format. Supports pagination via `limit` and `start` parameters. Pagination information including next offset value is included directly in the returned text content. Requires Confluence credentials to be configured. Returns comment details as Markdown.',
 		ListPageCommentsArgsSchema.shape,
 		handleListPageComments,
 	);

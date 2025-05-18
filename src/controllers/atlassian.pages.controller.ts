@@ -28,6 +28,7 @@ import {
 	GetPageToolArgsType,
 } from '../tools/atlassian.pages.types.js';
 import { adfToMarkdown } from '../utils/adf.util.js';
+import { formatPagination } from '../utils/formatter.util.js';
 
 /**
  * Controller for managing Confluence pages.
@@ -56,7 +57,7 @@ const CACHE_TTL = 3600000; // 1 hour in milliseconds
  * @param options.sort - Sort order for results
  * @param options.limit - Maximum number of pages to return
  * @param options.cursor - Pagination cursor for subsequent requests
- * @returns Promise with formatted pages list content
+ * @returns Promise with formatted pages list content including pagination information
  * @throws Error if page listing fails
  */
 async function list(
@@ -189,7 +190,6 @@ async function list(
 			return {
 				content:
 					'No pages found. Specified space keys/IDs are invalid or inaccessible.',
-				pagination: { hasMore: false, count: 0 },
 			};
 		}
 
@@ -234,13 +234,24 @@ async function list(
 			'Page',
 		);
 
-		// Pass the results array and baseUrl to the formatter (remove pagination arg)
+		// Pass the results array and baseUrl to the formatter
 		const baseUrl = pagesData._links?.base || '';
 		const formattedPages = formatPagesList(pagesData.results, baseUrl);
 
+		// Create the complete content string by appending the pagination information
+		let finalContent = formattedPages;
+
+		// Only add pagination information if it exists and contains relevant information
+		if (
+			pagination &&
+			(pagination.hasMore || pagination.count !== undefined)
+		) {
+			const paginationString = formatPagination(pagination);
+			finalContent += '\n\n' + paginationString;
+		}
+
 		return {
-			content: formattedPages,
-			pagination,
+			content: finalContent,
 		};
 	} catch (error) {
 		throw handleControllerError(error, {
@@ -321,9 +332,7 @@ async function get(args: GetPageToolArgsType): Promise<ControllerResponse> {
 					bodyFormat: 'atlas_doc_format', // Get the comments in ADF format
 				});
 
-			methodLogger.debug(
-				`Retrieved comments summary for page. Has more: ${commentsSummary.pagination?.hasMore ? 'yes' : 'no'}`,
-			);
+			methodLogger.debug(`Retrieved comments summary for page.`);
 		} catch (error) {
 			methodLogger.warn(
 				`Failed to fetch comments: ${error instanceof Error ? error.message : String(error)}`,
