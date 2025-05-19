@@ -187,6 +187,20 @@ Get full content (as Markdown) and metadata for a specific page by its `pageId`.
 
 ---
 
+## `conf_ls_page_comments`
+
+Lists comments on a specific Confluence page. Provides formatted comments with author information, timestamps, and hierarchical structure.
+
+**Example:**
+
+```json
+{ "pageId": "12345678" }
+```
+
+> "Show me all comments on page 12345678."
+
+---
+
 ## `conf_search`
 
 Searches Confluence content.
@@ -234,6 +248,7 @@ npx -y @aashari/mcp-server-atlassian-confluence ls-spaces --type global --status
 npx -y @aashari/mcp-server-atlassian-confluence get-space --space-key DEV
 npx -y @aashari/mcp-server-atlassian-confluence ls-pages --space-keys DEV HR MARKETING --limit 15 --sort "-modified-date"
 npx -y @aashari/mcp-server-atlassian-confluence get-page --page-id 12345678
+npx -y @aashari/mcp-server-atlassian-confluence ls-page-comments --page-id 12345678
 npx -y @aashari/mcp-server-atlassian-confluence search --query "security best practices" --space-key DOCS --type page --limit 5
 npx -y @aashari/mcp-server-atlassian-confluence search --cql "label = official-docs AND creator = currentUser()"
 ```
@@ -311,6 +326,17 @@ Options:
   -p, --page-id <id>    The numeric ID of the Confluence page to retrieve (required)
 ```
 
+### `ls-page-comments`
+
+Retrieves comments on a specific Confluence page.
+
+```bash
+mcp-atlassian-confluence ls-page-comments --page-id <id>
+
+Options:
+  -p, --page-id <id>    The numeric ID of the Confluence page to retrieve comments from (required)
+```
+
 ### `search`
 
 Searches Confluence content using CQL (Confluence Query Language) or simplified filters.
@@ -344,6 +370,7 @@ mcp-atlassian-confluence ls-spaces --help
 mcp-atlassian-confluence get-space --help
 mcp-atlassian-confluence ls-pages --help
 mcp-atlassian-confluence get-page --help
+mcp-atlassian-confluence ls-page-comments --help
 mcp-atlassian-confluence search --help
 ```
 
