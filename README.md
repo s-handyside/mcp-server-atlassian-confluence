@@ -1,56 +1,42 @@
 # Atlassian Confluence MCP Server
 
-This project provides a Model Context Protocol (MCP) server that acts as a bridge between AI assistants (like Anthropic's Claude, Cursor AI, or other MCP-compatible clients) and your Atlassian Confluence instance. It allows AI to securely access and interact with your Confluence spaces and pages in real time.
+A Node.js/TypeScript Model Context Protocol (MCP) server for Atlassian Confluence Cloud. Enables AI systems (e.g., LLMs like Claude or Cursor AI) to securely interact with your Confluence spaces, pages, and content in real time.
 
----
-
-# Overview
-
-## What is MCP?
-
-Model Context Protocol (MCP) is an open standard that allows AI systems to securely and contextually connect with external tools and data sources.
-
-This server implements MCP specifically for Confluence Cloud, bridging your Confluence data with AI assistants.
+[![NPM Version](https://img.shields.io/npm/v/@aashari/mcp-server-atlassian-confluence)](https://www.npmjs.com/package/@aashari/mcp-server-atlassian-confluence)
+[![Build Status](https://img.shields.io/github/workflow/status/aashari/mcp-server-atlassian-confluence/CI)](https://github.com/aashari/mcp-server-atlassian-confluence/actions)
 
 ## Why Use This Server?
 
-- **Minimal Input, Maximum Output Philosophy**: Simple identifiers like `spaceKey` and `pageId` are all you need. Each tool returns comprehensive details without requiring extra flags.
+- **Minimal Input, Maximum Output**: Simple identifiers provide comprehensive details without requiring extra flags.
+- **Complete Knowledge Base Access**: Give AI assistants visibility into documentation, wikis, and knowledge base content.
+- **Rich Content Formatting**: Automatic conversion of Atlassian Document Format to readable Markdown.
+- **Secure Local Authentication**: Run locally with your credentials, never storing tokens on remote servers.
+- **Intuitive Markdown Responses**: Well-structured, consistent Markdown formatting for all outputs.
 
-- **Complete Knowledge Base Access**: Provide your AI assistant with full visibility into your documentation, wikis, and knowledge base content in real time.
+## What is MCP?
 
-- **Rich Content Formatting**: All page content is automatically converted from Atlassian Document Format to Markdown with proper headings, tables, lists, and other formatting elements.
-
-- **Secure Local Authentication**: Credentials are never stored in the server. The server runs locally, so your tokens never leave your machine and you can request only the permissions you need.
-
-- **Intuitive Markdown Responses**: All responses use well-structured Markdown for readability with consistent formatting and navigational links.
-
----
-
-# Getting Started
+Model Context Protocol (MCP) is an open standard for securely connecting AI systems to external tools and data sources. This server implements MCP for Confluence Cloud, enabling AI assistants to interact with your Confluence content programmatically.
 
 ## Prerequisites
 
 - **Node.js** (>=18.x): [Download](https://nodejs.org/)
 - **Atlassian Account** with access to Confluence Cloud
 
----
+## Setup
 
-## Step 1: Get Your Atlassian API Token
+### Step 1: Get Your Atlassian API Token
 
-1. Go to your Atlassian API token management page:
-   [https://id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens)
+1. Go to your Atlassian API token management page: [https://id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens)
 2. Click **Create API token**.
 3. Give it a descriptive **Label** (e.g., `mcp-confluence-access`).
 4. Click **Create**.
 5. **Copy the generated API token** immediately. You won't be able to see it again.
 
----
+### Step 2: Configure Credentials
 
-## Step 2: Configure Credentials
+#### Option A: MCP Config File (Recommended)
 
-### Method A: MCP Config File (Recommended)
-
-Create or edit `~/.mcp/configs.json`:
+Edit or create `~/.mcp/configs.json`:
 
 ```json
 {
@@ -68,26 +54,32 @@ Create or edit `~/.mcp/configs.json`:
 - `<YOUR_ATLASSIAN_EMAIL>`: Your Atlassian account email.
 - `<YOUR_COPIED_API_TOKEN>`: The API token from Step 1.
 
-**Note:** For backward compatibility, the server will also recognize configurations under the full package name (`@aashari/mcp-server-atlassian-confluence`), the unscoped package name (`mcp-server-atlassian-confluence`), or the `atlassian-confluence` format if the recommended `confluence` key is not found. However, using the short `confluence` key is preferred for new configurations.
-
-### Method B: Environment Variables
-
-Pass credentials directly when running the server:
+#### Option B: Environment Variables
 
 ```bash
-ATLASSIAN_SITE_NAME="<YOUR_SITE_NAME>" \
-ATLASSIAN_USER_EMAIL="<YOUR_EMAIL>" \
-ATLASSIAN_API_TOKEN="<YOUR_API_TOKEN>" \
-npx -y @aashari/mcp-server-atlassian-confluence
+export ATLASSIAN_SITE_NAME="<YOUR_SITE_NAME>"
+export ATLASSIAN_USER_EMAIL="<YOUR_EMAIL>"
+export ATLASSIAN_API_TOKEN="<YOUR_API_TOKEN>"
 ```
 
----
+### Step 3: Install and Run
 
-## Step 3: Connect Your AI Assistant
+#### Quick Start with `npx`
 
-Configure your MCP-compatible client to launch this server.
+```bash
+npx -y @aashari/mcp-server-atlassian-confluence ls-spaces
+```
 
-**Claude / Cursor Configuration:**
+#### Global Installation
+
+```bash
+npm install -g @aashari/mcp-server-atlassian-confluence
+mcp-atlassian-confluence ls-spaces
+```
+
+### Step 4: Connect to AI Assistant
+
+Configure your MCP-compatible client (e.g., Claude, Cursor AI):
 
 ```json
 {
@@ -100,56 +92,37 @@ Configure your MCP-compatible client to launch this server.
 }
 ```
 
-This configuration launches the server automatically at runtime.
+## MCP Tools
 
----
+MCP tools use `snake_case` names, `camelCase` parameters, and return Markdown-formatted responses.
 
-# Tools
+- **conf_ls_spaces**: Lists accessible Confluence spaces (`type`: str opt, `status`: str opt, `limit`: num opt, `cursor`: str opt). Use: View available spaces.
+- **conf_get_space**: Gets detailed space information (`spaceKey`: str req). Use: Access space content and metadata.
+- **conf_ls_pages**: Lists pages with filtering (`spaceIds`: str[] opt, `spaceKeys`: str[] opt, `title`: str opt, `status`: str[] opt, `sort`: str opt, `limit`: num opt, `cursor`: str opt). Use: Find pages matching criteria.
+- **conf_get_page**: Gets comprehensive page content (`pageId`: str req). Use: View full page content as Markdown.
+- **conf_ls_page_comments**: Lists comments on a page (`pageId`: str req). Use: Read page discussions.
+- **conf_search**: Searches Confluence content (`cql`: str opt, `query`: str opt, `title`: str opt, `spaceKey`: str opt, `labels`: str[] opt, `contentType`: str opt, `limit`: num opt, `cursor`: str opt). Use: Find specific content.
 
-This section covers the MCP tools available when using this server with an AI assistant. Note that MCP tools use `snake_case` for tool names and `camelCase` for parameters.
+<details>
+<summary><b>MCP Tool Examples (Click to expand)</b></summary>
 
-## `conf_ls_spaces`
+### `conf_ls_spaces`
 
-Lists Confluence spaces accessible to the user.
-
-- Filters: `type` ('global', 'personal'), `status` ('current', 'archived').
-- Pagination: `limit`, `cursor`. Pagination information, including the next cursor value, is included directly in the returned text content.
-- Default sort: by name.
-
-**Example:**
-
+**List Global Spaces:**
 ```json
 { "type": "global", "status": "current", "limit": 10 }
 ```
 
-> "Show me the first 10 current global Confluence spaces."
+### `conf_get_space`
 
----
-
-## `conf_get_space`
-
-Get full details for a specific space using its `spaceKey`. Includes homepage, description, and other metadata.
-
-**Example:**
-
+**Get Space Details:**
 ```json
 { "spaceKey": "DEV" }
 ```
 
-> "Tell me about the DEV space in Confluence."
+### `conf_ls_pages`
 
----
-
-## `conf_ls_pages`
-
-Lists pages.
-
-- Filters: `spaceIds` (array of space IDs), `spaceKeys` (array of space keys), `title` (text in title), `status` (e.g., 'current', 'archived').
-- Sorting: `sort` (e.g., '-modified-date', 'title').
-- Pagination: `limit`, `cursor`. Pagination information, including the next cursor value, is included directly in the returned text content.
-
-**Example (by space key and title):**
-
+**List Pages by Space and Title:**
 ```json
 {
 	"spaceKeys": ["DEV"],
@@ -159,8 +132,7 @@ Lists pages.
 }
 ```
 
-**Example (multiple space keys):**
-
+**List Pages from Multiple Spaces:**
 ```json
 {
 	"spaceKeys": ["DEV", "HR", "MARKETING"],
@@ -169,53 +141,23 @@ Lists pages.
 }
 ```
 
-> "Show me current pages in the DEV space with 'API Documentation' in the title, sorted by modification date."
+### `conf_get_page`
 
----
-
-## `conf_get_page`
-
-Get full content (as Markdown) and metadata for a specific page by its `pageId`.
-
-**Example:**
-
+**Get Page Content:**
 ```json
 { "pageId": "12345678" }
 ```
 
-> "Get the content of Confluence page 12345678."
+### `conf_ls_page_comments`
 
----
-
-## `conf_ls_page_comments`
-
-Lists comments on a specific Confluence page. Provides formatted comments with author information, timestamps, and hierarchical structure.
-
-**Example:**
-
+**List Page Comments:**
 ```json
 { "pageId": "12345678" }
 ```
 
-> "Show me all comments on page 12345678."
+### `conf_search`
 
----
-
-## `conf_search`
-
-Searches Confluence content.
-
-- Querying: `cql` (full Confluence Query Language string) or combine simpler filters:
-    - `query` (free-text search for body and title)
-    - `title` (text in title)
-    - `spaceKey` (limit to a space)
-    - `labels` (array of labels - content must have ALL)
-    - `contentType` ('page', 'blogpost')
-- Pagination: `limit`, `cursor`. Pagination information, including the next cursor value, is included directly in the returned text content.
-- Returns results as Markdown, including snippets and metadata. The executed CQL query is also included directly in the returned text content.
-
-**Example (simple search):**
-
+**Simple Search:**
 ```json
 {
 	"query": "release notes Q1",
@@ -225,157 +167,194 @@ Searches Confluence content.
 }
 ```
 
-> "Search for 'release notes Q1' in pages within the PRODUCT space."
-
-**Example (advanced CQL):**
-
+**Advanced CQL Search:**
 ```json
 { "cql": "space = DEV AND label = api AND created >= '2023-01-01'" }
 ```
 
-> "Find content in the DEV space, labeled 'api', created since January 1st, 2023."
+</details>
 
----
+## CLI Commands
 
-# Command-Line Interface (CLI)
+CLI commands use `kebab-case`. Run `--help` for details (e.g., `mcp-atlassian-confluence ls-spaces --help`).
 
-The CLI uses kebab-case for commands (e.g., `ls-spaces`) and options (e.g., `--space-key`).
+- **ls-spaces**: Lists spaces (`--type`, `--status`, `--limit`, `--cursor`). Ex: `mcp-atlassian-confluence ls-spaces --type global`.
+- **get-space**: Gets space details (`--space-key`). Ex: `mcp-atlassian-confluence get-space --space-key DEV`.
+- **ls-pages**: Lists pages (`--space-keys`, `--title`, `--status`, `--sort`, `--limit`, `--cursor`). Ex: `mcp-atlassian-confluence ls-pages --space-keys DEV`.
+- **get-page**: Gets page content (`--page-id`). Ex: `mcp-atlassian-confluence get-page --page-id 12345678`.
+- **ls-page-comments**: Lists comments (`--page-id`). Ex: `mcp-atlassian-confluence ls-page-comments --page-id 12345678`.
+- **search**: Searches content (`--cql`, `--query`, `--space-key`, `--label`, `--type`, `--limit`, `--cursor`). Ex: `mcp-atlassian-confluence search --query "security"`.
 
-## Quick Use with `npx`
+<details>
+<summary><b>CLI Command Examples (Click to expand)</b></summary>
 
+### List Spaces
+
+**List Global Spaces:**
 ```bash
-npx -y @aashari/mcp-server-atlassian-confluence ls-spaces --type global --status current --limit 10
-npx -y @aashari/mcp-server-atlassian-confluence get-space --space-key DEV
-npx -y @aashari/mcp-server-atlassian-confluence ls-pages --space-keys DEV HR MARKETING --limit 15 --sort "-modified-date"
-npx -y @aashari/mcp-server-atlassian-confluence get-page --page-id 12345678
-npx -y @aashari/mcp-server-atlassian-confluence ls-page-comments --page-id 12345678
-npx -y @aashari/mcp-server-atlassian-confluence search --query "security best practices" --space-key DOCS --type page --limit 5
-npx -y @aashari/mcp-server-atlassian-confluence search --cql "label = official-docs AND creator = currentUser()"
+mcp-atlassian-confluence ls-spaces --type global --status current --limit 10
 ```
 
-## Install Globally
+### Get Space
 
 ```bash
-npm install -g @aashari/mcp-server-atlassian-confluence
+mcp-atlassian-confluence get-space --space-key DEV
 ```
 
-Then run directly:
+### List Pages
+
+**By Multiple Space Keys:**
+```bash
+mcp-atlassian-confluence ls-pages --space-keys DEV HR MARKETING --limit 15 --sort "-modified-date"
+```
+
+**With Title Filter:**
+```bash
+mcp-atlassian-confluence ls-pages --space-keys DEV --title "API Documentation" --status current
+```
+
+### Get Page
 
 ```bash
-mcp-atlassian-confluence ls-spaces
 mcp-atlassian-confluence get-page --page-id 12345678
 ```
 
-## Available Commands
-
-The following CLI commands are available:
-
-### `ls-spaces`
-
-Lists Confluence spaces with optional filtering and pagination.
+### List Page Comments
 
 ```bash
-mcp-atlassian-confluence ls-spaces [options]
-
-Options:
-  -l, --limit <number>    Maximum number of items to return (1-100). Default is 25
-  -c, --cursor <string>   Pagination cursor for retrieving the next set of results
-  -t, --type <type>       Filter spaces by type. Options: "global" (team spaces), 
-                          "personal" (user spaces), or "archived" (archived spaces)
-  -s, --status <status>   Filter spaces by status. Options: "current" (active spaces) 
-                          or "archived" (archived spaces)
+mcp-atlassian-confluence ls-page-comments --page-id 12345678
 ```
 
-### `get-space`
+### Search
 
-Gets detailed information about a specific Confluence space.
+**Simple Search:**
+```bash
+mcp-atlassian-confluence search --query "security best practices" --space-key DOCS --type page --limit 5
+```
+
+**CQL Search:**
+```bash
+mcp-atlassian-confluence search --cql "label = official-docs AND creator = currentUser()"
+```
+
+</details>
+
+## Response Format
+
+All responses are Markdown-formatted, including:
+
+- **Title**: Content type and name.
+- **Content**: Full page content, search results, or list of items.
+- **Metadata**: Creator, date, labels, and other relevant information.
+- **Pagination**: Navigation information for paginated results.
+- **Links**: References to related resources when applicable.
+
+<details>
+<summary><b>Response Format Examples (Click to expand)</b></summary>
+
+### Space List Response
+
+```markdown
+# Confluence Spaces
+
+Showing **5** global spaces (current)
+
+| Key | Name | Description |
+|---|---|---|
+| [DEV](#) | Development | Engineering and development documentation |
+| [HR](#) | Human Resources | Employee policies and procedures |
+| [MARKETING](#) | Marketing | Brand guidelines and campaign materials |
+| [PRODUCT](#) | Product | Product specifications and roadmaps |
+| [SALES](#) | Sales | Sales processes and resources |
+
+*Retrieved from mycompany.atlassian.net on 2025-05-19 14:22 UTC*
+
+Use `cursor: "next-page-token-123"` to see more spaces.
+```
+
+### Page Content Response
+
+```markdown
+# API Authentication Guide
+
+**Space:** [DEV](#) (Development)
+**Created by:** Jane Smith on 2025-04-01
+**Last updated:** John Doe on 2025-05-15
+**Labels:** api, security, authentication
+
+## Overview
+
+This document outlines the authentication approaches supported by our API platform.
+
+## Authentication Methods
+
+### OAuth 2.0
+
+We support the following OAuth 2.0 flows:
+
+1. **Authorization Code Flow** - For web applications
+2. **Client Credentials Flow** - For server-to-server
+3. **Implicit Flow** - For legacy clients only
+
+### API Keys
+
+Static API keys are supported but discouraged for production use due to security limitations:
+
+| Key Type | Use Case | Expiration |
+|---|---|---|
+| Development | Testing | 30 days |
+| Production | Live systems | 90 days |
+
+## Implementation Examples
+
+```python
+import requests
+
+def get_oauth_token():
+    return requests.post(
+        'https://api.example.com/oauth/token',
+        data={
+            'client_id': 'YOUR_CLIENT_ID',
+            'client_secret': 'YOUR_CLIENT_SECRET',
+            'grant_type': 'client_credentials'
+        }
+    ).json()['access_token']
+```
+
+*Retrieved from mycompany.atlassian.net on 2025-05-19 14:25 UTC*
+```
+
+</details>
+
+## Development
 
 ```bash
-mcp-atlassian-confluence get-space --space-key <key>
+# Clone repository
+git clone https://github.com/aashari/mcp-server-atlassian-confluence.git
+cd mcp-server-atlassian-confluence
 
-Options:
-  -k, --space-key <key>   The key of the Confluence space to retrieve (required)
+# Install dependencies
+npm install
+
+# Run in development mode
+npm run dev:server
+
+# Run tests
+npm test
 ```
 
-### `ls-pages`
+## Contributing
 
-Lists Confluence pages with filtering, sorting, and pagination.
+Contributions are welcome! Please:
 
-```bash
-mcp-atlassian-confluence ls-pages [options]
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/xyz`).
+3. Commit changes (`git commit -m "Add xyz feature"`).
+4. Push to the branch (`git push origin feature/xyz`).
+5. Open a pull request.
 
-Options:
-  -l, --limit <number>         Maximum number of items to return (1-250). Default is 25
-  -c, --cursor <string>        Pagination cursor for next set of results
-  -t, --title <text>           Filter pages by title (EXACT match)
-  -S, --space-ids <ids...>     Filter by space IDs (repeatable)
-  -k, --space-keys <keys...>   Filter by space keys (repeatable, e.g., "DEV" "HR")
-  -s, --status <status>        Filter by status (current, archived, trashed, deleted)
-  -o, --sort <sort>            Property to sort pages by (e.g., "-modified-date", "title")
-  -p, --parent-id <id>         Filter to show only child pages of the specified parent page ID
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-### `get-page`
+## License
 
-Gets detailed information and content for a specific Confluence page.
-
-```bash
-mcp-atlassian-confluence get-page --page-id <id>
-
-Options:
-  -p, --page-id <id>    The numeric ID of the Confluence page to retrieve (required)
-```
-
-### `ls-page-comments`
-
-Retrieves comments on a specific Confluence page.
-
-```bash
-mcp-atlassian-confluence ls-page-comments --page-id <id>
-
-Options:
-  -p, --page-id <id>    The numeric ID of the Confluence page to retrieve comments from (required)
-```
-
-### `search`
-
-Searches Confluence content using CQL (Confluence Query Language) or simplified filters.
-
-```bash
-mcp-atlassian-confluence search [options]
-
-Options:
-  -l, --limit <number>       Maximum number of items to return (1-100). Default is 25
-  -c, --cursor <string>      Pagination cursor for next set of results
-  -q, --cql <cql>            Full CQL query for advanced filtering
-  -t, --title <text>         Filter results by title (contains)
-  -k, --space-key <key>      Filter results to a specific space
-  --label <labels...>        Filter by one or more labels (repeatable)
-  --type <type>              Filter by content type (page or blogpost)
-  -s, --query <text>         Simple text search query
-```
-
-## Discover More CLI Options
-
-Use `--help` to see flags and usage for all available commands:
-
-```bash
-mcp-atlassian-confluence --help
-```
-
-Or get detailed help for a specific command:
-
-```bash
-mcp-atlassian-confluence ls-spaces --help
-mcp-atlassian-confluence get-space --help
-mcp-atlassian-confluence ls-pages --help
-mcp-atlassian-confluence get-page --help
-mcp-atlassian-confluence ls-page-comments --help
-mcp-atlassian-confluence search --help
-```
-
----
-
-# License
-
-[ISC License](https://opensource.org/licenses/ISC)
+[ISC License](LICENSE)
