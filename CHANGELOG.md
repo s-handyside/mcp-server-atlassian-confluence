@@ -1,3 +1,10 @@
+## [1.29.4](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.29.3...v1.29.4) (2025-05-19)
+
+
+### Bug Fixes
+
+* remove mock implementations from tests to comply with Live Data Policy ([6d33913](https://github.com/aashari/mcp-server-atlassian-confluence/commit/6d339138d9a99f734ac00da9d4e15b4ccfed848b))
+
 ## [1.29.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.29.2...v1.29.3) (2025-05-18)
 
 
