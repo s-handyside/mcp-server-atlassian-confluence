@@ -307,19 +307,17 @@ Static API keys are supported but discouraged for production use due to security
 
 ## Implementation Examples
 
-```python
-import requests
+  import requests
 
-def get_oauth_token():
-    return requests.post(
-        'https://api.example.com/oauth/token',
-        data={
-            'client_id': 'YOUR_CLIENT_ID',
-            'client_secret': 'YOUR_CLIENT_SECRET',
-            'grant_type': 'client_credentials'
-        }
-    ).json()['access_token']
-```
+  def get_oauth_token():
+      return requests.post(
+          'https://api.example.com/oauth/token',
+          data={
+              'client_id': 'YOUR_CLIENT_ID',
+              'client_secret': 'YOUR_CLIENT_SECRET',
+              'grant_type': 'client_credentials'
+          }
+      ).json()['access_token']
 
 *Retrieved from mycompany.atlassian.net on 2025-05-19 14:25 UTC*
 ```
