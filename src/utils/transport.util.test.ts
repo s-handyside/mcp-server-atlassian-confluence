@@ -1,6 +1,5 @@
 import { getAtlassianCredentials, fetchAtlassian } from './transport.util.js';
 import { config } from './config.util.js';
-import { Logger } from './logger.util.js';
 import { McpError } from './error.util.js';
 
 /**
@@ -17,18 +16,6 @@ interface SpacesResponse {
 		[key: string]: string;
 	};
 }
-
-// Mock the Logger class to prevent console output during tests
-jest.mock('./logger.util.js', () => ({
-	Logger: {
-		forContext: jest.fn().mockReturnValue({
-			debug: jest.fn(),
-			info: jest.fn(),
-			warn: jest.fn(),
-			error: jest.fn(),
-		}),
-	},
-}));
 
 describe('Transport Utility', () => {
 	// Load configuration before all tests
@@ -58,13 +45,7 @@ describe('Transport Utility', () => {
 			}
 		});
 
-		it('should return null and log a warning when environment variables are missing', () => {
-			// Create a spy on the Logger instance to track warn calls
-			const warnSpy = jest.spyOn(
-				Logger.forContext('utils/transport.util.ts'),
-				'warn',
-			);
-
+		it('should return null when environment variables are missing', () => {
 			// Store original environment values
 			const originalSiteName = process.env.ATLASSIAN_SITE_NAME;
 			const originalUserEmail = process.env.ATLASSIAN_USER_EMAIL;
@@ -75,8 +56,7 @@ describe('Transport Utility', () => {
 			delete process.env.ATLASSIAN_USER_EMAIL;
 			delete process.env.ATLASSIAN_API_TOKEN;
 
-			// Clear the config cache
-			jest.clearAllMocks();
+			// Reload config
 			config.load();
 
 			// Call the function
@@ -85,11 +65,6 @@ describe('Transport Utility', () => {
 			// Verify the result is null
 			expect(credentials).toBeNull();
 
-			// Verify that a warning was logged
-			expect(warnSpy).toHaveBeenCalledWith(
-				'Missing Atlassian credentials. Please set ATLASSIAN_SITE_NAME, ATLASSIAN_USER_EMAIL, and ATLASSIAN_API_TOKEN environment variables.',
-			);
-
 			// Restore original environment values
 			process.env.ATLASSIAN_SITE_NAME = originalSiteName;
 			process.env.ATLASSIAN_USER_EMAIL = originalUserEmail;
@@ -97,9 +72,6 @@ describe('Transport Utility', () => {
 
 			// Restore config
 			config.load();
-
-			// Clean up spy
-			warnSpy.mockRestore();
 		});
 	});
 

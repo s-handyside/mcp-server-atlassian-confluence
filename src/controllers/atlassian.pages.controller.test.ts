@@ -236,58 +236,19 @@ describe('Atlassian Pages Controller', () => {
 		it('should handle empty results gracefully', async () => {
 			if (skipIfNoCredentials()) return;
 
-			// Mock the controller's list method to return a consistently empty result
-			const originalList = Object.getOwnPropertyDescriptor(
-				atlassianPagesController,
-				'list',
+			// Instead of mocking, use a unique search term guaranteed to return no results
+			const uniqueSearchTerm = `NonExistentPage${Date.now()}${Math.random().toString(36).substring(2, 8)}`;
+
+			// Call with a search term that won't match any pages
+			const result = await atlassianPagesController.list({
+				title: uniqueSearchTerm,
+			});
+
+			// Verify the empty result message
+			expect(result.content).toContain(
+				'No Confluence pages found matching your criteria.',
 			);
-
-			// Use a mock method only for this test
-			if (originalList) {
-				// Save original implementation
-				const originalMethod = originalList.value;
-
-				// Replace with mock implementation for this test only
-				Object.defineProperty(atlassianPagesController, 'list', {
-					value: jest.fn().mockImplementation(async (options) => {
-						// When query contains our specific test term, return empty result
-						if (options?.title?.includes('NonExistentPage')) {
-							return {
-								content:
-									'No Confluence pages found matching your criteria.',
-							};
-						}
-
-						// Otherwise use original implementation
-						return originalMethod.call(
-							atlassianPagesController,
-							options,
-						);
-					}),
-					configurable: true,
-					writable: true,
-				});
-
-				// Use a highly specific query that's guaranteed to use our mock path
-				const uniqueSearchTerm = `NonExistentPage${Date.now()}${Math.random().toString(36).substring(2, 8)}`;
-
-				const result = await atlassianPagesController.list({
-					title: uniqueSearchTerm,
-					limit: 5,
-				});
-
-				// Verify the empty result message
-				expect(result.content).toBe(
-					'No Confluence pages found matching your criteria.',
-				);
-
-				// Restore original implementation
-				Object.defineProperty(
-					atlassianPagesController,
-					'list',
-					originalList,
-				);
-			}
+			expect(result.content).toContain('Information retrieved at:');
 		}, 15000);
 
 		it('should handle combinations of filters', async () => {
