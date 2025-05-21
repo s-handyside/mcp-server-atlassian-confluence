@@ -65,10 +65,8 @@ async function getSpace(args: GetSpaceToolArgsType) {
 	methodLogger.debug('Tool called with args:', args);
 
 	try {
-		// Call the controller to get space details
-		const result = await atlassianSpacesController.get({
-			spaceKey: args.spaceKey,
-		});
+		// Call the controller to get space details with args directly
+		const result = await atlassianSpacesController.get(args);
 
 		methodLogger.debug('Successfully retrieved space details');
 

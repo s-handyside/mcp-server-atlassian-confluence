@@ -7,7 +7,6 @@ import { z } from 'zod';
 import { Logger } from '../utils/logger.util.js';
 import { formatErrorForMcpTool } from '../utils/error.util.js';
 import { atlassianCommentsController } from '../controllers/atlassian.comments.controller.js';
-import { PAGE_DEFAULTS } from '../utils/defaults.util.js';
 
 // Create logger for this file
 const logger = Logger.forContext('tools/atlassian.comments.tool.ts');
@@ -32,7 +31,7 @@ const ListPageCommentsArgsSchema = z.object({
 		.int()
 		.min(1)
 		.max(100)
-		.default(PAGE_DEFAULTS.PAGE_SIZE)
+		.default(25)
 		.describe('Maximum number of comments to retrieve (1-100)'),
 
 	/**
