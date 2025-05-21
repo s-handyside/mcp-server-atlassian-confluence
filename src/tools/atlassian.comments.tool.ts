@@ -61,12 +61,11 @@ async function handleListPageComments(args: ListPageCommentsArgs) {
 	try {
 		methodLogger.debug('Tool conf_ls_page_comments called', args);
 
-		// Call the controller
+		// Call the controller with original args
 		const result = await atlassianCommentsController.listPageComments({
 			pageId: args.pageId,
 			limit: args.limit,
 			start: args.start,
-			bodyFormat: PAGE_DEFAULTS.BODY_FORMAT as 'atlas_doc_format',
 		});
 
 		// Format the response for MCP

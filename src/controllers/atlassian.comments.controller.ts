@@ -11,7 +11,7 @@ import {
 } from '../utils/pagination.util.js';
 import { ControllerResponse } from '../types/common.types.js';
 import { formatCommentsList } from './atlassian.comments.formatter.js';
-import { DEFAULT_PAGE_SIZE, PAGE_DEFAULTS } from '../utils/defaults.util.js';
+import { DEFAULT_PAGE_SIZE } from '../utils/defaults.util.js';
 import { adfToMarkdown } from '../utils/adf.util.js';
 import {
 	CommentData,
@@ -80,10 +80,7 @@ async function listPageComments(
 			pageId,
 			limit = DEFAULT_PAGE_SIZE,
 			start = 0,
-			bodyFormat = PAGE_DEFAULTS.BODY_FORMAT as
-				| 'storage'
-				| 'view'
-				| 'atlas_doc_format', // Cast to expected type
+			bodyFormat = 'atlas_doc_format', // Explicitly define default
 		} = options;
 
 		methodLogger.debug('Listing page comments', {

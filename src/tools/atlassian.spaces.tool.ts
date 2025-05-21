@@ -28,13 +28,8 @@ async function listSpaces(args: ListSpacesToolArgsType) {
 	toolLogger.debug('Listing Confluence spaces with filters:', args);
 
 	try {
-		// Pass the filter options to the controller
-		const result = await atlassianSpacesController.list({
-			type: args.type === 'archived' ? 'global' : args.type,
-			status: args.status,
-			limit: args.limit,
-			cursor: args.cursor,
-		});
+		// Pass the args directly to the controller without any transformation
+		const result = await atlassianSpacesController.list(args);
 
 		toolLogger.debug('Successfully retrieved spaces from controller');
 
