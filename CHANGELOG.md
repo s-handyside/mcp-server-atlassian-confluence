@@ -1,3 +1,12 @@
+## [1.30.3](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.30.2...v1.30.3) (2025-05-21)
+
+
+### Bug Fixes
+
+* Complete architectural improvements for tools layer in Confluence project ([6e4b49e](https://github.com/aashari/mcp-server-atlassian-confluence/commit/6e4b49ef0ddaf3fe6cfe1c4114e75d85d575a334))
+* Move business logic to controllers and follow architectural standards ([1078a48](https://github.com/aashari/mcp-server-atlassian-confluence/commit/1078a489c0940ba3bdb48871f67c9a76b3f55d5c))
+* update dependencies ([7964854](https://github.com/aashari/mcp-server-atlassian-confluence/commit/7964854594ed9205c0ea90f32489ec0d4e9c8bd1))
+
 ## [1.30.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.30.1...v1.30.2) (2025-05-21)
 
 
