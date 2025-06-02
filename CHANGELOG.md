@@ -1,3 +1,10 @@
+## [1.30.5](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.30.4...v1.30.5) (2025-06-02)
+
+
+### Bug Fixes
+
+* replace Unix-specific chmod with cross-platform ensure-executable script ([5b9cb6e](https://github.com/aashari/mcp-server-atlassian-confluence/commit/5b9cb6eff99191ae44e9ea383bfd9644e2676b05))
+
 ## [1.30.4](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.30.3...v1.30.4) (2025-06-02)
 
 
