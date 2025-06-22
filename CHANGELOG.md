@@ -1,3 +1,10 @@
+# [1.31.0](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.30.5...v1.31.0) (2025-06-22)
+
+
+### Features
+
+* migrate from deprecated SSE to dual transport support (STDIO + HTTP) ([6322a43](https://github.com/aashari/mcp-server-atlassian-confluence/commit/6322a437f068527b3c156f514eb2aa54e29430e4))
+
 ## [1.30.5](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.30.4...v1.30.5) (2025-06-02)
 
 
