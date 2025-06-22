@@ -1,3 +1,10 @@
+## [1.31.2](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.31.1...v1.31.2) (2025-06-22)
+
+
+### Bug Fixes
+
+* change default transport from HTTP to STDIO for proper MCP client integration ([1ef20d6](https://github.com/aashari/mcp-server-atlassian-confluence/commit/1ef20d6bac4fc5b31571348216354d5f43c72d84))
+
 ## [1.31.1](https://github.com/aashari/mcp-server-atlassian-confluence/compare/v1.31.0...v1.31.1) (2025-06-22)
 
 
