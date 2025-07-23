@@ -1,4 +1,1 @@
-// server.js
-const { serve } = require('./dist/index.js');
-
-serve({ transport: 'sse' });
+require('./dist/index.js'); // Just import and run CLI entry
